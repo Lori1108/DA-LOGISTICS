@@ -45,11 +45,15 @@
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
-body {
+body, html {
     background-color: var(--bg-app);
     color: var(--text-primary);
-    overflow: hidden;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
     height: 100vh;
+    margin: 0;
+    padding: 0;
 }
 
 /* =========================================================================
@@ -59,7 +63,7 @@ body {
     display: grid;
     grid-template-columns: 260px 1fr 380px;
     height: 100vh;
-    width: 100vw;
+    width: 100%;
 }
 
 /* =========================================================================
@@ -1840,7 +1844,7 @@ tr:hover td {
         display: grid;
         grid-template-columns: 240px 1fr; /* Oculta la columna fija de 380px de la factura */
         height: 100vh;
-        width: 100vw;
+        width: 100%;
     }
 
     /* Transformar Aside de Factura a un Drawer Deslizante */
@@ -1848,7 +1852,7 @@ tr:hover td {
         position: fixed;
         top: 0;
         right: -100%;
-        width: 100vw;
+        width: 100%;
         max-width: 380px;
         height: 100%;
         z-index: 150;
@@ -1913,9 +1917,9 @@ tr:hover td {
         gap: 12px;
     }
 
-    .search-bar {
+    .search-container {
         width: 100%;
-        max-width: 320px;
+        max-width: 100%;
     }
 
     .header-stats {
@@ -1929,7 +1933,7 @@ tr:hover td {
         display: flex;
         flex-direction: column;
         height: 100vh;
-        width: 100vw;
+        width: 100%;
         grid-template-columns: none;
     }
 
@@ -2062,7 +2066,7 @@ tr:hover td {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     background-color: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(4px);
