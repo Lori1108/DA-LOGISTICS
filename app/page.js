@@ -84,7 +84,7 @@ export default function LoginPage() {
           position: fixed;
           top: 0; left: 0; right: 0; bottom: 0;
           display: flex;
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+          background: linear-gradient(135deg, #0B2C5F 0%, #124388 100%);
           padding: 20px;
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
           overflow-y: auto;
@@ -156,8 +156,8 @@ export default function LoginPage() {
         }
 
         .form-group input:focus {
-          border-color: #38bdf8;
-          box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+          border-color: #60BB46;
+          box-shadow: 0 0 0 3px rgba(96, 187, 70, 0.2);
           background: rgba(15, 23, 42, 0.8);
         }
 
@@ -166,7 +166,7 @@ export default function LoginPage() {
         }
 
         .login-button {
-          background: linear-gradient(to right, #0ea5e9, #6366f1);
+          background-color: #124388;
           color: white;
           border: none;
           border-radius: 12px;
@@ -176,12 +176,13 @@ export default function LoginPage() {
           cursor: pointer;
           transition: all 0.3s ease;
           margin-top: 10px;
-          box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+          box-shadow: 0 4px 15px rgba(18, 67, 136, 0.3);
         }
 
         .login-button:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+          box-shadow: 0 6px 20px rgba(18, 67, 136, 0.4);
+          background-color: #0C2B59;
         }
 
         .login-button:active:not(:disabled) {

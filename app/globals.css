@@ -10,15 +10,15 @@
     --text-secondary: #64748B;
     --text-muted: #94A3B8;
     
-    --primary: #2563EB;
-    --primary-light: #EFF6FF;
-    --primary-dark: #1D4ED8;
+    --primary: #124388;
+    --primary-light: #E8F0FE;
+    --primary-dark: #0C2B59;
     
-    --accent: #8B5CF6;
-    --accent-light: #F5F3FF;
+    --accent: #60BB46;
+    --accent-light: #EFF9EA;
     
-    --success: #10B981;
-    --success-light: #ECFDF5;
+    --success: #60BB46;
+    --success-light: #EFF9EA;
     
     --danger: #EF4444;
     --danger-light: #FEF2F2;
@@ -2344,16 +2344,16 @@ body.night-theme .corporate-logo {
     justify-content: center;
     width: 38px;
     height: 38px;
-    background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     color: #FFFFFF;
     border-radius: var(--radius-sm);
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 4px 10px rgba(18, 67, 136, 0.25);
     flex-shrink: 0;
 }
 
 body.night-theme .logo-icon-wrapper {
-    background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
-    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    box-shadow: 0 4px 10px rgba(18, 67, 136, 0.3);
 }
 
 .logo-svg {
