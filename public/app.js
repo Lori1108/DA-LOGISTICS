@@ -1900,29 +1900,43 @@ if (DOM.btnModalAddToCart) {
     });
 }
 
-// --- EVENTOS DE RESPONSIVIDAD PARA EL CARRITO EN MÓVIL (FAB Y DRAWER) ---
+// --- EVENTOS DE RESPONSIVIDAD PARA EL CARRITO EN MÓVIL Y DESKTOP ---
 const mobileCartToggle = document.getElementById("btn-mobile-cart-toggle");
 const closeInvoiceDrawer = document.getElementById("btn-close-invoice-drawer");
 const invoiceSidebar = document.getElementById("invoice-sidebar");
 
+const toggleCart = (e) => {
+    if (e) e.stopPropagation();
+    if (window.innerWidth <= 1024) {
+        if (invoiceSidebar) invoiceSidebar.classList.toggle("active-drawer");
+    } else {
+        document.body.classList.toggle("cart-closed");
+    }
+};
+
+const closeCart = () => {
+    if (window.innerWidth <= 1024) {
+        if (invoiceSidebar) invoiceSidebar.classList.remove("active-drawer");
+    } else {
+        document.body.classList.add("cart-closed");
+    }
+};
+
 if (mobileCartToggle && invoiceSidebar) {
-    mobileCartToggle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        invoiceSidebar.classList.toggle("active-drawer");
-    });
+    mobileCartToggle.addEventListener("click", toggleCart);
 }
 
 if (closeInvoiceDrawer && invoiceSidebar) {
-    closeInvoiceDrawer.addEventListener("click", () => {
-        invoiceSidebar.classList.remove("active-drawer");
-    });
+    closeInvoiceDrawer.addEventListener("click", closeCart);
 }
 
 // Cerrar drawer al hacer clic fuera de él en móvil
 document.addEventListener('click', (e) => {
-    if (invoiceSidebar && invoiceSidebar.classList.contains('active-drawer')) {
-        if (!invoiceSidebar.contains(e.target) && mobileCartToggle && !mobileCartToggle.contains(e.target)) {
-            invoiceSidebar.classList.remove("active-drawer");
+    if (window.innerWidth <= 1024) {
+        if (invoiceSidebar && invoiceSidebar.classList.contains('active-drawer')) {
+            if (!invoiceSidebar.contains(e.target) && mobileCartToggle && !mobileCartToggle.contains(e.target)) {
+                invoiceSidebar.classList.remove("active-drawer");
+            }
         }
     }
 });
@@ -1944,8 +1958,8 @@ if (btnLogout) {
 // Cerrar drawer al cambiar de pestaña
 DOM.navButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-        if (invoiceSidebar) {
-            invoiceSidebar.classList.remove("active-drawer");
+        if (window.innerWidth <= 1024) {
+            closeCart();
         }
     });
 });

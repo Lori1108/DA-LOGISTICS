@@ -1756,6 +1756,79 @@ tr:hover td {
 }
 
 /* =========================================================================
+   ESTADO DEL CARRITO (CART-CLOSED) - DESKTOP Y MOBILE
+   ========================================================================= */
+
+body.cart-closed .app-container {
+    grid-template-columns: 260px 1fr !important;
+}
+
+body.cart-closed .invoice-section {
+    display: none !important;
+}
+
+body.cart-closed .mobile-cart-toggle-fab {
+    display: flex !important;
+}
+
+/* Base styles for FAB and Close Button (now global) */
+.btn-close-drawer {
+    display: block;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-app);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-close-drawer:hover {
+    background-color: var(--danger-light);
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.mobile-cart-toggle-fab {
+    display: none; /* hidden by default on desktop unless .cart-closed */
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+    align-items: center;
+    justify-content: center;
+    z-index: 120;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.mobile-cart-toggle-fab:hover {
+    transform: scale(1.05);
+    background-color: var(--primary-dark);
+}
+
+.mobile-cart-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: var(--danger);
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 10px;
+    padding: 2px 6px;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+/* =========================================================================
    DISEÑO RESPONSIVO MULTI-NIVEL (MEDIA QUERIES)
    ========================================================================= */
 
@@ -1796,61 +1869,9 @@ tr:hover td {
         border-bottom: 1px solid var(--border-color);
     }
 
-    .btn-close-drawer {
-        display: block !important;
-        border: 1px solid var(--border-color);
-        background-color: var(--bg-app);
-        padding: 6px 12px;
-        border-radius: var(--radius-sm);
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--text-secondary);
-        cursor: pointer;
-        transition: var(--transition);
-    }
-
-    .btn-close-drawer:hover {
-        background-color: var(--danger-light);
-        color: var(--danger);
-        border-color: var(--danger);
-    }
-
-    /* Mostrar botón flotante del Carrito (FAB) */
+    /* Mostrar botón flotante del Carrito (FAB) SIEMPRE en móvil */
     .mobile-cart-toggle-fab {
         display: flex !important;
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background-color: var(--primary);
-        color: white;
-        border: none;
-        box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
-        align-items: center;
-        justify-content: center;
-        z-index: 120;
-        cursor: pointer;
-        transition: var(--transition);
-    }
-
-    .mobile-cart-toggle-fab:hover {
-        transform: scale(1.05);
-        background-color: var(--primary-dark);
-    }
-
-    .mobile-cart-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        background-color: var(--danger);
-        color: white;
-        font-size: 10px;
-        font-weight: 800;
-        border-radius: 10px;
-        padding: 2px 6px;
-        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
     }
 
     /* Evitar encimado en Catálogo, Clientes e Historial */
