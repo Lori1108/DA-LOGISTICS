@@ -5,16 +5,23 @@ export const config = {
 };
 
 export function middleware(request) {
-  const basicAuth = request.headers.get('authorization');
-
-  if (basicAuth === 'Basic QklMTzpsb3JlbmExMjM=') {
+  const url = request.nextUrl;
+  const authToken = request.cookies.get('bilo_auth')?.value;
+  
+  if (authToken === 'authenticated') {
+    // Si ya está autenticado y entra a la página principal (login), enviarlo al POS
+    if (url.pathname === '/') {
+      url.pathname = '/pos.html';
+      return NextResponse.redirect(url);
+    }
     return NextResponse.next();
   }
 
-  return new NextResponse('Auth required', {
-    status: 401,
-    headers: {
-      'WWW-Authenticate': 'Basic realm="Secure Area"',
-    },
-  });
+  // Si no está autenticado y NO está en la página principal, enviarlo al login
+  if (url.pathname !== '/') {
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
+  
+  return NextResponse.next();
 }

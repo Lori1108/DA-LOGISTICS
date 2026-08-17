@@ -186,10 +186,13 @@ const DOM = {
     prodBrand: document.getElementById("prod-brand"),
     prodDesc: document.getElementById("prod-desc"),
     priceCajetilla: document.getElementById("price-cajetilla"),
-    pricePaquete: document.getElementById("price-paquete"),
-    priceCajon: document.getElementById("price-cajon"),
+    costCajetilla: document.getElementById("cost-cajetilla"),
     stockCajetilla: document.getElementById("stock-cajetilla"),
+    pricePaquete: document.getElementById("price-paquete"),
+    costPaquete: document.getElementById("cost-paquete"),
     stockPaquete: document.getElementById("stock-paquete"),
+    priceCajon: document.getElementById("price-cajon"),
+    costCajon: document.getElementById("cost-cajon"),
     stockCajon: document.getElementById("stock-cajon"),
     prodImageFile: document.getElementById("prod-image-file"),
     imgFormPreview: document.getElementById("img-form-preview"),
@@ -260,6 +263,7 @@ const DOM = {
     kpiGrossSales: document.getElementById("kpi-gross-sales"),
     kpiTicketCount: document.getElementById("kpi-ticket-count"),
     kpiAverageTicket: document.getElementById("kpi-average-ticket"),
+    kpiProfitMargin: document.getElementById("kpi-profit-margin"),
     paymentMethodsAnalytics: document.getElementById("payment-methods-analytics"),
     topProductsAnalytics: document.getElementById("top-products-analytics"),
     
@@ -654,11 +658,16 @@ function adjustCartQty(product, presentation, price, action) {
         }
     } else {
         if (action === "plus" && activeStock > 0) {
+            let cost = product.costo_cajetilla || 0;
+            if (presentation === "paquete") cost = product.costo_paquete || 0;
+            else if (presentation === "cajon") cost = product.costo_cajon || 0;
+
             AppState.cart.push({
                 product: product,
                 presentation: presentation,
                 qty: 1,
-                activePrice: price
+                activePrice: price,
+                costo: cost
             });
         }
     }
@@ -843,6 +852,7 @@ function placeOrder() {
             presentacion: it.presentation,
             qty: it.qty,
             precio: it.activePrice,
+            costo: it.costo || 0,
             subtotal: it.activePrice * it.qty
         }))
     };
@@ -933,10 +943,13 @@ function clearCatalogForm() {
     DOM.prodBrand.value = "";
     DOM.prodDesc.value = "";
     DOM.priceCajetilla.value = "0.00";
-    DOM.pricePaquete.value = "0.00";
-    DOM.priceCajon.value = "0.00";
+    DOM.costCajetilla.value = "0.00";
     DOM.stockCajetilla.value = "0";
+    DOM.pricePaquete.value = "0.00";
+    DOM.costPaquete.value = "0.00";
     DOM.stockPaquete.value = "0";
+    DOM.priceCajon.value = "0.00";
+    DOM.costCajon.value = "0.00";
     DOM.stockCajon.value = "0";
     DOM.prodImageFile.value = "";
     
@@ -962,8 +975,11 @@ DOM.catalogForm.addEventListener("submit", function(e) {
     const brand = DOM.prodBrand.value.trim();
     const desc = DOM.prodDesc.value.trim();
     const pCajetilla = parseFloat(DOM.priceCajetilla.value) || 0;
+    const cCajetilla = parseFloat(DOM.costCajetilla.value) || 0;
     const pPaquete = parseFloat(DOM.pricePaquete.value) || 0;
+    const cPaquete = parseFloat(DOM.costPaquete.value) || 0;
     const pCajon = parseFloat(DOM.priceCajon.value) || 0;
+    const cCajon = parseFloat(DOM.costCajon.value) || 0;
     const sCajetilla = parseInt(DOM.stockCajetilla.value) || 0;
     const sPaquete = parseInt(DOM.stockPaquete.value) || 0;
     const sCajon = parseInt(DOM.stockCajon.value) || 0;
@@ -976,8 +992,11 @@ DOM.catalogForm.addEventListener("submit", function(e) {
         marca: brand,
         descripcion: desc,
         precio_cajetilla: pCajetilla,
+        costo_cajetilla: cCajetilla,
         precio_paquete: pPaquete,
+        costo_paquete: cPaquete,
         precio_cajon: pCajon,
+        costo_cajon: cCajon,
         stock_cajetilla: sCajetilla,
         stock_paquete: sPaquete,
         stock_cajon: sCajon,
@@ -1080,8 +1099,11 @@ function renderCatalogTable() {
                 DOM.prodBrand.value = prod.marca;
                 DOM.prodDesc.value = prod.descripcion || "";
                 DOM.priceCajetilla.value = prod.precio_cajetilla.toFixed(2);
+                DOM.costCajetilla.value = (prod.costo_cajetilla || 0).toFixed(2);
                 DOM.pricePaquete.value = prod.precio_paquete.toFixed(2);
+                DOM.costPaquete.value = (prod.costo_paquete || 0).toFixed(2);
                 DOM.priceCajon.value = prod.precio_cajon.toFixed(2);
+                DOM.costCajon.value = (prod.costo_cajon || 0).toFixed(2);
                 DOM.stockCajetilla.value = prod.stock_cajetilla || 0;
                 DOM.stockPaquete.value = prod.stock_paquete || 0;
                 DOM.stockCajon.value = prod.stock_cajon || 0;
@@ -1636,9 +1658,16 @@ function renderAnalytics() {
     const averageTicket = totalTransactions > 0 ? (grossSales / totalTransactions) : 0;
 
     // Escribir KPIs principales
+    const totalCost = orders.reduce((sum, o) => {
+        const orderCost = o.items ? o.items.reduce((itemSum, item) => itemSum + ((item.costo || 0) * item.qty), 0) : 0;
+        return sum + orderCost;
+    }, 0);
+    const profitMargin = grossSales - totalCost;
+
     if (DOM.kpiGrossSales) DOM.kpiGrossSales.textContent = `S/${grossSales.toFixed(2)}`;
     if (DOM.kpiTicketCount) DOM.kpiTicketCount.textContent = totalTransactions;
     if (DOM.kpiAverageTicket) DOM.kpiAverageTicket.textContent = `S/${averageTicket.toFixed(2)}`;
+    if (DOM.kpiProfitMargin) DOM.kpiProfitMargin.textContent = `S/${profitMargin.toFixed(2)}`;
 
     // 1. Calcular Analíticas por Método de Pago
     const paymentMethods = { Efectivo: 0, Tarjeta: 0, Transferencia: 0 };

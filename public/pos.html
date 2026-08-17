@@ -166,9 +166,13 @@
                                         <input type="number" id="price-cajetilla" step="0.01" min="0" required value="0.00">
                                     </div>
                                     <div class="form-group">
-                                        <label for="stock-cajetilla">Stock Cajetilla *</label>
-                                        <input type="number" id="stock-cajetilla" min="0" required value="0">
+                                        <label for="cost-cajetilla">Costo Cajetilla (S/) *</label>
+                                        <input type="number" id="cost-cajetilla" step="0.01" min="0" required value="0.00">
                                     </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="stock-cajetilla">Stock Cajetilla *</label>
+                                    <input type="number" id="stock-cajetilla" min="0" required value="0">
                                 </div>
 
                                 <!-- Paquete -->
@@ -178,9 +182,13 @@
                                         <input type="number" id="price-paquete" step="0.01" min="0" required value="0.00">
                                     </div>
                                     <div class="form-group">
-                                        <label for="stock-paquete">Stock Paquete *</label>
-                                        <input type="number" id="stock-paquete" min="0" required value="0">
+                                        <label for="cost-paquete">Costo Paquete (S/) *</label>
+                                        <input type="number" id="cost-paquete" step="0.01" min="0" required value="0.00">
                                     </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="stock-paquete">Stock Paquete *</label>
+                                    <input type="number" id="stock-paquete" min="0" required value="0">
                                 </div>
 
                                 <!-- Cajon -->
@@ -190,9 +198,13 @@
                                         <input type="number" id="price-cajon" step="0.01" min="0" required value="0.00">
                                     </div>
                                     <div class="form-group">
-                                        <label for="stock-cajon">Stock Cajón *</label>
-                                        <input type="number" id="stock-cajon" min="0" required value="0">
+                                        <label for="cost-cajon">Costo Cajón (S/) *</label>
+                                        <input type="number" id="cost-cajon" step="0.01" min="0" required value="0.00">
                                     </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="stock-cajon">Stock Cajón *</label>
+                                    <input type="number" id="stock-cajon" min="0" required value="0">
                                 </div>
 
                                 <div class="form-group">
@@ -438,6 +450,16 @@
                                 </div>
                                 <h2 id="kpi-average-ticket">S/0.00</h2>
                                 <p class="kpi-sub">Valor promedio por ticket</p>
+                            </div>
+                            <div class="kpi-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.2) 100%); border: 1px solid rgba(16, 185, 129, 0.3);">
+                                <div class="kpi-header">
+                                    <span style="color: #059669; font-weight: 700;">Margen de Ganancia</span>
+                                    <div class="kpi-icon bg-success-light">
+                                        <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                    </div>
+                                </div>
+                                <h2 id="kpi-profit-margin" style="color: #059669;">S/0.00</h2>
+                                <p class="kpi-sub" style="color: #047857;">Utilidad bruta (Ventas - Costos)</p>
                             </div>
                         </div>
 
