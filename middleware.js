@@ -6,19 +6,10 @@ export const config = {
 
 export function middleware(req) {
   const basicAuth = req.headers.get('authorization');
-  const url = req.nextUrl;
 
-  if (basicAuth) {
-    try {
-      const authValue = basicAuth.split(' ')[1];
-      const [user, pwd] = atob(authValue).split(':');
-
-      if (user === 'BILO' && pwd === 'lorena123') {
-        return NextResponse.next();
-      }
-    } catch (e) {
-      // Evitar errores 500 si atob falla por formato incorrecto
-    }
+  // BILO:lorena123 en base64 es QklMTzpsb3JlbmExMjM=
+  if (basicAuth && basicAuth.includes('QklMTzpsb3JlbmExMjM=')) {
+    return NextResponse.next();
   }
 
   return new NextResponse('Auth required', {
