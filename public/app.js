@@ -88,27 +88,7 @@ const IS_SERVER = window.location.protocol.startsWith("http");
 const API_URL = IS_SERVER ? window.location.origin : "";
 
 function saveFileViaServer(filename, content, type = 'text') {
-    if (IS_SERVER) {
-        try {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", `${API_URL}/api/guardar-archivo`, false);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.send(JSON.stringify({
-                nombre_sugerido: filename,
-                contenido: content,
-                tipo: type
-            }));
-            const res = JSON.parse(xhr.responseText);
-            if (res.error) {
-                alert("Error al guardar archivo: " + res.error);
-            }
-        } catch (err) {
-            console.error("Error al enviar archivo al servidor:", err);
-            fallbackDownload(filename, content, type);
-        }
-    } else {
-        fallbackDownload(filename, content, type);
-    }
+    fallbackDownload(filename, content, type);
 }
 
 function fallbackDownload(filename, content, type) {
@@ -127,53 +107,23 @@ function fallbackDownload(filename, content, type) {
 }
 
 class LocalDB {
-    static init() {
-        AppState.products = [];
-        AppState.orders = [];
-        AppState.clients = [];
-        
-        if (IS_SERVER) {
-            try {
-                const xhrProd = new XMLHttpRequest();
-                xhrProd.open("GET", `${API_URL}/api/productos`, false);
-                xhrProd.send();
-                AppState.products = JSON.parse(xhrProd.responseText);
-
-                const xhrCli = new XMLHttpRequest();
-                xhrCli.open("GET", `${API_URL}/api/clientes`, false);
-                xhrCli.send();
-                AppState.clients = JSON.parse(xhrCli.responseText);
-
-                const xhrOrd = new XMLHttpRequest();
-                xhrOrd.open("GET", `${API_URL}/api/pedidos`, false);
-                xhrOrd.send();
-                AppState.orders = JSON.parse(xhrOrd.responseText);
-            } catch (err) {
-                console.error("Error cargando desde el servidor local. Usando localstorage fallback:", err);
-                this.loadFromLocalStorage();
-            }
-        } else {
-            this.loadFromLocalStorage();
-        }
-    }
-
-    static loadFromLocalStorage() {
-        if (!localStorage.getItem("pulpocigars_products")) {
-            localStorage.setItem("pulpocigars_products", JSON.stringify(DEFAULT_PRODUCTS));
-        }
-        if (!localStorage.getItem("pulpocigars_orders")) {
-            localStorage.setItem("pulpocigars_orders", JSON.stringify([]));
-        }
-        if (!localStorage.getItem("pulpocigars_clients")) {
-            const defaultClients = [
+    static async initAsync() {
+        try {
+            const res = await fetch('/api/data');
+            const data = await res.json();
+            AppState.products = (data.products && data.products.length > 0) ? data.products : DEFAULT_PRODUCTS;
+            AppState.orders = data.orders || [];
+            AppState.clients = (data.clients && data.clients.length > 0) ? data.clients : [
                 { id: "c1", nombre: "Cliente General", telefono: "-", email: "" }
             ];
-            localStorage.setItem("pulpocigars_clients", JSON.stringify(defaultClients));
+        } catch (err) {
+            console.error("Error cargando desde Neon DB:", err);
+            AppState.products = DEFAULT_PRODUCTS;
+            AppState.orders = [];
+            AppState.clients = [
+                { id: "c1", nombre: "Cliente General", telefono: "-", email: "" }
+            ];
         }
-
-        AppState.products = JSON.parse(localStorage.getItem("pulpocigars_products")) || [];
-        AppState.orders = JSON.parse(localStorage.getItem("pulpocigars_orders")) || [];
-        AppState.clients = JSON.parse(localStorage.getItem("pulpocigars_clients")) || [];
     }
 
     static getProducts() {
@@ -182,9 +132,7 @@ class LocalDB {
 
     static saveProducts(products) {
         AppState.products = products;
-        if (!IS_SERVER) {
-            localStorage.setItem("pulpocigars_products", JSON.stringify(products));
-        }
+        fetch('/api/data', { method: 'POST', body: JSON.stringify({ products }) }).catch(console.error);
     }
 
     static getOrders() {
@@ -193,9 +141,7 @@ class LocalDB {
 
     static saveOrders(orders) {
         AppState.orders = orders;
-        if (!IS_SERVER) {
-            localStorage.setItem("pulpocigars_orders", JSON.stringify(orders));
-        }
+        fetch('/api/data', { method: 'POST', body: JSON.stringify({ orders }) }).catch(console.error);
     }
 
     static getClients() {
@@ -204,14 +150,11 @@ class LocalDB {
 
     static saveClients(clients) {
         AppState.clients = clients;
-        if (!IS_SERVER) {
-            localStorage.setItem("pulpocigars_clients", JSON.stringify(clients));
-        }
+        fetch('/api/data', { method: 'POST', body: JSON.stringify({ clients }) }).catch(console.error);
     }
 }
 
-// Inicializar base de datos
-LocalDB.init();
+
 
 // =========================================================================
 // 3. SELECCIÓN DE ELEMENTOS DEL DOM
@@ -2182,11 +2125,18 @@ if (DOM.btnImportClientsExcel && DOM.fileImportClients) {
     DOM.fileImportClients.addEventListener("change", importClientsFromExcel);
 }
 
-// Poblar barra de marcas, renderizar la cuadrícula del POS y renderizar el carrito inicial (vacío)
-updateBrandsBar();
-renderPOS();
-renderCart();
-updateInventoryStats();
+// =========================================================================
+// 3. INICIALIZACIÓN DE LA APP CON DATOS REMOTOS
+// =========================================================================
+(async function initializeApp() {
+    await LocalDB.initAsync();
+    
+    // Poblar barra de marcas, renderizar la cuadrícula del POS y renderizar el carrito inicial (vacío)
+    updateBrandsBar();
+    renderPOS();
+    renderCart();
+    updateInventoryStats();
+})();
 
 // --- LÓGICA DE CAMBIO DE TEMA (MODO NOCHE / MODO NORMAL) ---
 const themeToggleBtn = document.getElementById("btn-theme-toggle");
