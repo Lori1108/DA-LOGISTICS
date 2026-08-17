@@ -81,16 +81,18 @@ export default function LoginPage() {
 
       <style jsx>{`
         .login-container {
-          min-height: 100vh;
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
           display: flex;
-          align-items: center;
-          justify-content: center;
           background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
           padding: 20px;
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          overflow-y: auto;
+          box-sizing: border-box;
         }
 
         .login-card {
+          margin: auto;
           background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
