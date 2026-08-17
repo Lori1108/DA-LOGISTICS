@@ -40,18 +40,7 @@ export default function LoginPage() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <svg width="64" height="64" viewBox="-2 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: '16px' }}>
-            <path d="M14 4H4C2.89543 4 2 4.89543 2 6V15H14V4Z" fill="#60BB46"/>
-            <path d="M-1 7H2" stroke="#60BB46" strokeWidth="1.5" strokeLinecap="round"/>
-            <path d="M-2 10H2" stroke="#60BB46" strokeWidth="1.5" strokeLinecap="round"/>
-            <path d="M-1 13H2" stroke="#60BB46" strokeWidth="1.5" strokeLinecap="round"/>
-            <path d="M14 7H19L23 11V15H14V7Z" fill="#124388"/>
-            <path d="M15 8H18.5L21.5 11H15V8Z" fill="#FFFFFF"/>
-            <circle cx="6" cy="16" r="2.5" fill="#1E293B"/>
-            <circle cx="6" cy="16" r="1" fill="#FFFFFF"/>
-            <circle cx="18" cy="16" r="2.5" fill="#1E293B"/>
-            <circle cx="18" cy="16" r="1" fill="#FFFFFF"/>
-          </svg>
+          <img src="/logo.png" alt="DA LOGISTICS" style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '16px', borderRadius: '12px' }} />
           <h1>DA LOGISTICS</h1>
           <p>Portal de Punto de Venta</p>
         </div>
