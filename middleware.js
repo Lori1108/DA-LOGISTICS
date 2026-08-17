@@ -9,11 +9,15 @@ export function middleware(req) {
   const url = req.nextUrl;
 
   if (basicAuth) {
-    const authValue = basicAuth.split(' ')[1];
-    const [user, pwd] = atob(authValue).split(':');
+    try {
+      const authValue = basicAuth.split(' ')[1];
+      const [user, pwd] = atob(authValue).split(':');
 
-    if (user === 'BILO' && pwd === 'lorena123') {
-      return NextResponse.next();
+      if (user === 'BILO' && pwd === 'lorena123') {
+        return NextResponse.next();
+      }
+    } catch (e) {
+      // Evitar errores 500 si atob falla por formato incorrecto
     }
   }
 

@@ -2494,3 +2494,37 @@ body.night-theme .modal-qty-controls input {
 }
 
 
+
+/* =========================================================================
+   RESPONSIVE (MÓVIL / TABLET)
+   ========================================================================= */
+@media (max-width: 1024px) {
+    .app-container {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    .sidebar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 20px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        height: auto;
+        overflow-x: auto;
+    }
+    .sidebar-logo { margin-bottom: 0; margin-right: 20px; }
+    .sidebar-nav { flex-direction: row; gap: 5px; }
+    .nav-btn { padding: 8px 12px; font-size: 12px; }
+    .sidebar-footer { display: none; }
+    .main-content { flex: 1; overflow: visible; height: auto; }
+    .main-header { flex-direction: column; gap: 15px; align-items: stretch; padding: 15px; }
+    .search-container { width: 100%; }
+    .invoice-section { width: 100%; height: auto; border-left: none; border-top: 2px solid var(--border-color); }
+    .catalog-layout { grid-template-columns: 1fr; }
+    .prices-form-row, .form-row-2col { grid-template-columns: 1fr; }
+    .tab-content { padding: 15px; }
+}
+
