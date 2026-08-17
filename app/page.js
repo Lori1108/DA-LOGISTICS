@@ -93,21 +93,19 @@ export default function LoginPage() {
           position: fixed;
           top: 0; left: 0; right: 0; bottom: 0;
           display: flex;
-          background: linear-gradient(135deg, #0B2C5F 0%, #124388 100%);
+          background: linear-gradient(135deg, #0E2954 0%, #1B4A96 100%);
           padding: 20px;
-          font-family: 'Inter', system-ui, -apple-system, sans-serif;
-          overflow-y: auto;
-          box-sizing: border-box;
+          font-family: 'Inter', system-ui, sans-serif;
+          justify-content: center;
+          align-items: center;
         }
 
         .login-card {
-          margin: auto;
           background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 24px;
           padding: 40px;
+          border-radius: 24px;
           width: 100%;
           max-width: 420px;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -115,22 +113,19 @@ export default function LoginPage() {
 
         .login-header {
           text-align: center;
-          margin-bottom: 30px;
+          margin-bottom: 32px;
         }
 
         .login-header h1 {
-          color: #fff;
-          font-size: 28px;
-          font-weight: 800;
+          color: white;
+          font-size: 24px;
+          font-weight: 700;
           margin: 0 0 8px 0;
           letter-spacing: -0.5px;
-          background: linear-gradient(to right, #38bdf8, #818cf8);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
         }
 
         .login-header p {
-          color: #94a3b8;
+          color: rgba(255, 255, 255, 0.7);
           margin: 0;
           font-size: 15px;
         }
@@ -142,29 +137,18 @@ export default function LoginPage() {
         }
 
         .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
+          margin-bottom: 20px;
         }
 
         .form-group label {
-          color: #cbd5e1;
+          display: block;
+          color: rgba(255, 255, 255, 0.9);
+          margin-bottom: 8px;
           font-size: 14px;
           font-weight: 500;
         }
 
         .form-group input {
-          background: rgba(15, 23, 42, 0.6);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 12px;
-          padding: 14px 16px;
-          color: #fff;
-          font-size: 16px;
-          transition: all 0.2s ease;
-          outline: none;
-        }
-
-        .form-group input:focus {
           border-color: #60BB46;
           box-shadow: 0 0 0 3px rgba(96, 187, 70, 0.2);
           background: rgba(15, 23, 42, 0.8);
@@ -175,7 +159,7 @@ export default function LoginPage() {
         }
 
         .login-button {
-          background-color: #124388;
+          background-color: #1B4A96;
           color: white;
           border: none;
           border-radius: 12px;
