@@ -40,8 +40,16 @@ export default function LoginPage() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <img src="/logo.png" alt="DA LOGISTICS" style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '16px', borderRadius: '12px' }} />
-          <h1>DA LOGISTICS</h1>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '24px',
+            padding: '15px',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+            display: 'inline-block',
+            marginBottom: '20px'
+          }}>
+            <img src="/logo.png" alt="DA LOGISTICS" style={{ width: '160px', height: 'auto', objectFit: 'contain', display: 'block' }} />
+          </div>
           <p>Portal de Punto de Venta</p>
         </div>
         
