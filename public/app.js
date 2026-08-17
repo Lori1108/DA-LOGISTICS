@@ -84,8 +84,8 @@ const AppState = {
     productStatesInPOS: {} // Almacena qué presentación está seleccionada por id de producto en el POS
 };
 
-const IS_SERVER = window.location.protocol.startsWith("http");
-const API_URL = IS_SERVER ? window.location.origin : "";
+const IS_SERVER = false; // Forzamos false para usar LocalDB que interactúa con /api/data
+const API_URL = "";
 
 function saveFileViaServer(filename, content, type = 'text') {
     fallbackDownload(filename, content, type);
