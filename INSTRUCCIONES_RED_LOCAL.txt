@@ -1,0 +1,30 @@
+=============================================================================
+                  DA LOGISTICS - CONEXIÓN RÁPIDA DE RED LOCAL
+=============================================================================
+
+¡No necesitas instalar ni copiar ningún archivo en las otras laptops!
+Todo el sistema, la base de datos y los archivos se ejecutan desde tu 
+computadora principal. Las otras laptops se conectan usando solo el navegador.
+
+Sigue estos pasos sencillos para conectar tus otros dispositivos:
+
+Paso 1: EN LA COMPUTADORA PRINCIPAL (DONDE EJECUTAS EL SISTEMA)
+---------------------------------------------------------------
+1. Abre tu aplicación ejecutando:
+   "DaLogistics.exe" (dentro de la carpeta dist/DaLogistics).
+2. Mira la esquina superior derecha del programa. Verás un texto azul que dice:
+   "Red Compartida (LAN): http://192.168.1.XX:8080"
+   (Anota el número de IP que aparece en tu pantalla).
+
+Paso 2: EN CUALQUIER OTRA LAPTOP, CELULAR O TABLET
+--------------------------------------------------
+1. Abre Google Chrome, Microsoft Edge o cualquier navegador de internet.
+2. En la barra de direcciones de arriba (donde escribes las páginas web),
+   escribe la dirección exacta que copiaste del Paso 1 (por ejemplo: http://192.168.1.15:8080).
+3. Presiona Enter.
+4. ¡Listo! El Punto de Venta se abrirá inmediatamente y todo lo que vendas
+   se guardará automáticamente en tu base de datos principal en tiempo real.
+
+=============================================================================
+* REQUISITO: Ambos dispositivos deben estar conectados al mismo Wi-Fi del local.
+=============================================================================

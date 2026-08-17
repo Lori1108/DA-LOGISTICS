@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DA LOGISTICS - Punto de Venta Offline</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- BARRA LATERAL IZQUIERDA -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="corporate-logo">
+                    <div class="logo-icon-wrapper">
+                        <svg class="logo-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                        </svg>
+                    </div>
+                    <div class="logo-text-wrapper">
+                        <span class="brand-da">DA</span>
+                        <span class="brand-logistics">LOGISTICS</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-tab="pos-tab" id="btn-pos-tab">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                    <span>Nueva Venta</span>
+                </button>
+                <button class="nav-btn" data-tab="catalog-tab" id="btn-catalog-tab">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    <span>Catálogo</span>
+                </button>
+                <button class="nav-btn" data-tab="history-tab" id="btn-history-tab">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Historial</span>
+                </button>
+                <button class="nav-btn" data-tab="clients-tab" id="btn-clients-tab">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Clientes</span>
+                </button>
+                <button class="nav-btn" data-tab="analytics-tab" id="btn-analytics-tab">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span>Analíticas</span>
+                </button>
+            </nav>
+
+
+            <div class="sidebar-footer">
+                <div class="status-badge-container">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Base de datos local lista</span>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- PANEL DE CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <!-- ENCABEZADO SUPERIOR -->
+            <header class="main-header">
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="search-input" placeholder="Buscar cigarros o marcas...">
+                </div>
+                <div class="header-stats" id="header-stats" style="display:flex; align-items:center; gap:10px;">
+                    <span class="stat-badge">
+                        <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        <span id="stat-products-count">Cargando inventario...</span>
+                    </span>
+                    <button type="button" id="btn-theme-toggle" class="theme-toggle-btn" title="Cambiar Tema (Día/Noche)">
+                        <span class="theme-icon">🌙</span>
+                        <span class="theme-text">Modo Noche</span>
+                    </button>
+                </div>
+            </header>
+
+
+            <!-- CONTENIDO DINÁMICO DE PESTAÑAS -->
+            <div class="tab-content">
+                
+                <!-- PESTAÑA 1: NUEVO PEDIDO / POS -->
+                <section id="pos-tab" class="tab-pane active">
+                    <!-- Selector de marcas/categorías -->
+                    <div class="brands-bar-wrapper">
+                        <div class="brands-bar" id="brands-bar">
+                            <button class="brand-chip active" data-brand="all">Todos</button>
+                            <!-- Se poblará dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Panel de Estadísticas / Dashboard de Inventario -->
+                    <div class="pos-dashboard">
+                        <div class="dash-card">
+                            <div class="dash-card-icon bg-primary-light">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            </div>
+                            <div class="dash-card-details">
+                                <h3 id="dash-total-products">0</h3>
+                                <span>Total Productos</span>
+                            </div>
+                        </div>
+                        <div class="dash-card warning">
+                            <div class="dash-card-icon bg-warning-light">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            </div>
+                            <div class="dash-card-details">
+                                <h3 id="dash-low-stock">0</h3>
+                                <span>Stock Bajo (Alertas)</span>
+                            </div>
+                        </div>
+                        <div class="dash-card danger">
+                            <div class="dash-card-icon bg-danger-light">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                            </div>
+                            <div class="dash-card-details">
+                                <h3 id="dash-out-of-stock">0</h3>
+                                <span>Agotados</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pos-layout">
+                        <!-- Cuadrícula de Productos -->
+                        <div class="menu-section">
+                            <h2 class="section-title" id="menu-title">Menú de Cigarros</h2>
+                            <div class="products-grid" id="products-grid">
+                                <!-- Se poblará dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PESTAÑA 2: CATÁLOGO -->
+                <section id="catalog-tab" class="tab-pane">
+                    <div class="catalog-layout">
+                        <!-- Formulario de Registro/Edición -->
+                        <div class="catalog-form-container">
+                            <h2 class="form-title" id="catalog-form-title">Registrar Nuevo Cigarro</h2>
+                            <form id="catalog-form">
+                                <input type="hidden" id="edit-product-id" value="">
+                                
+                                <div class="form-group">
+                                    <label for="prod-name">Nombre del Cigarro *</label>
+                                    <input type="text" id="prod-name" required placeholder="Ej. Marlboro Red">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="prod-brand">Marca *</label>
+                                    <input type="text" id="prod-brand" required placeholder="Ej. Marlboro">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="prod-desc">Descripción / Detalles</label>
+                                    <textarea id="prod-desc" rows="2" placeholder="Ej. Sabor clásico, filtro corcho"></textarea>
+                                </div>
+
+                                <!-- Cajetilla -->
+                                <div class="form-row-2col">
+                                    <div class="form-group">
+                                        <label for="price-cajetilla">Precio Cajetilla (S/) *</label>
+                                        <input type="number" id="price-cajetilla" step="0.01" min="0" required value="0.00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stock-cajetilla">Stock Cajetilla *</label>
+                                        <input type="number" id="stock-cajetilla" min="0" required value="0">
+                                    </div>
+                                </div>
+
+                                <!-- Paquete -->
+                                <div class="form-row-2col">
+                                    <div class="form-group">
+                                        <label for="price-paquete">Precio Paquete (S/) *</label>
+                                        <input type="number" id="price-paquete" step="0.01" min="0" required value="0.00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stock-paquete">Stock Paquete *</label>
+                                        <input type="number" id="stock-paquete" min="0" required value="0">
+                                    </div>
+                                </div>
+
+                                <!-- Cajon -->
+                                <div class="form-row-2col">
+                                    <div class="form-group">
+                                        <label for="price-cajon">Precio Cajón (S/) *</label>
+                                        <input type="number" id="price-cajon" step="0.01" min="0" required value="0.00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stock-cajon">Stock Cajón *</label>
+                                        <input type="number" id="stock-cajon" min="0" required value="0">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Foto del Producto</label>
+                                    <div class="image-upload-wrapper">
+                                        <div class="image-preview-container" id="img-form-preview-container">
+                                            <span class="preview-placeholder">Sin imagen</span>
+                                            <img id="img-form-preview" src="" alt="Vista previa" style="display: none;">
+                                        </div>
+                                        <div class="image-upload-controls">
+                                            <label class="btn-file-label" for="prod-image-file">Seleccionar foto...</label>
+                                            <input type="file" id="prod-image-file" accept="image/*">
+                                            <button type="button" class="btn-danger-outline" id="btn-remove-form-img" style="display: none;">Quitar</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary" id="btn-submit-product">Guardar Cigarro</button>
+                                    <button type="button" class="btn-secondary" id="btn-clear-catalog-form">Cancelar / Limpiar</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Lista de Productos en Catálogo -->
+                        <div class="catalog-list-container">
+                            <div class="catalog-list-header">
+                                <h2>Cigarros Registrados</h2>
+                                <div class="catalog-actions-row">
+                                    <button type="button" class="btn-primary btn-sm" id="btn-download-order-sheet" style="background-color: var(--success); border-color: var(--success);" title="Descargar hoja de pedido sugerido para proveedores en formato Excel (CSV)">
+                                        Pedir a Proveedores (Excel)
+                                    </button>
+                                    <button type="button" class="btn-secondary btn-sm" id="btn-export-inventory" title="Exportar inventario a JSON">
+                                        Exportar Inventario
+                                    </button>
+                                    <button type="button" class="btn-secondary btn-sm" id="btn-import-inventory" title="Importar inventario desde JSON">
+                                        Importar Inventario
+                                    </button>
+                                    <input type="file" id="file-import-inventory" accept=".json" style="display: none;">
+                                    <div class="catalog-search">
+                                        <input type="text" id="catalog-search-input" placeholder="Buscar en catálogo...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="catalog-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Foto</th>
+                                            <th>Cigarro / Marca</th>
+                                            <th>P. Cajetilla</th>
+                                            <th>P. Paquete</th>
+                                            <th>P. Cajón</th>
+                                            <th>Inventario (C/P/CJ)</th>
+                                            <th>Existencias Reales (Caj.)</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody id="catalog-table-body">
+                                        <!-- Se poblará dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PESTAÑA 3: HISTORIAL -->
+                <section id="history-tab" class="tab-pane">
+                    <div class="history-layout">
+                        <!-- Lista de Pedidos -->
+                        <div class="history-list-container">
+                            <div class="history-list-header" style="flex-wrap: wrap; gap: 8px;">
+                                <h2>Pedidos Registrados</h2>
+                                <div style="display:flex; gap: 8px; align-items:center;">
+                                    <button type="button" class="btn-primary btn-sm" id="btn-export-all-orders-excel" style="background-color: var(--success); border-color: var(--success); font-size:11px; padding:6px 10px;" title="Descargar historial de todos los pedidos en un archivo Excel (CSV)">Exportar Todo (Excel)</button>
+                                    <div class="history-search">
+                                        <input type="text" id="history-search-input" placeholder="Buscar por cliente...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Folio</th>
+                                            <th>Cliente</th>
+                                            <th>Fecha</th>
+                                            <th>Total</th>
+                                            <th>Método</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <!-- Se poblará dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Detalles del Pedido Seleccionado -->
+                        <div class="history-details-container" id="history-details-container">
+                            <div class="details-empty-state" id="details-empty-state">
+                                <svg class="icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                <p>Selecciona un pedido de la lista para ver su detalle de venta</p>
+                            </div>
+                            <div class="order-details-card" id="order-details-card" style="display: none;">
+                                <div class="order-details-header">
+                                    <div>
+                                        <h3 id="details-folio">PED-00000000</h3>
+                                        <span id="details-date">Fecha: -</span>
+                                    </div>
+                                    <div style="display:flex; gap:8px;">
+                                        <button class="btn-primary btn-sm" id="btn-print-history-order" style="padding:6px 10px; font-size:11px;">Descargar PDF</button>
+                                        <button class="btn-primary btn-sm" id="btn-export-order-excel" style="padding:6px 10px; font-size:11px; background-color: var(--success); border-color: var(--success);" title="Descargar este pedido en formato de hoja de cálculo Excel (CSV)">Descargar Excel</button>
+                                        <button class="btn-danger-outline btn-sm" id="btn-delete-order">Eliminar Venta</button>
+                                    </div>
+                                </div>
+                                <div class="order-details-client">
+                                    <p><strong>Cliente:</strong> <span id="details-client-name">-</span></p>
+                                    <p><strong>Teléfono:</strong> <span id="details-client-phone">-</span></p>
+                                    <p><strong>Método de Pago:</strong> <span id="details-payment-method" class="payment-badge">-</span></p>
+                                </div>
+                                <div class="order-details-items">
+                                    <h4>Detalles del Pedido</h4>
+                                    <ul class="details-items-list" id="details-items-list">
+                                        <!-- Se poblará dinámicamente -->
+                                    </ul>
+                                </div>
+                                <div class="order-details-summary">
+                                    <div class="summary-row">
+                                        <span>Total:</span>
+                                        <span id="details-total" class="total-price">S/0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PESTAÑA 4: CLIENTES -->
+                <section id="clients-tab" class="tab-pane">
+                    <div class="catalog-layout">
+                        <!-- Formulario de Registro/Edición de Clientes -->
+                        <div class="catalog-form-container">
+                            <h2 class="form-title" id="client-form-title">Registrar Nuevo Cliente</h2>
+                            <form id="client-form">
+                                <input type="hidden" id="edit-client-id" value="">
+                                
+                                <div class="form-group">
+                                    <label for="c-name">Nombre Completo *</label>
+                                    <input type="text" id="c-name" required placeholder="Ej. Juan Pérez">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="c-phone">Teléfono / Celular *</label>
+                                    <input type="text" id="c-phone" required placeholder="Ej. 11 2345-6789">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="c-email">Correo Electrónico</label>
+                                    <input type="email" id="c-email" placeholder="Ej. juan@correo.com">
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary" id="btn-submit-client">Guardar Cliente</button>
+                                    <button type="button" class="btn-secondary" id="btn-clear-client-form">Cancelar / Limpiar</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Directorio de Clientes -->
+                        <div class="catalog-list-container">
+                            <div class="catalog-list-header" style="flex-wrap: wrap; gap: 8px;">
+                                <h2>Directorio de Clientes</h2>
+                                <div class="catalog-actions-row">
+                                    <button type="button" class="btn-primary btn-sm" id="btn-export-clients-excel" style="background-color: var(--success); border-color: var(--success); font-size:11px; padding:6px 10px;" title="Exportar directorio de clientes a Excel (CSV)">Exportar Excel</button>
+                                    <button type="button" class="btn-secondary btn-sm" id="btn-import-clients-excel" style="font-size:11px; padding:6px 10px;" title="Importar clientes desde un archivo Excel (CSV)">Importar Excel</button>
+                                    <input type="file" id="file-import-clients" accept=".csv" style="display: none;">
+                                    <div class="catalog-search">
+                                        <input type="text" id="client-search-input" placeholder="Buscar clientes...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="catalog-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Contacto</th>
+                                            <th>Compras</th>
+                                            <th>Total Gastado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="clients-table-body">
+                                        <!-- Se poblará dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PESTAÑA 5: ANALÍTICAS -->
+                <section id="analytics-tab" class="tab-pane">
+                    <div class="analytics-dashboard">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                            <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary);">Tablero de Analíticas</h2>
+                            <button type="button" class="btn-primary btn-sm" id="btn-export-analytics-excel" style="background-color: var(--success); border-color: var(--success); font-size:11px; padding:6px 12px; font-weight:700;" title="Exportar analíticas a Excel (CSV)">Exportar Analíticas (Excel)</button>
+                        </div>
+                        <!-- KPI Cards -->
+                        <div class="kpi-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <span>Ventas Brutas</span>
+                                    <div class="kpi-icon bg-primary-light">
+                                        <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                    </div>
+                                </div>
+                                <h2 id="kpi-gross-sales">S/0.00</h2>
+                                <p class="kpi-sub">Total acumulado en caja</p>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <span>Ventas (Tickets)</span>
+                                    <div class="kpi-icon bg-success-light">
+                                        <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                                    </div>
+                                </div>
+                                <h2 id="kpi-ticket-count">0</h2>
+                                <p class="kpi-sub">Transacciones registradas</p>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <span>Ticket Promedio</span>
+                                    <div class="kpi-icon bg-warning-light">
+                                        <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    </div>
+                                </div>
+                                <h2 id="kpi-average-ticket">S/0.00</h2>
+                                <p class="kpi-sub">Valor promedio por ticket</p>
+                            </div>
+                        </div>
+
+                        <!-- Detalle de Analíticas -->
+                        <div class="analytics-details">
+                            <!-- Ventas por Método de Pago -->
+                            <div class="analytics-card">
+                                <h3>Métodos de Pago Utilizados</h3>
+                                <div class="progress-bar-list" id="payment-methods-analytics">
+                                    <!-- Dinámico: Efectivo, Tarjeta, Transferencia -->
+                                </div>
+                            </div>
+                            
+                            <!-- Ranking de Productos Más Vendidos -->
+                            <div class="analytics-card">
+                                <h3>Top Productos Más Vendidos</h3>
+                                <div class="ranking-list" id="top-products-analytics">
+                                    <!-- Dinámico: lista de productos más vendidos -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- PANEL DERECHO: FACTURA / CARRITO (Flotante o Anclado) -->
+        <aside class="invoice-section" id="invoice-sidebar">
+            <div class="invoice-header-wrapper">
+                <h2 class="invoice-title">Factura actual</h2>
+                <button type="button" class="btn-close-drawer" id="btn-close-invoice-drawer">✕ Cerrar</button>
+            </div>
+            
+            <!-- Datos del Cliente -->
+            <div class="client-form">
+                <div class="form-group-small" style="position:relative;">
+                    <label for="client-select-input">Buscar / Seleccionar Cliente</label>
+                    <div style="display:flex; gap:6px;">
+                        <input type="text" id="client-select-input" placeholder="Buscar por nombre o teléfono..." autocomplete="off">
+                        <button type="button" class="btn-secondary" id="btn-clear-selected-client" style="padding:6px 10px; font-size:11px; display:none;" title="Quitar cliente seleccionado">✕</button>
+                    </div>
+                    <div class="client-dropdown" id="client-dropdown" style="display:none;">
+                        <!-- Se poblará dinámicamente -->
+                    </div>
+                </div>
+                <!-- Inputs ocultos que guardan el estado seleccionado de cliente -->
+                <input type="hidden" id="client-name" value="Cliente General">
+                <input type="hidden" id="client-phone" value="-">
+                
+                <div class="selected-client-badge" id="selected-client-badge" style="display:none;">
+                    Cliente: <strong id="selected-client-name-display">-</strong>
+                </div>
+            </div>
+
+            <!-- Items del Carrito -->
+            <div class="cart-items-wrapper">
+                <div class="cart-empty-state" id="cart-empty-state">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-cart"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <p>El carrito de compras está vacío</p>
+                </div>
+                <div class="cart-items-list" id="cart-items-list" style="display: none;">
+                    <!-- Se poblará dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Resumen y Pago -->
+            <div class="invoice-summary-container">
+                <div class="invoice-summary">
+                    <div class="summary-line">
+                        <span>Sub Total</span>
+                        <span id="summary-subtotal">S/0.00</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Descuento</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <select id="discount-type" style="padding:4px 6px; font-size:12px; border-radius:4px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary);">
+                                <option value="none">Sin Desc.</option>
+                                <option value="percent">Porcentaje (%)</option>
+                                <option value="fixed">Monto Fijo (S/)</option>
+                            </select>
+                            <input type="number" id="discount-value" value="0" min="0" style="width:60px; padding:4px 6px; font-size:12px; border-radius:4px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-primary); text-align:right;">
+                        </div>
+                    </div>
+                    <div class="summary-line" id="discount-total-row" style="display:none; color:var(--danger);">
+                        <span>Descuento Aplicado</span>
+                        <span id="summary-discount">-S/0.00</span>
+                    </div>
+                    <hr class="summary-divider">
+                    <div class="summary-line total">
+                        <span>Total de Pago</span>
+                        <span id="summary-total">S/0.00</span>
+                    </div>
+                </div>
+
+                <!-- Método de Pago -->
+                <div class="payment-method-selector">
+                    <label class="payment-btn active" id="pay-cash">
+                        <input type="radio" name="payment-method" value="Efectivo" checked style="display:none;">
+                        <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                        <span>Efectivo</span>
+                    </label>
+                    <label class="payment-btn" id="pay-card">
+                        <input type="radio" name="payment-method" value="Tarjeta" style="display:none;">
+                        <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                        <span>Tarjeta</span>
+                    </label>
+                    <label class="payment-btn" id="pay-transfer">
+                        <input type="radio" name="payment-method" value="Transferencia" style="display:none;">
+                        <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <span>Transferencia</span>
+                    </label>
+                </div>
+
+                <!-- Acción de Registro -->
+                <button class="btn-primary btn-large" id="btn-place-order">
+                    <span>Registrar Venta (F12)</span>
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- SECCIÓN DE IMPRESIÓN DEL TICKET (OCULTA POR DEFECTO EN PANTALLA) -->
+    <div id="print-ticket-receipt" class="print-receipt-container">
+        <div class="receipt-header">
+            <h2 class="receipt-title">DA LOGISTICS</h2>
+            <p>Ventas Offline y Catálogo</p>
+            <p class="receipt-divider">================================</p>
+        </div>
+        <div class="receipt-info">
+            <p><strong>Folio:</strong> <span id="receipt-folio">-</span></p>
+            <p><strong>Fecha:</strong> <span id="receipt-date">-</span></p>
+            <p><strong>Cliente:</strong> <span id="receipt-client">-</span></p>
+            <p><strong>Método:</strong> <span id="receipt-payment">-</span></p>
+            <p class="receipt-divider">--------------------------------</p>
+        </div>
+        <table class="receipt-items-table">
+            <thead>
+                <tr>
+                    <th style="text-align:left;">Cant | Item</th>
+                    <th style="text-align:right;">Sub</th>
+                </tr>
+            </thead>
+            <tbody id="receipt-items-body">
+                <!-- Se poblará por JS -->
+            </tbody>
+        </table>
+        <div class="receipt-totals">
+            <p class="receipt-divider">--------------------------------</p>
+            <div class="receipt-total-row">
+                <span>Subtotal:</span>
+                <span id="receipt-subtotal">S/0.00</span>
+            </div>
+            <div class="receipt-total-row" id="receipt-discount-row" style="display:none;">
+                <span>Descuento:</span>
+                <span id="receipt-discount">-S/0.00</span>
+            </div>
+            <div class="receipt-total-row main-total">
+                <strong>TOTAL:</strong>
+                <strong id="receipt-total">S/0.00</strong>
+            </div>
+            <p class="receipt-divider">================================</p>
+        </div>
+        <div class="receipt-footer">
+            <p>¡Gracias por su compra!</p>
+            <p>DA LOGISTICS Offline POS</p>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIGURACIÓN DE PRODUCTO (PRECIO FLEXIBLE) -->
+    <div id="product-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-cig-title">Marlboro Red (Marlboro)</h3>
+                <button type="button" class="btn-close-modal" id="btn-close-product-modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-product-layout">
+                    <div class="modal-product-img" id="modal-cig-img-container">
+                        <!-- Se poblará por JS -->
+                    </div>
+                    <div class="modal-product-fields">
+                        <div class="form-group">
+                            <label>Presentación</label>
+                            <div class="modal-presentation-selector">
+                                <label class="modal-pres-option">
+                                    <input type="radio" name="modal-presentation" value="cajetilla" checked>
+                                    <span>Cajetilla</span>
+                                </label>
+                                <label class="modal-pres-option">
+                                    <input type="radio" name="modal-presentation" value="paquete">
+                                    <span>Paquete</span>
+                                </label>
+                                <label class="modal-pres-option">
+                                    <input type="radio" name="modal-presentation" value="cajon">
+                                    <span>Cajón</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top:12px;">
+                            <span id="modal-stock-info" class="modal-stock-text ok">Stock disponible: -</span>
+                        </div>
+
+                        <div class="form-row-split">
+                            <div class="form-group">
+                                <label for="modal-price-input">Precio Unitario (S/)</label>
+                                <input type="number" id="modal-price-input" step="0.01" min="0" style="padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-weight:700; width:100%;">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-qty-input">Cantidad</label>
+                                <div class="modal-qty-controls">
+                                    <button type="button" class="modal-qty-btn" id="btn-modal-qty-minus">-</button>
+                                    <input type="number" id="modal-qty-input" value="1" min="1" style="text-align:center; border:none; width:50px;">
+                                    <button type="button" class="modal-qty-btn" id="btn-modal-qty-plus">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-subtotal-box">
+                            <span>Subtotal:</span>
+                            <span id="modal-subtotal-display">S/0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-primary" id="btn-modal-add-to-cart" style="width:100%; padding:12px; font-weight:700;">Añadir al Carrito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTÓN FLOTANTE PARA VER EL CARRITO (CARRITO FAB EN MÓVIL) -->
+    <button id="btn-mobile-cart-toggle" class="mobile-cart-toggle-fab" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        <span id="mobile-cart-badge" class="mobile-cart-badge">0</span>
+    </button>
+
+    <!-- Librería offline-compatible para descarga directa de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

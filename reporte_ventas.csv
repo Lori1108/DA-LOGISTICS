@@ -1,0 +1,5 @@
+﻿Folio;Fecha;Cliente;Telefono;Producto;Presentacion;Cantidad;Precio Unitario;Subtotal Item;Total Venta
+PED-20260817085624;2026-08-17 08:56:24;Cliente General;-;Lorena;cajetilla;1;$1000000.00;$1000000.00;$1000000.00
+PED-20260816204608;2026-08-16 20:46:08;Cliente General;-;Camel Original;cajetilla;1;$72.00;$72.00;$72.00
+PED-20260816204501;2026-08-16 20:45:01;Cliente General;-;Camel Original;cajetilla;1;$72.00;$72.00;$72.00
+PED-20260816203738;2026-08-16 20:37:38;Cliente General;-;Cohiba Siglo II;cajetilla;1;$450.00;$450.00;$450.00
