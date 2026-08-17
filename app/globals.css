@@ -2344,16 +2344,15 @@ body.night-theme .corporate-logo {
     justify-content: center;
     width: 38px;
     height: 38px;
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    color: #FFFFFF;
+    background: #FFFFFF;
     border-radius: var(--radius-sm);
-    box-shadow: 0 4px 10px rgba(18, 67, 136, 0.25);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
 }
 
 body.night-theme .logo-icon-wrapper {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    box-shadow: 0 4px 10px rgba(18, 67, 136, 0.3);
+    background: #FFFFFF;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .logo-svg {
