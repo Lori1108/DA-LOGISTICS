@@ -10,12 +10,13 @@
     --text-secondary: #64748B;
     --text-muted: #94A3B8;
     
-    --primary: #2563EB;
-    --primary-light: #EFF6FF;
-    --primary-dark: #1D4ED8;
+    --primary: #1B4A96;
+    --primary-light: #F0F4FA;
+    --primary-dark: #12336B;
     
-    --accent: #8B5CF6;
-    --accent-light: #F5F3FF;
+    --accent: #79C143;
+    --accent-light: #F2F9ED;
+    --accent-dark: #5C9A2E;
     
     --success: #10B981;
     --success-light: #ECFDF5;
@@ -562,12 +563,12 @@ body {
 }
 
 .qty-btn.plus {
-    background-color: var(--primary);
+    background-color: var(--accent);
     color: white;
 }
 
 .qty-btn.plus:hover {
-    background-color: var(--primary-dark);
+    background-color: var(--accent-dark);
 }
 
 .qty-input {
@@ -1276,7 +1277,7 @@ tr:hover td {
    BOTONES Y COMPONENTES GENÉRICOS
    ========================================================================= */
 .btn-primary {
-    background-color: var(--primary);
+    background-color: var(--accent);
     color: white;
     border: none;
     padding: 10px 16px;
@@ -1289,7 +1290,7 @@ tr:hover td {
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-dark);
+    background-color: var(--accent-dark);
 }
 
 .btn-primary.btn-large {
@@ -1297,7 +1298,7 @@ tr:hover td {
     padding: 14px;
     font-size: 15px;
     border-radius: var(--radius-md);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 4px 12px rgba(121, 193, 67, 0.3);
 }
 
 .btn-secondary {
@@ -1800,10 +1801,10 @@ tr:hover td {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: var(--primary);
+    background-color: var(--accent);
     color: white;
     border: none;
-    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 4px 20px rgba(121, 193, 67, 0.4);
     align-items: center;
     justify-content: center;
     z-index: 120;
@@ -1813,7 +1814,7 @@ tr:hover td {
 
 .mobile-cart-toggle-fab:hover {
     transform: scale(1.05);
-    background-color: var(--primary-dark);
+    background-color: var(--accent-dark);
 }
 
 .mobile-cart-badge {
