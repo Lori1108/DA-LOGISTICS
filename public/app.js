@@ -283,7 +283,14 @@ const DOM = {
     btnModalQtyPlus: document.getElementById("btn-modal-qty-plus"),
     modalStockInfo: document.getElementById("modal-stock-info"),
     modalSubtotalDisplay: document.getElementById("modal-subtotal-display"),
-    btnModalAddToCart: document.getElementById("btn-modal-add-to-cart")
+    btnModalAddToCart: document.getElementById("btn-modal-add-to-cart"),
+
+    // Modal de Venta Exitosa
+    modalSaleSuccess: document.getElementById("modal-sale-success"),
+    closeSaleSuccess: document.getElementById("close-sale-success"),
+    saleSuccessFolio: document.getElementById("sale-success-folio"),
+    btnDownloadReceipt: document.getElementById("btn-download-receipt"),
+    btnSkipReceipt: document.getElementById("btn-skip-receipt")
 };
 
 // =========================================================================
@@ -896,23 +903,71 @@ function placeOrder() {
         LocalDB.saveOrders(orders);
     }
 
-    // Disparar Impresión de Ticket
-    if (confirm(`Venta registrada exitosamente.\nFolio: ${folio}\n\n¿Deseas DESCARGAR el PDF del ticket de compra?`)) {
-        printReceipt(newOrder);
+    // Disparar Modal de Venta Exitosa en lugar de confirm
+    if (DOM.saleSuccessFolio) DOM.saleSuccessFolio.textContent = folio;
+    if (DOM.modalSaleSuccess) {
+        DOM.modalSaleSuccess.style.display = "flex";
+        
+        // Limpiar listeners previos para evitar duplicados si hace varias ventas
+        const newBtnDownload = DOM.btnDownloadReceipt.cloneNode(true);
+        DOM.btnDownloadReceipt.parentNode.replaceChild(newBtnDownload, DOM.btnDownloadReceipt);
+        DOM.btnDownloadReceipt = newBtnDownload;
+        
+        const newBtnSkip = DOM.btnSkipReceipt.cloneNode(true);
+        DOM.btnSkipReceipt.parentNode.replaceChild(newBtnSkip, DOM.btnSkipReceipt);
+        DOM.btnSkipReceipt = newBtnSkip;
+        
+        const newClose = DOM.closeSaleSuccess.cloneNode(true);
+        DOM.closeSaleSuccess.parentNode.replaceChild(newClose, DOM.closeSaleSuccess);
+        DOM.closeSaleSuccess = newClose;
+
+        const closeModalAndReset = () => {
+            DOM.modalSaleSuccess.style.display = "none";
+            // Resetear formulario de venta DESPUÉS de cerrar el modal
+            if (DOM.clientSelectInput) DOM.clientSelectInput.value = "";
+            if (DOM.clientName) DOM.clientName.value = "Cliente General";
+            if (DOM.clientPhone) DOM.clientPhone.value = "-";
+            if (DOM.btnClearSelectedClient) DOM.btnClearSelectedClient.style.display = "none";
+            if (DOM.selectedClientBadge) DOM.selectedClientBadge.style.display = "none";
+            
+            if (DOM.discountType) DOM.discountType.value = "none";
+            if (DOM.discountValue) DOM.discountValue.value = "0";
+
+            AppState.cart = [];
+            renderCart();
+        };
+
+        DOM.btnDownloadReceipt.addEventListener("click", () => {
+            printReceipt(newOrder);
+            closeModalAndReset();
+        });
+
+        DOM.btnSkipReceipt.addEventListener("click", () => {
+            closeModalAndReset();
+        });
+
+        DOM.closeSaleSuccess.addEventListener("click", () => {
+            closeModalAndReset();
+        });
+    } else {
+        // Fallback en caso de que no exista el modal (por si acaso)
+        if (confirm(`Venta registrada exitosamente.\nFolio: ${folio}\n\n¿Deseas DESCARGAR el PDF del ticket de compra?`)) {
+            printReceipt(newOrder);
+        }
+        
+        // Resetear formulario de venta
+        if (DOM.clientSelectInput) DOM.clientSelectInput.value = "";
+        if (DOM.clientName) DOM.clientName.value = "Cliente General";
+        if (DOM.clientPhone) DOM.clientPhone.value = "-";
+        if (DOM.btnClearSelectedClient) DOM.btnClearSelectedClient.style.display = "none";
+        if (DOM.selectedClientBadge) DOM.selectedClientBadge.style.display = "none";
+        
+        if (DOM.discountType) DOM.discountType.value = "none";
+        if (DOM.discountValue) DOM.discountValue.value = "0";
+
+        AppState.cart = [];
+        renderCart();
     }
-
-    // Resetear formulario de venta
-    if (DOM.clientSelectInput) DOM.clientSelectInput.value = "";
-    if (DOM.clientName) DOM.clientName.value = "Cliente General";
-    if (DOM.clientPhone) DOM.clientPhone.value = "-";
-    if (DOM.btnClearSelectedClient) DOM.btnClearSelectedClient.style.display = "none";
-    if (DOM.selectedClientBadge) DOM.selectedClientBadge.style.display = "none";
-    
-    if (DOM.discountType) DOM.discountType.value = "none";
-    if (DOM.discountValue) DOM.discountValue.value = "0";
-
-    AppState.cart = [];
-    renderCart();
     renderPOS();
     renderCatalogTable();
     updateInventoryStats();

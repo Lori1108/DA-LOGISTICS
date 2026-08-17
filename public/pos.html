@@ -683,6 +683,35 @@
         </div>
     </div>
 
+    <!-- Modal Venta Exitosa -->
+    <div id="modal-sale-success" class="modal-overlay" style="display: none; z-index: 2000;">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+                <button class="close-modal" id="close-sale-success">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding-top: 0;">
+                <div style="width: 80px; height: 80px; background: var(--success-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width: 40px; height: 40px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <h3 style="font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">¡Venta Exitosa!</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 15px;">La venta se ha registrado correctamente.<br><strong id="sale-success-folio" style="color: var(--text-primary);">Folio: ---</strong></p>
+                <div style="background: var(--bg-body); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px; text-align: left;">
+                    <p style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">¿Deseas el comprobante?</p>
+                    <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">Puedes descargar un ticket en PDF para enviarlo por WhatsApp o imprimirlo.</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button type="button" id="btn-download-receipt" class="btn-primary" style="width: 100%; padding: 14px; font-weight: 700; font-size: 15px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; margin-right: 8px; display: inline-block; vertical-align: middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Descargar Ticket PDF
+                    </button>
+                    <button type="button" id="btn-skip-receipt" class="btn-outline" style="width: 100%; padding: 14px; font-weight: 600; font-size: 15px; border-color: transparent; color: var(--text-secondary);">
+                        Continuar sin descargar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- BOTÓN FLOTANTE PARA VER EL CARRITO (CARRITO FAB EN MÓVIL) -->
     <button id="btn-mobile-cart-toggle" class="mobile-cart-toggle-fab" style="display:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
