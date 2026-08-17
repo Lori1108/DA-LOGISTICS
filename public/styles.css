@@ -1756,19 +1756,20 @@ tr:hover td {
 }
 
 /* =========================================================================
-   ESTADO DEL CARRITO (CART-CLOSED) - DESKTOP Y MOBILE
+   ESTADO DEL CARRITO (CART-CLOSED) - SOLO DESKTOP (>=1401px)
    ========================================================================= */
+@media (min-width: 1401px) {
+    body.cart-closed .app-container {
+        grid-template-columns: 260px 1fr !important;
+    }
 
-body.cart-closed .app-container {
-    grid-template-columns: 260px 1fr !important;
-}
+    body.cart-closed .invoice-section {
+        display: none !important;
+    }
 
-body.cart-closed .invoice-section {
-    display: none !important;
-}
-
-body.cart-closed .mobile-cart-toggle-fab {
-    display: flex !important;
+    body.cart-closed .mobile-cart-toggle-fab {
+        display: flex !important;
+    }
 }
 
 /* Base styles for FAB and Close Button (now global) */
@@ -1846,7 +1847,8 @@ body.cart-closed .mobile-cart-toggle-fab {
         position: fixed;
         top: 0;
         right: -100%;
-        width: 380px;
+        width: 100vw;
+        max-width: 380px;
         height: 100%;
         z-index: 150;
         transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
