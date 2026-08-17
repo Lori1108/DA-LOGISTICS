@@ -1918,6 +1918,29 @@ if (closeInvoiceDrawer && invoiceSidebar) {
     });
 }
 
+// Cerrar drawer al hacer clic fuera de él en móvil
+document.addEventListener('click', (e) => {
+    if (invoiceSidebar && invoiceSidebar.classList.contains('active-drawer')) {
+        if (!invoiceSidebar.contains(e.target) && mobileCartToggle && !mobileCartToggle.contains(e.target)) {
+            invoiceSidebar.classList.remove("active-drawer");
+        }
+    }
+});
+
+// LOGOUT
+const btnLogout = document.getElementById("btn-logout");
+if (btnLogout) {
+    btnLogout.addEventListener("click", async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/';
+        } catch (err) {
+            console.error("Error logging out", err);
+            window.location.href = '/';
+        }
+    });
+}
+
 // Cerrar drawer al cambiar de pestaña
 DOM.navButtons.forEach(btn => {
     btn.addEventListener("click", () => {

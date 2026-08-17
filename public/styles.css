@@ -990,8 +990,12 @@ tr:hover td {
 .invoice-title {
     font-size: 18px;
     font-weight: 700;
-    margin-bottom: 16px;
+    margin-bottom: 0;
     color: var(--text-primary);
+}
+
+.btn-close-drawer {
+    display: none;
 }
 
 /* Formulario Corto Cliente */
