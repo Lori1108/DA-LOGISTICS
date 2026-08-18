@@ -1858,9 +1858,6 @@ if (DOM.clientSearchInput) {
 
 // --- 9.5.4. BUSCADOR PREDICTIVO EN CARRITO (POS) ---
 if (DOM.clientSelectInput) {
-    if (DOM.zoneSelectInput) {
-        DOM.zoneSelectInput.addEventListener("change", filterClientDropdown);
-    }
     // Rellenar y filtrar dropdown de clientes en base a lo escrito
     const filterClientDropdown = () => {
         const query = DOM.clientSelectInput.value.toLowerCase().trim();
@@ -1920,6 +1917,9 @@ if (DOM.clientSelectInput) {
 
     DOM.clientSelectInput.addEventListener("input", filterClientDropdown);
     DOM.clientSelectInput.addEventListener("focus", filterClientDropdown);
+    if (DOM.zoneSelectInput) {
+        DOM.zoneSelectInput.addEventListener("change", filterClientDropdown);
+    }
 
     // Ocultar dropdown al clickear fuera
     document.addEventListener("click", (e) => {
