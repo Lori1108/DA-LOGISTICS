@@ -133,49 +133,59 @@ async function renderDeliveriesAndMap() {
 
     list.innerHTML = html;
 
-    // Dibujar ruta si hay waypoints
-    if (routeWaypoints.length > 0) {
-        const drawRoute = (waypointsToDraw) => {
+    const drawRoute = (waypointsToDraw) => {
+        if (waypointsToDraw.length > 1) {
             routingControl = L.Routing.control({
                 waypoints: waypointsToDraw,
                 routeWhileDragging: false,
                 addWaypoints: false,
-                show: false, // Ocultar el panel de instrucciones
+                show: false,
                 lineOptions: {
                     styles: [{color: '#3b82f6', opacity: 0.8, weight: 6}]
                 },
                 createMarker: function() { return null; }
             }).addTo(map);
+        }
 
+        if (markers.length > 0) {
             const group = new L.featureGroup(markers);
             map.fitBounds(group.getBounds().pad(0.1));
-        };
+        }
+    };
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const currentPos = L.latLng(pos.coords.latitude, pos.coords.longitude);
-                    const startMarker = L.marker(currentPos, {
-                        icon: L.icon({
-                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        })
-                    }).addTo(map);
-                    startMarker.bindPopup("<b>📍 Tu ubicación actual</b>").openPopup();
-                    markers.push(startMarker);
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const currentPos = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                const startMarker = L.marker(currentPos, {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map);
+                startMarker.bindPopup("<b>📍 Tu ubicación actual</b>").openPopup();
+                markers.push(startMarker);
+                
+                if (routeWaypoints.length > 0) {
                     drawRoute([currentPos, ...routeWaypoints]);
-                },
-                (err) => {
-                    console.warn("No se pudo obtener ubicación actual", err);
+                } else {
+                    drawRoute([currentPos]);
+                }
+            },
+            (err) => {
+                console.warn("No se pudo obtener ubicación actual", err);
+                if (routeWaypoints.length > 0) {
                     drawRoute(routeWaypoints);
-                },
-                { enableHighAccuracy: true, timeout: 5000 }
-            );
-        } else {
+                }
+            },
+            { enableHighAccuracy: true, timeout: 5000 }
+        );
+    } else {
+        if (routeWaypoints.length > 0) {
             drawRoute(routeWaypoints);
         }
     }
