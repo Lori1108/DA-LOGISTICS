@@ -121,8 +121,14 @@ async function renderDeliveriesAndMap() {
         let stopLabel = isEntregado ? '✅' : pendingCount++;
         
         let distText = "";
-        if (!isEntregado && order._distance && order._distance < 9999999) {
-            distText = `<br><span style="font-size:11px; color:var(--text-secondary);">📍 a ${(order._distance / 1000).toFixed(2)} km de distancia</span>`;
+        let missingCoordsWarning = "";
+        
+        if (!isEntregado) {
+            if (order._distance && order._distance < 9999999) {
+                distText = `<br><span style="font-size:11px; color:var(--text-secondary);">📍 a ${(order._distance / 1000).toFixed(2)} km de distancia</span>`;
+            } else if (!order._latLng) {
+                missingCoordsWarning = `<div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; font-size: 11px; padding: 6px; border-radius: 4px; margin-top: 5px;">⚠️ Coordenadas GPS faltantes. El administrador debe "Fijar Ubicación en Mapa" al editar este cliente para poder trazar la ruta.</div>`;
+            }
         }
 
         if (!isEntregado && order._latLng) {
@@ -141,7 +147,8 @@ async function renderDeliveriesAndMap() {
             </div>
             <div class="order-meta">
                 <p>📍 <strong>Dirección:</strong> ${order.deliveryAddress || 'No especificada'} ${distText}</p>
-                <p>📞 <strong>Teléfono:</strong> <a href="tel:${order.telefono}" style="color: var(--primary);">${order.telefono}</a></p>
+                ${missingCoordsWarning}
+                <p style="margin-top:5px;">📞 <strong>Teléfono:</strong> <a href="tel:${order.telefono}" style="color: var(--primary);">${order.telefono}</a></p>
                 <p>🕒 <strong>Fecha programada:</strong> ${order.deliveryDate || 'N/A'} ${order.deliveryTime || ''}</p>
             </div>
             <div class="order-items">
