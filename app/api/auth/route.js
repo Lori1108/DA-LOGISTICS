@@ -8,7 +8,7 @@ export async function POST(request) {
 
     if (username === 'BILO' && password === 'lorena123') {
       role = 'admin';
-    } else if (username === 'ROBIN' && password === 'entrega123') {
+    } else if (username === 'trabajo' && password === 'entrega123') {
       role = 'worker';
     }
 
