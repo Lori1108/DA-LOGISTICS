@@ -369,7 +369,11 @@
 
                                 <div class="form-group">
                                     <label for="c-address">Dirección de Entrega</label>
-                                    <input type="text" id="c-address" placeholder="Ej. Calle Falsa 123">
+                                    <div style="display:flex; gap:8px;">
+                                        <input type="text" id="c-address" placeholder="Ej. Calle Falsa 123" style="flex:1;">
+                                        <button type="button" id="btn-search-map" class="btn-secondary" style="padding: 0 10px;">Buscar en Mapa 🔍</button>
+                                    </div>
+                                    <div id="client-map" style="height: 200px; width: 100%; border-radius: var(--radius-sm); margin-top: 10px; display: none; border: 1px solid var(--border-color);"></div>
                                 </div>
 
                                 <div class="form-actions">
@@ -738,6 +742,9 @@
 
     <!-- Librería offline-compatible para descarga directa de PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="app.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script src="/app.js"></script>
 </body>
 </html>

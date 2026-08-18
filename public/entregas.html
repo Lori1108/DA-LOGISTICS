@@ -5,10 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Repartidor - DA LOGISTICS</title>
     <link rel="stylesheet" href="/styles.css">
+    
+    <!-- Leaflet CSS para Mapas -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    
     <style>
         body { background-color: var(--bg-app); color: var(--text-primary); font-family: var(--font-main); }
-        .delivery-container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        .delivery-container { max-width: 800px; margin: 0 auto; padding: 10px 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        
+        /* Contenedor del Mapa */
+        #map-container {
+            width: 100%;
+            height: 350px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            background: #e5e5e5;
+        }
+        #map { width: 100%; height: 100%; }
+        
         .order-card { background: var(--bg-card); border-radius: var(--radius-md); padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--warning); border-bottom: 1px solid var(--border-color); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); }
         .order-card.entregado { border-left-color: var(--success); opacity: 0.7; }
         .order-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; font-size: 16px; }
@@ -29,13 +48,22 @@
             </div>
         </header>
 
-        <h2 style="margin-bottom: 20px; color: var(--text-primary);">Rutas de Entrega</h2>
+        <!-- Mapa interactivo -->
+        <div id="map-container">
+            <div id="map"></div>
+        </div>
+
+        <h2 style="margin-bottom: 15px; color: var(--text-primary); font-size: 18px;">Ruta de Entregas</h2>
         
         <div id="deliveries-list">
             <p style="text-align:center; color:var(--text-secondary);">Cargando entregas...</p>
         </div>
     </div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    
     <script src="/entregas.js"></script>
 </body>
 </html>

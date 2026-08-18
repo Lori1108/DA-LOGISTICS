@@ -2332,3 +2332,68 @@ if (themeToggleBtn) {
         }
     });
 }
+
+// =========================================================================
+// 12. MAPA DE CLIENTE (LEAFLET)
+// =========================================================================
+let clientMap = null;
+let clientMarker = null;
+
+function initClientMap() {
+    if (clientMap) return; 
+    const mapDiv = document.getElementById("client-map");
+    if (!mapDiv) return;
+    
+    if (typeof L === "undefined") {
+        setTimeout(initClientMap, 500);
+        return;
+    }
+    
+    clientMap = L.map('client-map').setView([-12.046374, -77.042793], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(clientMap);
+}
+
+async function showAddressOnMap(address) {
+    if (!address || address.trim() === '') return;
+    
+    initClientMap();
+    const mapDiv = document.getElementById("client-map");
+    mapDiv.style.display = "block";
+    
+    setTimeout(() => {
+        if(clientMap) clientMap.invalidateSize();
+    }, 200);
+
+    try {
+        const searchQuery = encodeURIComponent(address + ", Peru");
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}&limit=1`);
+        const data = await res.json();
+        
+        if (data && data.length > 0) {
+            const latLng = L.latLng(data[0].lat, data[0].lon);
+            if (clientMarker) {
+                clientMarker.setLatLng(latLng);
+            } else {
+                clientMarker = L.marker(latLng).addTo(clientMap);
+            }
+            clientMap.setView(latLng, 16);
+            clientMarker.bindPopup(`<b>Dirección:</b> ${address}`).openPopup();
+        } else {
+            alert("No se pudo encontrar la dirección en el mapa. Intenta ser más específico.");
+        }
+    } catch (e) {
+        console.error("Geocoding error", e);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const btnSearch = document.getElementById("btn-search-map");
+    if (btnSearch) {
+        btnSearch.addEventListener("click", () => {
+            const addr = document.getElementById("c-address").value;
+            showAddressOnMap(addr);
+        });
+    }
+});
