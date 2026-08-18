@@ -1,3 +1,24 @@
+// Helper functions for inventory management
+function getProductTotalUnits(prod) {
+    return (parseInt(prod.stock_cajetilla) || 0) + 
+           ((parseInt(prod.stock_paquete) || 0) * 10) + 
+           ((parseInt(prod.stock_cajon) || 0) * 500);
+}
+
+function updateProductStockFromTotal(prod, totalUnits) {
+    if (totalUnits < 0) totalUnits = 0;
+    prod.stock_cajon = Math.floor(totalUnits / 500);
+    let rem = totalUnits % 500;
+    prod.stock_paquete = Math.floor(rem / 10);
+    prod.stock_cajetilla = rem % 10;
+}
+
+function getPresentationMultiplier(presentation) {
+    if (presentation === 'cajon') return 500;
+    if (presentation === 'paquete') return 10;
+    return 1;
+}
+
 /**
  * app.js - Lógica principal del Punto de Venta Offline de PulpoCigars
  * Controla el almacenamiento local, el carrito, el catálogo, las fotos y el historial.
@@ -649,9 +670,7 @@ DOM.searchInput.addEventListener("input", (e) => {
 function adjustCartQty(product, presentation, price, action) {
     const existingIndex = AppState.cart.findIndex(it => it.product.id === product.id && it.presentation === presentation);
     
-    let activeStock = parseInt(product.stock_cajetilla) || 0;
-    if (presentation === "paquete") activeStock = parseInt(product.stock_paquete) || 0;
-    else if (presentation === "cajon") activeStock = parseInt(product.stock_cajon) || 0;
+    let activeStock = Math.floor(getProductTotalUnits(product) / getPresentationMultiplier(presentation));
 
     if (existingIndex > -1) {
         if (action === "plus") {
@@ -905,13 +924,9 @@ function placeOrder() {
         AppState.cart.forEach(item => {
             const prod = products.find(p => p.id === item.product.id);
             if (prod) {
-                if (item.presentation === "cajetilla") {
-                    prod.stock_cajetilla = Math.max(0, (parseInt(prod.stock_cajetilla) || 0) - item.qty);
-                } else if (item.presentation === "paquete") {
-                    prod.stock_paquete = Math.max(0, (parseInt(prod.stock_paquete) || 0) - item.qty);
-                } else if (item.presentation === "cajon") {
-                    prod.stock_cajon = Math.max(0, (parseInt(prod.stock_cajon) || 0) - item.qty);
-                }
+                let currentTotal = getProductTotalUnits(prod);
+                let qtyToDeduct = item.qty * getPresentationMultiplier(item.presentation);
+                updateProductStockFromTotal(prod, currentTotal - qtyToDeduct);
             }
         });
         LocalDB.saveProducts(products);
@@ -2061,9 +2076,7 @@ if (DOM.btnModalAddToCart) {
             if (r.checked) presentation = r.value;
         });
 
-        let activeStock = parseInt(product.stock_cajetilla) || 0;
-        if (presentation === "paquete") activeStock = parseInt(product.stock_paquete) || 0;
-        else if (presentation === "cajon") activeStock = parseInt(product.stock_cajon) || 0;
+        let activeStock = Math.floor(getProductTotalUnits(product) / getPresentationMultiplier(presentation));
 
         const price = parseFloat(DOM.modalPriceInput.value) || 0;
         const qty = parseInt(DOM.modalQtyInput.value) || 1;

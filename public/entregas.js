@@ -3,6 +3,8 @@ let map;
 let routingControl;
 let markers = [];
 let routeWaypoints = [];
+let currentDriverPos = null;
+let currentTab = 'pendientes';
 
 async function fetchOrders() {
     try {
@@ -17,20 +19,18 @@ async function fetchOrders() {
 }
 
 function initMap() {
-    // Inicializar en Lima por defecto si no hay pedidos (puedes cambiarlo)
-    map = L.map('map').setView([-12.046374, -77.042793], 12);
+    map = L.map('map', { zoomControl: false }).setView([-12.046374, -77.042793], 12);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
+    
+    L.control.zoom({ position: 'topright' }).addTo(map);
 }
 
-// Función para geocodificar usando Nominatim (gratuito)
 async function geocodeAddress(address) {
     if (!address || address.trim() === '') return null;
-    
     try {
-        // Agregamos contexto para ayudar a Nominatim (asumimos Perú si no se especifica)
         const searchQuery = encodeURIComponent(address + ", Peru");
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}&limit=1`);
         const data = await response.json();
@@ -44,7 +44,6 @@ async function geocodeAddress(address) {
     return null;
 }
 
-// Limpiar mapa
 function clearMap() {
     markers.forEach(m => map.removeLayer(m));
     markers = [];
@@ -55,39 +54,60 @@ function clearMap() {
     routeWaypoints = [];
 }
 
-let currentDriverPos = null;
+const getPosition = () => new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+        (pos) => resolve(L.latLng(pos.coords.latitude, pos.coords.longitude)),
+        () => resolve(null),
+        { enableHighAccuracy: true, timeout: 5000 }
+    );
+});
 
-async function renderDeliveriesAndMap() {
-    const list = document.getElementById('deliveries-list');
+// UI Toggles
+window.switchTab = function(tabId) {
+    currentTab = tabId;
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+    renderDeliveriesAndMap(false); // don't refetch GPS every tab switch
+}
+
+window.toggleMobileView = function(view) {
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.getElementById(`nav-${view}`).classList.add('active');
     
+    if (view === 'map') {
+        document.body.classList.add('show-map');
+        setTimeout(() => map.invalidateSize(), 300); // fix leaflet map render bug when hidden
+    } else {
+        document.body.classList.remove('show-map');
+    }
+}
+
+// Global colors for markers OptimoRoute style
+const colors = ['#f39c12', '#3498db', '#e74c3c', '#9b59b6', '#2ecc71', '#1abc9c', '#e67e22', '#34495e'];
+
+async function renderDeliveriesAndMap(fetchGps = true) {
+    const list = document.getElementById('deliveries-list');
     let orders = storeData.orders || [];
     let deliveries = orders.filter(o => o.deliveryDate || o.deliveryAddress || (o.deliveryLat && o.deliveryLng));
     
     if (deliveries.length === 0) {
-        list.innerHTML = `<p style="text-align:center; color:var(--text-secondary); padding: 40px;">No hay pedidos para entregar en este momento.</p>`;
+        list.innerHTML = `<p style="text-align:center; color:#888; padding: 40px;">No hay pedidos para entregar en este momento.</p>`;
         return;
     }
 
-    list.innerHTML = `<p style="text-align:center; padding: 20px;">Obteniendo tu ubicación actual para ordenar los pedidos por cercanía...</p>`;
-    
-    const getPosition = () => new Promise((resolve) => {
-        if (!navigator.geolocation) return resolve(null);
-        navigator.geolocation.getCurrentPosition(
-            (pos) => resolve(L.latLng(pos.coords.latitude, pos.coords.longitude)),
-            () => resolve(null),
-            { enableHighAccuracy: true, timeout: 5000 }
-        );
-    });
+    if (fetchGps && currentTab === 'pendientes') {
+        list.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">Ubicando tu posición actual...</p>`;
+        currentDriverPos = await getPosition();
+    }
 
-    currentDriverPos = await getPosition();
-
-    // Geocodificar direcciones faltantes y calcular distancias
+    // Geocode and calc distance
     for (let i = 0; i < deliveries.length; i++) {
         let order = deliveries[i];
         if (order.deliveryStatus === 'Pendiente' && (order.deliveryAddress || (order.deliveryLat && order.deliveryLng))) {
             if (order.deliveryLat && order.deliveryLng) {
                 order._latLng = L.latLng(order.deliveryLat, order.deliveryLng);
-            } else {
+            } else if (!order._latLng) { // don't geocode again if we did
                 order._latLng = await geocodeAddress(order.deliveryAddress);
             }
             
@@ -99,70 +119,83 @@ async function renderDeliveriesAndMap() {
         }
     }
 
-    deliveries.sort((a, b) => {
-        if (a.deliveryStatus === 'Pendiente' && b.deliveryStatus !== 'Pendiente') return -1;
-        if (a.deliveryStatus !== 'Pendiente' && b.deliveryStatus === 'Pendiente') return 1;
-        if (a.deliveryStatus === 'Pendiente' && b.deliveryStatus === 'Pendiente') {
-             if (currentDriverPos) {
-                  return (a._distance || 9999999) - (b._distance || 9999999);
-             }
-        }
-        return new Date(b.fecha) - new Date(a.fecha);
+    // Filter by tab
+    let filteredDeliveries = deliveries.filter(o => {
+        if (currentTab === 'pendientes') return o.deliveryStatus === 'Pendiente';
+        return o.deliveryStatus === 'Entregado';
     });
+
+    if (currentTab === 'pendientes') {
+        filteredDeliveries.sort((a, b) => {
+            if (currentDriverPos) {
+                return (a._distance || 9999999) - (b._distance || 9999999);
+            }
+            return new Date(a.fecha) - new Date(b.fecha);
+        });
+    } else {
+        filteredDeliveries.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    }
 
     clearMap();
     let html = '';
+    
+    if (filteredDeliveries.length === 0) {
+        html = `<p style="text-align:center; color:#888; padding: 40px;">No hay pedidos en esta sección.</p>`;
+    }
+    
     let pendingCount = 1;
     
-    for (let i = 0; i < deliveries.length; i++) {
-        const order = deliveries[i];
+    for (let i = 0; i < filteredDeliveries.length; i++) {
+        const order = filteredDeliveries[i];
         const isEntregado = order.deliveryStatus === 'Entregado';
         
-        let stopLabel = isEntregado ? '✅' : pendingCount++;
+        let stopNum = pendingCount++;
+        let stopLabel = isEntregado ? '✓' : stopNum;
+        let color = isEntregado ? '#2ecc71' : colors[stopNum % colors.length];
         
         let distText = "";
         let missingCoordsWarning = "";
         
         if (!isEntregado) {
             if (order._distance && order._distance < 9999999) {
-                distText = `<br><span style="font-size:11px; color:var(--text-secondary);">📍 a ${(order._distance / 1000).toFixed(2)} km de distancia</span>`;
+                distText = `<br><span style="font-size:11px; color:#888;">📍 a ${(order._distance / 1000).toFixed(2)} km</span>`;
             } else if (!order._latLng) {
-                missingCoordsWarning = `<div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; font-size: 11px; padding: 6px; border-radius: 4px; margin-top: 5px;">⚠️ Coordenadas GPS faltantes. El administrador debe "Fijar Ubicación en Mapa" al editar este cliente para poder trazar la ruta.</div>`;
+                missingCoordsWarning = `<div style="background: #fee2e2; color: #ef4444; font-size: 11px; padding: 6px; border-radius: 4px; margin-top: 5px;">⚠️ Sin GPS. Editar cliente para fijar mapa.</div>`;
             }
         }
 
-        if (!isEntregado && order._latLng) {
-            const marker = L.marker(order._latLng).addTo(map);
+        // Add Marker to map
+        if (order._latLng) {
+            const markerHtml = `
+                <div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                    ${stopLabel}
+                </div>
+            `;
+            const icon = L.divIcon({ html: markerHtml, className: '', iconSize: [24, 24], iconAnchor: [12, 12] });
+            const marker = L.marker(order._latLng, { icon }).addTo(map);
             marker.bindPopup(`<b>Parada ${stopLabel}:</b> ${order.cliente}<br>${order.deliveryAddress}`);
             markers.push(marker);
         }
 
         html += `
-        <div class="order-card ${isEntregado ? 'entregado' : ''}" id="order-${order.id}">
+        <div class="order-card ${isEntregado ? 'entregado' : ''}" style="border-left-color: ${color}">
             <div class="order-header">
-                <span><span style="background:var(--primary);color:white;padding:2px 6px;border-radius:4px;font-size:12px;margin-right:5px;">${stopLabel}</span> ${order.cliente}</span>
-                <span style="color: ${isEntregado ? 'var(--success)' : 'var(--warning)'}; font-size:12px; padding: 4px 8px; border-radius: 12px; background: ${isEntregado ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)'};">
-                    ${order.deliveryStatus || 'Pendiente'}
-                </span>
+                <span class="icon-type">🚚</span>
+                <span style="flex:1;">${order.cliente}</span>
+                <span style="font-size:12px; font-weight:normal; color:#888;">${order.deliveryTime || ''}</span>
             </div>
             <div class="order-meta">
-                <p>📍 <strong>Dirección:</strong> ${order.deliveryAddress || 'Coordenadas GPS (Sin texto)'} ${distText}</p>
+                ${order.deliveryAddress || 'Coordenadas GPS (Sin texto)'} ${distText}
                 ${missingCoordsWarning}
-                <p style="margin-top:5px;">📞 <strong>Teléfono:</strong> <a href="tel:${order.telefono}" style="color: var(--primary);">${order.telefono}</a></p>
-                <p>🕒 <strong>Fecha programada:</strong> ${order.deliveryDate || 'N/A'} ${order.deliveryTime || ''}</p>
+                <div style="margin-top:4px;"><a href="tel:${order.telefono}" style="color:#3498db; text-decoration:none;">📞 ${order.telefono || 'Sin número'}</a></div>
             </div>
             <div class="order-items">
-                <div style="font-weight:bold; margin-bottom: 5px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">Productos a entregar:</div>
-                ${order.items.map(it => `
-                    <div class="item-row">
-                        <span>${it.qty}x ${it.nombre} (${it.presentacion})</span>
-                    </div>
-                `).join('')}
+                ${order.items.map(it => `<div>${it.qty}x ${it.nombre} (${it.presentacion})</div>`).join('')}
             </div>
-            <div class="action-row" style="flex-wrap: wrap;">
-                ${!isEntregado && order._latLng ? `<button class="btn-secondary" onclick="showRouteOnMap(${order._latLng.lat}, ${order._latLng.lng}, '${order.cliente}')" style="font-size:12px; padding: 6px 10px; flex: 1;">📍 Ver en Mapa</button>` : ''}
-                ${!isEntregado ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${order._latLng ? `${order._latLng.lat},${order._latLng.lng}` : encodeURIComponent(order.deliveryAddress)}" target="_blank" class="btn-secondary" style="font-size:12px; padding: 6px 10px; text-decoration:none; text-align:center; flex: 1;">📱 Google Maps</a>` : ''}
-                ${!isEntregado ? `<button class="btn-primary" onclick="markDelivered('${order.id}')" style="background: var(--success); border-color: var(--success); font-size:12px; padding: 6px 10px; flex: 1;">Entregado ✅</button>` : ''}
+            <div class="action-row">
+                ${!isEntregado && order._latLng ? `<button class="btn-action outline" onclick="showRouteOnMap(${order._latLng.lat}, ${order._latLng.lng})">📍 Ruta</button>` : ''}
+                ${!isEntregado ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${order._latLng ? `${order._latLng.lat},${order._latLng.lng}` : encodeURIComponent(order.deliveryAddress)}" target="_blank" class="btn-action outline" style="text-decoration:none;">🗺️ G. Maps</a>` : ''}
+                ${!isEntregado ? `<button class="btn-action success" onclick="markDelivered('${order.id}')">Entregado ✓</button>` : ''}
             </div>
         </div>
         `;
@@ -171,15 +204,11 @@ async function renderDeliveriesAndMap() {
     list.innerHTML = html;
 
     if (currentDriverPos) {
+        const markerHtml = `
+            <div style="background-color: #34495e; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>
+        `;
         const startMarker = L.marker(currentDriverPos, {
-            icon: L.icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            })
+            icon: L.divIcon({ html: markerHtml, className: '', iconSize: [16, 16], iconAnchor: [8, 8] })
         }).addTo(map);
         startMarker.bindPopup("<b>📍 Tu ubicación actual</b>").openPopup();
         markers.push(startMarker);
@@ -191,9 +220,9 @@ async function renderDeliveriesAndMap() {
     }
 }
 
-window.showRouteOnMap = function(lat, lng, cliente) {
+window.showRouteOnMap = function(lat, lng) {
     if (!currentDriverPos) {
-        alert("No pudimos obtener tu ubicación actual para trazar la ruta. Asegúrate de tener el GPS activado.");
+        alert("No pudimos obtener tu ubicación actual.");
         return;
     }
     
@@ -206,28 +235,25 @@ window.showRouteOnMap = function(lat, lng, cliente) {
 
     routingControl = L.Routing.control({
         waypoints: [currentDriverPos, destLatLng],
-        router: L.Routing.osrmv1({
-            language: 'es',
-            profile: 'driving'
-        }),
+        router: L.Routing.osrmv1({ language: 'es', profile: 'driving' }),
         routeWhileDragging: false,
         addWaypoints: false,
         show: false,
-        lineOptions: {
-            styles: [{color: '#3b82f6', opacity: 0.8, weight: 6}]
-        },
-        createMarker: function() { return null; } // No crear marcadores adicionales del router
+        lineOptions: { styles: [{color: '#0f2b45', opacity: 0.8, weight: 6}] },
+        createMarker: function() { return null; }
     }).addTo(map);
 
-    // Centrar mapa
     const group = new L.featureGroup([L.marker(currentDriverPos), L.marker(destLatLng)]);
     map.fitBounds(group.getBounds().pad(0.1));
     
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Switch to map view automatically on mobile
+    if(window.innerWidth <= 768) {
+        toggleMobileView('map');
+    }
 }
 
-async function markDelivered(orderId) {
-    if (!confirm('¿Estás seguro que deseas marcar este pedido como entregado?')) return;
+window.markDelivered = async function(orderId) {
+    if (!confirm('¿Marcar pedido como entregado?')) return;
 
     let orders = storeData.orders || [];
     const index = orders.findIndex(o => o.id === orderId);
@@ -244,14 +270,11 @@ async function markDelivered(orderId) {
             const result = await res.json();
             if(result.success) {
                 storeData.orders = orders;
-                await renderDeliveriesAndMap();
-                alert('Pedido marcado como entregado correctamente.');
+                await renderDeliveriesAndMap(false);
             } else {
-                alert('Error guardando en la base de datos.');
                 orders[index].deliveryStatus = 'Pendiente';
             }
         } catch (err) {
-            alert('Error de red al actualizar pedido.');
             orders[index].deliveryStatus = 'Pendiente';
         }
     }
@@ -266,5 +289,4 @@ async function logout() {
     }
 }
 
-// Iniciar app
 document.addEventListener("DOMContentLoaded", fetchOrders);
