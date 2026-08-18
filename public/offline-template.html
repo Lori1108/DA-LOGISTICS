@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Offline - BILO</title>
+    <style>
+        :root {
+            --primary: #0f2b45;
+            --secondary: #f39c12;
+            --bg: #f8f9fa;
+            --text: #333;
+            --border: #ddd;
+            --success: #2ecc71;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 80px; }
+        header { background-color: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+        .card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+        h2 { font-size: 16px; margin-bottom: 10px; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 5px; display: inline-block;}
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #666; }
+        select, input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+        
+        .product-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .product-info { flex: 1; }
+        .product-name { font-weight: bold; font-size: 14px; }
+        .product-price { color: var(--secondary); font-weight: bold; font-size: 13px; }
+        
+        .qty-control { display: flex; align-items: center; gap: 10px; }
+        .btn-qty { background: #eee; border: none; width: 30px; height: 30px; border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .qty-display { font-weight: bold; min-width: 20px; text-align: center; }
+        
+        .cart-summary { background: #fff; padding: 15px; border-top: 2px solid var(--border); position: fixed; bottom: 0; left: 0; width: 100%; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 20; display: flex; justify-content: space-between; align-items: center;}
+        .total-display { font-size: 18px; font-weight: bold; color: var(--primary); }
+        .btn-checkout { background: var(--success); color: white; border: none; padding: 12px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        
+        .nav-tabs { display: flex; margin-bottom: 15px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .nav-tab { flex: 1; padding: 12px; text-align: center; font-weight: bold; cursor: pointer; background: white; border-bottom: 3px solid transparent; }
+        .nav-tab.active { border-bottom: 3px solid var(--primary); color: var(--primary); }
+        
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        
+        .order-card { background: white; padding: 10px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid var(--success); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .order-card-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; }
+        .order-card-date { font-size: 11px; color: #888; }
+        
+        .btn-export { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 6px; width: 100%; font-weight: bold; margin-bottom: 20px; cursor: pointer; }
+        .btn-danger { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header>
+        <h3>📱 POS Offline - BILO</h3>
+        <p style="font-size: 11px; margin-top:2px; color:#ddd;">Versión de uso sin internet</p>
+    </header>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('sale')">🛒 Vender</div>
+            <div class="nav-tab" onclick="switchTab('history')">📋 Pedidos (<span id="orders-count">0</span>)</div>
+        </div>
+
+        <!-- PESTAÑA: VENDER -->
+        <div id="view-sale" class="view-section active">
+            <div class="card">
+                <h2>1. Seleccionar Cliente</h2>
+                <div class="form-group">
+                    <label>Zona / Localidad</label>
+                    <select id="zone-select" onchange="filterClients()">
+                        <option value="">Todas las Zonas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cliente</label>
+                    <select id="client-select">
+                        <option value="">Seleccione un cliente...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>2. Productos (Cajetillas)</h2>
+                <div id="products-list"></div>
+            </div>
+            
+            <div class="card">
+                <h2>3. Pago</h2>
+                <div class="form-group">
+                    <label>Método de Pago</label>
+                    <select id="payment-method">
+                        <option value="EFECTIVO">EFECTIVO</option>
+                        <option value="YAPE">YAPE</option>
+                        <option value="PLIN">PLIN</option>
+                        <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA: HISTORIAL -->
+        <div id="view-history" class="view-section">
+            <button class="btn-export" onclick="exportOrdersToCSV()">⬇️ EXPORTAR PEDIDOS (CSV)</button>
+            <div id="orders-list"></div>
+            <button class="btn-danger" style="margin-top:20px;" onclick="clearAllOrders()">🗑️ Borrar Todos los Pedidos</button>
+        </div>
+    </div>
+
+    <!-- BOTONERA INFERIOR (Solo en Venta) -->
+    <div id="cart-summary" class="cart-summary">
+        <div>
+            <div style="font-size:11px; color:#666;">Total a Cobrar</div>
+            <div class="total-display" id="cart-total">S/0.00</div>
+        </div>
+        <button class="btn-checkout" onclick="placeOrder()">Guardar Pedido ✓</button>
+    </div>
+
+    <script>
+        // DATOS INYECTADOS POR EL SISTEMA
+        const CLIENTS = __CLIENTS_DATA__;
+        const PRODUCTS = __PRODUCTS_DATA__;
+        
+        let cart = {};
+        let orders = JSON.parse(localStorage.getItem('bilo_offline_orders') || '[]');
+
+        function init() {
+            // Populate Zones
+            const zones = [...new Set(CLIENTS.map(c => c.zona).filter(Boolean))].sort();
+            const zoneSelect = document.getElementById('zone-select');
+            zones.forEach(z => {
+                zoneSelect.innerHTML += \`<option value="\${z}">\${z}</option>\`;
+            });
+
+            filterClients();
+            renderProducts();
+            updateHistory();
+        }
+
+        function filterClients() {
+            const zone = document.getElementById('zone-select').value;
+            const clientSelect = document.getElementById('client-select');
+            
+            let filtered = CLIENTS;
+            if (zone) filtered = CLIENTS.filter(c => c.zona === zone);
+            
+            filtered.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            
+            clientSelect.innerHTML = '<option value="">Seleccione un cliente...</option>';
+            filtered.forEach(c => {
+                clientSelect.innerHTML += \`<option value="\${c.nombre}">\${c.nombre} (\${c.telefono || '-'})</option>\`;
+            });
+        }
+
+        function renderProducts() {
+            const list = document.getElementById('products-list');
+            let html = '';
+            
+            PRODUCTS.forEach(p => {
+                // Solo listaremos la presentación principal o dejaremos elegir
+                // Para offline, lo haremos simple: Venta por Cajetilla, Paquete y Cajon
+                if (p.precio_cajetilla > 0) html += productRow(p, 'cajetilla', p.precio_cajetilla);
+                if (p.precio_paquete > 0) html += productRow(p, 'paquete', p.precio_paquete);
+                if (p.precio_cajon > 0) html += productRow(p, 'cajon', p.precio_cajon);
+            });
+            list.innerHTML = html;
+        }
+
+        function productRow(p, presentation, price) {
+            const key = p.id + '_' + presentation;
+            cart[key] = { product: p, presentation: presentation, price: price, qty: 0 };
+            
+            return \`
+                <div class="product-item">
+                    <div class="product-info">
+                        <div class="product-name">\${p.nombre}</div>
+                        <div class="product-price">S/\${price.toFixed(2)} (\${presentation})</div>
+                    </div>
+                    <div class="qty-control">
+                        <button class="btn-qty" onclick="changeQty('\${key}', -1)">-</button>
+                        <div class="qty-display" id="qty-\${key}">0</div>
+                        <button class="btn-qty" onclick="changeQty('\${key}', 1)">+</button>
+                    </div>
+                </div>
+            \`;
+        }
+
+        function changeQty(key, delta) {
+            let item = cart[key];
+            item.qty += delta;
+            if (item.qty < 0) item.qty = 0;
+            document.getElementById(\`qty-\${key}\`).innerText = item.qty;
+            updateTotal();
+        }
+
+        function updateTotal() {
+            let total = 0;
+            for (let key in cart) {
+                total += cart[key].qty * cart[key].price;
+            }
+            document.getElementById('cart-total').innerText = \`S/\${total.toFixed(2)}\`;
+        }
+
+        function placeOrder() {
+            const clientName = document.getElementById('client-select').value;
+            if (!clientName) return alert('Seleccione un cliente.');
+            
+            let total = 0;
+            let items = [];
+            for (let key in cart) {
+                if (cart[key].qty > 0) {
+                    const it = cart[key];
+                    const sub = it.qty * it.price;
+                    total += sub;
+                    items.push({
+                        id: it.product.id,
+                        nombre: it.product.nombre,
+                        presentacion: it.presentation,
+                        qty: it.qty,
+                        precio: it.price,
+                        subtotal: sub,
+                        costo: it.presentation === 'cajetilla' ? it.product.costo_cajetilla : (it.presentation === 'paquete' ? it.product.costo_paquete : it.product.costo_cajon)
+                    });
+                }
+            }
+            
+            if (items.length === 0) return alert('No ha agregado productos.');
+            
+            const client = CLIENTS.find(c => c.nombre === clientName);
+            const method = document.getElementById('payment-method').value;
+            
+            const order = {
+                id: 'OFF_' + Date.now(),
+                folio: 'OFF-' + Date.now().toString().slice(-6),
+                fecha: new Date().toISOString(),
+                cliente: clientName,
+                telefono: client ? client.telefono : '',
+                deliveryAddress: client ? client.address : '',
+                deliveryLat: client ? client.lat : '',
+                deliveryLng: client ? client.lng : '',
+                metodo: method,
+                items: items,
+                total: total,
+                descuento: 0,
+                deliveryStatus: 'Pendiente'
+            };
+            
+            orders.push(order);
+            localStorage.setItem('bilo_offline_orders', JSON.stringify(orders));
+            
+            // Reset
+            for (let key in cart) {
+                cart[key].qty = 0;
+                document.getElementById(\`qty-\${key}\`).innerText = 0;
+            }
+            updateTotal();
+            updateHistory();
+            document.getElementById('client-select').value = '';
+            
+            alert('¡Pedido guardado exitosamente!');
+        }
+
+        function updateHistory() {
+            document.getElementById('orders-count').innerText = orders.length;
+            const list = document.getElementById('orders-list');
+            
+            if (orders.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#888;">No hay pedidos aún.</p>';
+                return;
+            }
+            
+            let html = '';
+            orders.slice().reverse().forEach(o => {
+                html += \`
+                    <div class="order-card">
+                        <div class="order-card-header">
+                            <span>\${o.cliente}</span>
+                            <span>S/\${o.total.toFixed(2)}</span>
+                        </div>
+                        <div class="order-card-date">\${new Date(o.fecha).toLocaleString()} - \${o.metodo}</div>
+                        <div style="font-size:12px; margin-top:5px; color:#555;">
+                            \${o.items.map(it => \`\${it.qty}x \${it.nombre} (\${it.presentacion})\`).join(', ')}
+                        </div>
+                    </div>
+                \`;
+            });
+            list.innerHTML = html;
+        }
+
+        function clearAllOrders() {
+            if (confirm('¿ESTÁS SEGURO? Esto borrará todos los pedidos no sincronizados.')) {
+                orders = [];
+                localStorage.setItem('bilo_offline_orders', JSON.stringify(orders));
+                updateHistory();
+            }
+        }
+
+        function exportOrdersToCSV() {
+            if (orders.length === 0) return alert('No hay pedidos para exportar.');
+            
+            // Generar CSV (Formato esperado por la sincronización)
+            // Filas: Pedido JSON base64 (para mayor seguridad y facilidad de parseo)
+            // Wait, JSON in CSV is tricky. Let's just export a single JSON file but name it .json or .csv
+            // Let's make it a JSON file! Much easier for uploading.
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orders));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "bilo_pedidos_offline_" + Date.now() + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('view-' + tab).classList.add('active');
+            
+            document.getElementById('cart-summary').style.display = tab === 'sale' ? 'flex' : 'none';
+        }
+
+        // START
+        init();
+    </script>
+</body>
+</html>
