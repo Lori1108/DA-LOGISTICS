@@ -206,6 +206,10 @@ window.showRouteOnMap = function(lat, lng, cliente) {
 
     routingControl = L.Routing.control({
         waypoints: [currentDriverPos, destLatLng],
+        router: L.Routing.osrmv1({
+            language: 'es',
+            profile: 'driving'
+        }),
         routeWhileDragging: false,
         addWaypoints: false,
         show: false,
