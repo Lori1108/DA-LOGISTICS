@@ -836,9 +836,13 @@ function placeOrder() {
     const elDate = document.getElementById("delivery-date");
     const elTime = document.getElementById("delivery-time");
     const elAddress = document.getElementById("delivery-address");
+    const elLat = document.getElementById("delivery-lat");
+    const elLng = document.getElementById("delivery-lng");
     const deliveryDate = elDate ? elDate.value : "";
     const deliveryTime = elTime ? elTime.value : "";
     const deliveryAddress = elAddress ? elAddress.value.trim() : "";
+    const deliveryLat = elLat ? elLat.value : "";
+    const deliveryLng = elLng ? elLng.value : "";
     
     // Generar Folio
     const dateObj = new Date();
@@ -864,6 +868,8 @@ function placeOrder() {
         deliveryDate: deliveryDate,
         deliveryTime: deliveryTime,
         deliveryAddress: deliveryAddress,
+        deliveryLat: deliveryLat,
+        deliveryLng: deliveryLng,
         deliveryStatus: (deliveryDate || deliveryAddress) ? "Pendiente" : "Entregado",
         items: AppState.cart.map(it => ({
             id: it.product.id,
@@ -949,9 +955,13 @@ function placeOrder() {
             const elDate = document.getElementById("delivery-date");
             const elTime = document.getElementById("delivery-time");
             const elAddress = document.getElementById("delivery-address");
+            const elLat = document.getElementById("delivery-lat");
+            const elLng = document.getElementById("delivery-lng");
             if(elDate) elDate.value = "";
             if(elTime) elTime.value = "";
             if(elAddress) elAddress.value = "";
+            if(elLat) elLat.value = "";
+            if(elLng) elLng.value = "";
 
             AppState.cart = [];
             renderCart();
@@ -988,9 +998,13 @@ function placeOrder() {
         const elDate = document.getElementById("delivery-date");
         const elTime = document.getElementById("delivery-time");
         const elAddress = document.getElementById("delivery-address");
+        const elLat = document.getElementById("delivery-lat");
+        const elLng = document.getElementById("delivery-lng");
         if(elDate) elDate.value = "";
         if(elTime) elTime.value = "";
         if(elAddress) elAddress.value = "";
+        if(elLat) elLat.value = "";
+        if(elLng) elLng.value = "";
 
         AppState.cart = [];
         renderCart();
@@ -1577,9 +1591,16 @@ function renderClientsTable() {
                 DOM.cPhone.value = c.telefono || "";
                 DOM.cEmail.value = c.email || "";
                 DOM.cAddress.value = c.address || "";
+                document.getElementById("c-lat").value = c.lat || "";
+                document.getElementById("c-lng").value = c.lng || "";
                 DOM.clientFormTitle.textContent = "Editar Cliente: " + c.nombre;
                 DOM.btnSubmitClient.textContent = "Guardar Cambios";
                 DOM.clientForm.scrollIntoView({ behavior: 'smooth' });
+                
+                // Show on map if coordinates exist
+                if (c.lat && c.lng) {
+                    showCoordinatesOnMap(c.lat, c.lng, c.address);
+                }
             }
         });
     });
@@ -1620,6 +1641,8 @@ if (DOM.clientForm) {
         const phone = DOM.cPhone.value.trim();
         const email = DOM.cEmail.value.trim();
         const address = DOM.cAddress.value.trim();
+        const lat = document.getElementById("c-lat").value;
+        const lng = document.getElementById("c-lng").value;
 
         const clients = LocalDB.getClients();
 
@@ -1633,6 +1656,8 @@ if (DOM.clientForm) {
             telefono: phone,
             email: email,
             address: address,
+            lat: lat,
+            lng: lng,
             totalSpent: 0,
             orders: []
         };
@@ -1690,7 +1715,7 @@ if (DOM.clientSelectInput) {
         
         if (matches.length > 0) {
             matches.forEach(c => {
-                html += `<div class="client-dropdown-item" data-id="${c.id}" data-name="${c.nombre}" data-phone="${c.telefono}" data-address="${c.address || ''}">${c.nombre} (${c.telefono})</div>`;
+                html += `<div class="client-dropdown-item" data-id="${c.id}" data-name="${c.nombre}" data-phone="${c.telefono}" data-address="${c.address || ''}" data-lat="${c.lat || ''}" data-lng="${c.lng || ''}">${c.nombre} (${c.telefono})</div>`;
             });
         } else {
             html += `<div class="client-dropdown-item" style="color:var(--text-secondary); cursor:default;">Registrar nuevo cliente al facturar...</div>`;
@@ -1707,6 +1732,8 @@ if (DOM.clientSelectInput) {
                     const name = item.getAttribute("data-name");
                     const phone = item.getAttribute("data-phone");
                     const address = item.getAttribute("data-address");
+                    const lat = item.getAttribute("data-lat");
+                    const lng = item.getAttribute("data-lng");
                     
                     DOM.clientName.value = name;
                     DOM.clientPhone.value = phone;
@@ -1715,7 +1742,13 @@ if (DOM.clientSelectInput) {
                     DOM.selectedClientBadge.style.display = "flex";
                     
                     const elAddress = document.getElementById("delivery-address");
+                    const elLat = document.getElementById("delivery-lat");
+                    const elLng = document.getElementById("delivery-lng");
+                    
                     if (elAddress && address) elAddress.value = address;
+                    if (elLat && lat) elLat.value = lat;
+                    if (elLng && lng) elLng.value = lng;
+                    
                     DOM.btnClearSelectedClient.style.display = "block";
                     DOM.clientSelectInput.value = "";
                 }
@@ -1743,7 +1776,11 @@ if (DOM.clientSelectInput) {
             DOM.btnClearSelectedClient.style.display = "none";
             DOM.clientSelectInput.value = "";
             const elAddress = document.getElementById("delivery-address");
+            const elLat = document.getElementById("delivery-lat");
+            const elLng = document.getElementById("delivery-lng");
             if (elAddress) elAddress.value = "";
+            if (elLat) elLat.value = "";
+            if (elLng) elLng.value = "";
         });
     }
 }
@@ -2353,18 +2390,58 @@ function initClientMap() {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap'
     }).addTo(clientMap);
+    
+    // Permitir hacer clic para mover el pin
+    clientMap.on('click', function(e) {
+        setMarkerPosition(e.latlng.lat, e.latlng.lng);
+    });
+}
+
+function setMarkerPosition(lat, lng, addressInfo = "Ubicación seleccionada") {
+    const latLng = L.latLng(lat, lng);
+    if (clientMarker) {
+        clientMarker.setLatLng(latLng);
+    } else {
+        clientMarker = L.marker(latLng, {draggable: true}).addTo(clientMap);
+        
+        clientMarker.on('dragend', function(event) {
+            var position = clientMarker.getLatLng();
+            setMarkerPosition(position.lat, position.lng);
+        });
+    }
+    
+    clientMap.setView(latLng, 16);
+    document.getElementById("c-lat").value = lat;
+    document.getElementById("c-lng").value = lng;
 }
 
 async function showAddressOnMap(address) {
-    if (!address || address.trim() === '') return;
-    
     initClientMap();
     const mapDiv = document.getElementById("client-map");
+    const helperText = document.getElementById("map-helper-text");
     mapDiv.style.display = "block";
+    if(helperText) helperText.style.display = "block";
     
     setTimeout(() => {
         if(clientMap) clientMap.invalidateSize();
     }, 200);
+
+    // Si ya tenemos coordenadas, no buscar, solo mostrar mapa (o buscar si no hay marker)
+    if (document.getElementById("c-lat").value && document.getElementById("c-lng").value) {
+        setMarkerPosition(document.getElementById("c-lat").value, document.getElementById("c-lng").value);
+        return;
+    }
+
+    if (!address || address.trim() === '') {
+        // Tratar de geolocalizar al usuario si está vacío
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => setMarkerPosition(pos.coords.latitude, pos.coords.longitude),
+                () => alert("Ingresa una dirección o toca el mapa para fijar ubicación.")
+            );
+        }
+        return;
+    }
 
     try {
         const searchQuery = encodeURIComponent(address + ", Peru");
@@ -2372,20 +2449,27 @@ async function showAddressOnMap(address) {
         const data = await res.json();
         
         if (data && data.length > 0) {
-            const latLng = L.latLng(data[0].lat, data[0].lon);
-            if (clientMarker) {
-                clientMarker.setLatLng(latLng);
-            } else {
-                clientMarker = L.marker(latLng).addTo(clientMap);
-            }
-            clientMap.setView(latLng, 16);
-            clientMarker.bindPopup(`<b>Dirección:</b> ${address}`).openPopup();
+            setMarkerPosition(data[0].lat, data[0].lon, address);
         } else {
-            alert("No se pudo encontrar la dirección en el mapa. Intenta ser más específico.");
+            alert("No se encontró la dirección exacta. Por favor, navega en el mapa y toca la ubicación correcta para fijar el pin.");
         }
     } catch (e) {
         console.error("Geocoding error", e);
     }
+}
+
+function showCoordinatesOnMap(lat, lng, address) {
+    initClientMap();
+    const mapDiv = document.getElementById("client-map");
+    const helperText = document.getElementById("map-helper-text");
+    mapDiv.style.display = "block";
+    if(helperText) helperText.style.display = "block";
+    
+    setTimeout(() => {
+        if(clientMap) clientMap.invalidateSize();
+    }, 200);
+    
+    setMarkerPosition(lat, lng, address);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

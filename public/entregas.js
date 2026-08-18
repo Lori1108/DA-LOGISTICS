@@ -85,7 +85,13 @@ async function renderDeliveriesAndMap() {
         
         // Agregar al mapa si no está entregado
         if (!isEntregado && order.deliveryAddress) {
-            const latLng = await geocodeAddress(order.deliveryAddress);
+            let latLng = null;
+            if (order.deliveryLat && order.deliveryLng) {
+                latLng = L.latLng(order.deliveryLat, order.deliveryLng);
+            } else {
+                latLng = await geocodeAddress(order.deliveryAddress);
+            }
+            
             if (latLng) {
                 routeWaypoints.push(latLng);
                 
@@ -118,7 +124,7 @@ async function renderDeliveriesAndMap() {
                 `).join('')}
             </div>
             <div class="action-row">
-                ${!isEntregado ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.deliveryAddress)}" target="_blank" class="btn-secondary" style="font-size:13px; text-decoration:none;">🗺️ Navegar GPS</a>` : ''}
+                ${!isEntregado ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${order.deliveryLat && order.deliveryLng ? `${order.deliveryLat},${order.deliveryLng}` : encodeURIComponent(order.deliveryAddress)}" target="_blank" class="btn-secondary" style="font-size:13px; text-decoration:none;">🗺️ Navegar GPS</a>` : ''}
                 ${!isEntregado ? `<button class="btn-primary" onclick="markDelivered('${order.id}')" style="background: var(--success); border-color: var(--success); font-size:13px;">Marcar Entregado ✅</button>` : ''}
             </div>
         </div>

@@ -369,11 +369,14 @@
 
                                 <div class="form-group">
                                     <label for="c-address">Dirección de Entrega</label>
-                                    <div style="display:flex; gap:8px;">
-                                        <input type="text" id="c-address" placeholder="Ej. Calle Falsa 123" style="flex:1;">
-                                        <button type="button" id="btn-search-map" class="btn-secondary" style="padding: 0 10px;">Buscar en Mapa 🔍</button>
+                                    <div style="display:flex; gap:8px; flex-direction:column;">
+                                        <input type="text" id="c-address" placeholder="Ej. Calle Falsa 123" style="width:100%;">
+                                        <button type="button" id="btn-search-map" class="btn-secondary" style="padding: 6px 10px; width:100%;">📍 Fijar Ubicación Exacta en Mapa</button>
                                     </div>
-                                    <div id="client-map" style="height: 200px; width: 100%; border-radius: var(--radius-sm); margin-top: 10px; display: none; border: 1px solid var(--border-color);"></div>
+                                    <input type="hidden" id="c-lat" value="">
+                                    <input type="hidden" id="c-lng" value="">
+                                    <div id="client-map" style="height: 250px; width: 100%; border-radius: var(--radius-sm); margin-top: 10px; display: none; border: 1px solid var(--border-color); z-index:1;"></div>
+                                    <p id="map-helper-text" style="display:none; font-size:11px; color:var(--text-secondary); margin-top:5px; text-align:center;">Toca en el mapa o arrastra el marcador para guardar las coordenadas exactas.</p>
                                 </div>
 
                                 <div class="form-actions">
@@ -527,6 +530,8 @@
                         <input type="time" id="delivery-time" style="flex: 1; padding: 6px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; background: var(--bg-app); color: var(--text-primary);">
                     </div>
                     <input type="text" id="delivery-address" placeholder="Dirección de entrega..." style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; background: var(--bg-app); color: var(--text-primary);">
+                    <input type="hidden" id="delivery-lat">
+                    <input type="hidden" id="delivery-lng">
                 </div>
             </div>
 
