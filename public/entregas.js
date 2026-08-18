@@ -61,7 +61,7 @@ async function renderDeliveriesAndMap() {
     const list = document.getElementById('deliveries-list');
     
     let orders = storeData.orders || [];
-    let deliveries = orders.filter(o => o.deliveryDate || o.deliveryAddress);
+    let deliveries = orders.filter(o => o.deliveryDate || o.deliveryAddress || (o.deliveryLat && o.deliveryLng));
     
     if (deliveries.length === 0) {
         list.innerHTML = `<p style="text-align:center; color:var(--text-secondary); padding: 40px;">No hay pedidos para entregar en este momento.</p>`;
@@ -84,7 +84,7 @@ async function renderDeliveriesAndMap() {
     // Geocodificar direcciones faltantes y calcular distancias
     for (let i = 0; i < deliveries.length; i++) {
         let order = deliveries[i];
-        if (order.deliveryStatus === 'Pendiente' && order.deliveryAddress) {
+        if (order.deliveryStatus === 'Pendiente' && (order.deliveryAddress || (order.deliveryLat && order.deliveryLng))) {
             if (order.deliveryLat && order.deliveryLng) {
                 order._latLng = L.latLng(order.deliveryLat, order.deliveryLng);
             } else {
@@ -146,7 +146,7 @@ async function renderDeliveriesAndMap() {
                 </span>
             </div>
             <div class="order-meta">
-                <p>📍 <strong>Dirección:</strong> ${order.deliveryAddress || 'No especificada'} ${distText}</p>
+                <p>📍 <strong>Dirección:</strong> ${order.deliveryAddress || 'Coordenadas GPS (Sin texto)'} ${distText}</p>
                 ${missingCoordsWarning}
                 <p style="margin-top:5px;">📞 <strong>Teléfono:</strong> <a href="tel:${order.telefono}" style="color: var(--primary);">${order.telefono}</a></p>
                 <p>🕒 <strong>Fecha programada:</strong> ${order.deliveryDate || 'N/A'} ${order.deliveryTime || ''}</p>

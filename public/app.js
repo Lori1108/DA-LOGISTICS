@@ -870,7 +870,7 @@ function placeOrder() {
         deliveryAddress: deliveryAddress,
         deliveryLat: deliveryLat,
         deliveryLng: deliveryLng,
-        deliveryStatus: (deliveryDate || deliveryAddress) ? "Pendiente" : "Entregado",
+        deliveryStatus: (deliveryDate || deliveryAddress || (deliveryLat && deliveryLng)) ? "Pendiente" : "Entregado",
         items: AppState.cart.map(it => ({
             id: it.product.id,
             nombre: it.product.nombre,
