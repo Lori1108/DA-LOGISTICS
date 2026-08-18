@@ -1406,10 +1406,7 @@ if (btnEditOrder) {
         // 4. Cambiar a la pestaña de POS
         renderCart();
         DOM.clientSelect.value = clientObj ? clientObj.id : "";
-        DOM.navButtons.forEach(b => b.classList.remove("active"));
-        DOM.views.forEach(v => v.classList.remove("active"));
-        document.querySelector('[data-view="pos"]').classList.add("active");
-        document.getElementById("view-pos").classList.add("active");
+        switchTab("pos-tab");
         
         alert("El pedido ha sido cargado en el Punto de Venta para su edición.");
     });
@@ -1756,6 +1753,27 @@ if (DOM.clientForm) {
             if (id === "") {
                 clientData.id = "client_" + Date.now();
                 clients.push(clientData);
+                
+                // Actualizar pedidos pendientes de este cliente (por si fue creado como manual antes)
+                const orders = LocalDB.getOrders();
+                let updatedOrders = false;
+                orders.forEach(o => {
+                    const orderClientName = (o.cliente || "").trim().toLowerCase();
+                    const newClientName = (name || "").trim().toLowerCase();
+                    
+                    if (orderClientName === newClientName && o.deliveryStatus === 'Pendiente') {
+                        o.cliente = name;
+                        o.telefono = phone;
+                        o.deliveryAddress = address;
+                        o.deliveryLat = lat;
+                        o.deliveryLng = lng;
+                        updatedOrders = true;
+                    }
+                });
+                if (updatedOrders) {
+                    LocalDB.saveOrders(orders);
+                }
+                
                 alert(`Cliente "${name}" registrado correctamente.`);
             } else {
                 const index = clients.findIndex(item => item.id === id);
@@ -1772,7 +1790,11 @@ if (DOM.clientForm) {
                     const orders = LocalDB.getOrders();
                     let updatedOrders = false;
                     orders.forEach(o => {
-                        if ((o.cliente === oldName || o.cliente === name) && o.deliveryStatus === 'Pendiente') {
+                        const orderClientName = (o.cliente || "").trim().toLowerCase();
+                        const oldClientName = (oldName || "").trim().toLowerCase();
+                        const newClientName = (name || "").trim().toLowerCase();
+                        
+                        if ((orderClientName === oldClientName || orderClientName === newClientName) && o.deliveryStatus === 'Pendiente') {
                             o.cliente = name;
                             o.telefono = phone;
                             o.deliveryAddress = address;
