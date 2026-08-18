@@ -55,6 +55,8 @@ function clearMap() {
     routeWaypoints = [];
 }
 
+let currentDriverPos = null;
+
 async function renderDeliveriesAndMap() {
     const list = document.getElementById('deliveries-list');
     
@@ -66,9 +68,45 @@ async function renderDeliveriesAndMap() {
         return;
     }
 
+    list.innerHTML = `<p style="text-align:center; padding: 20px;">Obteniendo tu ubicación actual para ordenar los pedidos por cercanía...</p>`;
+    
+    const getPosition = () => new Promise((resolve) => {
+        if (!navigator.geolocation) return resolve(null);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => resolve(L.latLng(pos.coords.latitude, pos.coords.longitude)),
+            () => resolve(null),
+            { enableHighAccuracy: true, timeout: 5000 }
+        );
+    });
+
+    currentDriverPos = await getPosition();
+
+    // Geocodificar direcciones faltantes y calcular distancias
+    for (let i = 0; i < deliveries.length; i++) {
+        let order = deliveries[i];
+        if (order.deliveryStatus === 'Pendiente' && order.deliveryAddress) {
+            if (order.deliveryLat && order.deliveryLng) {
+                order._latLng = L.latLng(order.deliveryLat, order.deliveryLng);
+            } else {
+                order._latLng = await geocodeAddress(order.deliveryAddress);
+            }
+            
+            if (currentDriverPos && order._latLng) {
+                order._distance = currentDriverPos.distanceTo(order._latLng);
+            } else {
+                order._distance = 9999999;
+            }
+        }
+    }
+
     deliveries.sort((a, b) => {
         if (a.deliveryStatus === 'Pendiente' && b.deliveryStatus !== 'Pendiente') return -1;
         if (a.deliveryStatus !== 'Pendiente' && b.deliveryStatus === 'Pendiente') return 1;
+        if (a.deliveryStatus === 'Pendiente' && b.deliveryStatus === 'Pendiente') {
+             if (currentDriverPos) {
+                  return (a._distance || 9999999) - (b._distance || 9999999);
+             }
+        }
         return new Date(b.fecha) - new Date(a.fecha);
     });
 
@@ -76,30 +114,21 @@ async function renderDeliveriesAndMap() {
     let html = '';
     let pendingCount = 1;
     
-    // Iteramos secuencialmente para no saturar el geocoder
     for (let i = 0; i < deliveries.length; i++) {
         const order = deliveries[i];
         const isEntregado = order.deliveryStatus === 'Entregado';
         
         let stopLabel = isEntregado ? '✅' : pendingCount++;
         
-        // Agregar al mapa si no está entregado
-        if (!isEntregado && order.deliveryAddress) {
-            let latLng = null;
-            if (order.deliveryLat && order.deliveryLng) {
-                latLng = L.latLng(order.deliveryLat, order.deliveryLng);
-            } else {
-                latLng = await geocodeAddress(order.deliveryAddress);
-            }
-            
-            if (latLng) {
-                routeWaypoints.push(latLng);
-                
-                // Crear marcador
-                const marker = L.marker(latLng).addTo(map);
-                marker.bindPopup(`<b>Parada ${stopLabel}:</b> ${order.cliente}<br>${order.deliveryAddress}`);
-                markers.push(marker);
-            }
+        let distText = "";
+        if (!isEntregado && order._distance && order._distance < 9999999) {
+            distText = `<br><span style="font-size:11px; color:var(--text-secondary);">📍 a ${(order._distance / 1000).toFixed(2)} km de distancia</span>`;
+        }
+
+        if (!isEntregado && order._latLng) {
+            const marker = L.marker(order._latLng).addTo(map);
+            marker.bindPopup(`<b>Parada ${stopLabel}:</b> ${order.cliente}<br>${order.deliveryAddress}`);
+            markers.push(marker);
         }
 
         html += `
@@ -111,7 +140,7 @@ async function renderDeliveriesAndMap() {
                 </span>
             </div>
             <div class="order-meta">
-                <p>📍 <strong>Dirección:</strong> ${order.deliveryAddress || 'No especificada'}</p>
+                <p>📍 <strong>Dirección:</strong> ${order.deliveryAddress || 'No especificada'} ${distText}</p>
                 <p>📞 <strong>Teléfono:</strong> <a href="tel:${order.telefono}" style="color: var(--primary);">${order.telefono}</a></p>
                 <p>🕒 <strong>Fecha programada:</strong> ${order.deliveryDate || 'N/A'} ${order.deliveryTime || ''}</p>
             </div>
@@ -123,9 +152,10 @@ async function renderDeliveriesAndMap() {
                     </div>
                 `).join('')}
             </div>
-            <div class="action-row">
-                ${!isEntregado ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${order.deliveryLat && order.deliveryLng ? `${order.deliveryLat},${order.deliveryLng}` : encodeURIComponent(order.deliveryAddress)}" target="_blank" class="btn-secondary" style="font-size:13px; text-decoration:none;">🗺️ Navegar GPS</a>` : ''}
-                ${!isEntregado ? `<button class="btn-primary" onclick="markDelivered('${order.id}')" style="background: var(--success); border-color: var(--success); font-size:13px;">Marcar Entregado ✅</button>` : ''}
+            <div class="action-row" style="flex-wrap: wrap;">
+                ${!isEntregado && order._latLng ? `<button class="btn-secondary" onclick="showRouteOnMap(${order._latLng.lat}, ${order._latLng.lng}, '${order.cliente}')" style="font-size:12px; padding: 6px 10px; flex: 1;">📍 Ver en Mapa</button>` : ''}
+                ${!isEntregado ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${order._latLng ? `${order._latLng.lat},${order._latLng.lng}` : encodeURIComponent(order.deliveryAddress)}" target="_blank" class="btn-secondary" style="font-size:12px; padding: 6px 10px; text-decoration:none; text-align:center; flex: 1;">📱 Google Maps</a>` : ''}
+                ${!isEntregado ? `<button class="btn-primary" onclick="markDelivered('${order.id}')" style="background: var(--success); border-color: var(--success); font-size:12px; padding: 6px 10px; flex: 1;">Entregado ✅</button>` : ''}
             </div>
         </div>
         `;
@@ -133,62 +163,56 @@ async function renderDeliveriesAndMap() {
 
     list.innerHTML = html;
 
-    const drawRoute = (waypointsToDraw) => {
-        if (waypointsToDraw.length > 1) {
-            routingControl = L.Routing.control({
-                waypoints: waypointsToDraw,
-                routeWhileDragging: false,
-                addWaypoints: false,
-                show: false,
-                lineOptions: {
-                    styles: [{color: '#3b82f6', opacity: 0.8, weight: 6}]
-                },
-                createMarker: function() { return null; }
-            }).addTo(map);
-        }
-
-        if (markers.length > 0) {
-            const group = new L.featureGroup(markers);
-            map.fitBounds(group.getBounds().pad(0.1));
-        }
-    };
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                const currentPos = L.latLng(pos.coords.latitude, pos.coords.longitude);
-                const startMarker = L.marker(currentPos, {
-                    icon: L.icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                        shadowSize: [41, 41]
-                    })
-                }).addTo(map);
-                startMarker.bindPopup("<b>📍 Tu ubicación actual</b>").openPopup();
-                markers.push(startMarker);
-                
-                if (routeWaypoints.length > 0) {
-                    drawRoute([currentPos, ...routeWaypoints]);
-                } else {
-                    drawRoute([currentPos]);
-                }
-            },
-            (err) => {
-                console.warn("No se pudo obtener ubicación actual", err);
-                if (routeWaypoints.length > 0) {
-                    drawRoute(routeWaypoints);
-                }
-            },
-            { enableHighAccuracy: true, timeout: 5000 }
-        );
-    } else {
-        if (routeWaypoints.length > 0) {
-            drawRoute(routeWaypoints);
-        }
+    if (currentDriverPos) {
+        const startMarker = L.marker(currentDriverPos, {
+            icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            })
+        }).addTo(map);
+        startMarker.bindPopup("<b>📍 Tu ubicación actual</b>").openPopup();
+        markers.push(startMarker);
     }
+    
+    if (markers.length > 0) {
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+    }
+}
+
+window.showRouteOnMap = function(lat, lng, cliente) {
+    if (!currentDriverPos) {
+        alert("No pudimos obtener tu ubicación actual para trazar la ruta. Asegúrate de tener el GPS activado.");
+        return;
+    }
+    
+    if (routingControl) {
+        map.removeControl(routingControl);
+        routingControl = null;
+    }
+
+    const destLatLng = L.latLng(lat, lng);
+
+    routingControl = L.Routing.control({
+        waypoints: [currentDriverPos, destLatLng],
+        routeWhileDragging: false,
+        addWaypoints: false,
+        show: false,
+        lineOptions: {
+            styles: [{color: '#3b82f6', opacity: 0.8, weight: 6}]
+        },
+        createMarker: function() { return null; } // No crear marcadores adicionales del router
+    }).addTo(map);
+
+    // Centrar mapa
+    const group = new L.featureGroup([L.marker(currentDriverPos), L.marker(destLatLng)]);
+    map.fitBounds(group.getBounds().pad(0.1));
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function markDelivered(orderId) {
