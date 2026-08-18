@@ -30,7 +30,7 @@
                 </button>
                 <button class="nav-btn" data-tab="history-tab" id="btn-history-tab">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span>Historial</span>
+                    <span>Pedidos</span>
                 </button>
                 <button class="nav-btn" data-tab="clients-tab" id="btn-clients-tab">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -70,15 +70,7 @@
                         <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                         <span id="stat-products-count">Cargando inventario...</span>
                     </span>
-                    <button type="button" id="btn-sync-offline" class="theme-toggle-btn" title="Subir pedidos offline" onclick="document.getElementById('offline-upload-input').click()" style="background:#2ecc71; color:white; border-color:#27ae60;">
-                        <span class="theme-icon">☁️</span>
-                        <span class="theme-text">Sincronizar Offline</span>
-                    </button>
                     <input type="file" id="offline-upload-input" accept=".json,.csv" style="display:none" onchange="handleOfflineUpload(event)">
-                    <button type="button" id="btn-download-offline" class="theme-toggle-btn" title="Descargar versión sin internet" onclick="downloadOfflinePOS()">
-                        <span class="theme-icon">📱</span>
-                        <span class="theme-text">POS Offline</span>
-                    </button>
                     <button type="button" id="btn-theme-toggle" class="theme-toggle-btn" title="Cambiar Tema (Día/Noche)">
                         <span class="theme-icon">🌙</span>
                         <span class="theme-text">Modo Noche</span>
@@ -289,6 +281,12 @@
                             <div class="history-list-header" style="flex-wrap: wrap; gap: 8px;">
                                 <h2>Pedidos Registrados</h2>
                                 <div style="display:flex; gap: 8px; align-items:center;">
+                                    <button type="button" id="btn-sync-offline" class="btn-primary btn-sm" title="Subir pedidos offline" onclick="document.getElementById('offline-upload-input').click()" style="background:#2ecc71; border-color:#27ae60; font-size:11px; padding:6px 10px;">
+                                        ☁️ Sincronizar Offline
+                                    </button>
+                                    <button type="button" id="btn-download-offline" class="btn-primary btn-sm" title="Descargar versión sin internet" onclick="downloadOfflinePOS()" style="font-size:11px; padding:6px 10px;">
+                                        📱 POS Offline
+                                    </button>
                                     <button type="button" class="btn-primary btn-sm" id="btn-export-all-orders-excel" style="background-color: var(--success); border-color: var(--success); font-size:11px; padding:6px 10px;" title="Descargar historial de todos los pedidos en un archivo Excel (CSV)">Exportar Todo (Excel)</button>
                                     <div class="history-search">
                                         <input type="text" id="history-search-input" placeholder="Buscar por cliente...">
@@ -380,6 +378,11 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="c-zona">Zona / Localidad</label>
+                                    <input type="text" id="c-zona" placeholder="Ej. BELLAVISTA">
+                                </div>
+
+                                <div class="form-group">
                                     <label for="c-address">Dirección de Entrega</label>
                                     <div style="display:flex; gap:8px; flex-direction:column;">
                                         <input type="text" id="c-address" placeholder="Ej. Calle Falsa 123" style="width:100%;">
@@ -406,7 +409,10 @@
                                     <button type="button" class="btn-primary btn-sm" id="btn-export-clients-excel" style="background-color: var(--success); border-color: var(--success); font-size:11px; padding:6px 10px;" title="Exportar directorio de clientes a Excel (CSV)">Exportar Excel</button>
                                     <button type="button" class="btn-secondary btn-sm" id="btn-import-clients-excel" style="font-size:11px; padding:6px 10px;" title="Importar clientes desde un archivo Excel (CSV)">Importar Excel</button>
                                     <input type="file" id="file-import-clients" accept=".csv" style="display: none;">
-                                    <div class="catalog-search">
+                                    <div class="catalog-search" style="display:flex; gap:8px;">
+                                        <select id="client-dir-zone-select" style="padding:6px; border:1px solid var(--border-color); border-radius:4px; font-size:12px;">
+                                            <option value="">Todas las Zonas</option>
+                                        </select>
                                         <input type="text" id="client-search-input" placeholder="Buscar clientes...">
                                     </div>
                                 </div>
@@ -417,6 +423,7 @@
                                     <thead>
                                         <tr>
                                             <th>Cliente</th>
+                                            <th>Zona</th>
                                             <th>Contacto</th>
                                             <th>Compras</th>
                                             <th>Total Gastado</th>

@@ -259,6 +259,8 @@ const DOM = {
     cPhone: document.getElementById("c-phone"),
     cEmail: document.getElementById("c-email"),
     cAddress: document.getElementById("c-address"),
+    cZona: document.getElementById("c-zona"),
+    clientDirZoneSelect: document.getElementById("client-dir-zone-select"),
     btnSubmitClient: document.getElementById("btn-submit-client"),
     btnClearClientForm: document.getElementById("btn-clear-client-form"),
     clientSearchInput: document.getElementById("client-search-input"),
@@ -1155,6 +1157,9 @@ function renderCatalogTable() {
     const searchVal = DOM.catalogSearchInput.value.toLowerCase().trim();
     
     let filtered = products;
+    if (zoneFilter !== "") {
+        filtered = filtered.filter(c => c.zona === zoneFilter);
+    }
     if (searchVal !== "") {
         filtered = filtered.filter(p => p.nombre.toLowerCase().includes(searchVal) || p.marca.toLowerCase().includes(searchVal));
     }
@@ -1612,6 +1617,7 @@ function clearClientForm() {
     DOM.cPhone.value = "";
     DOM.cEmail.value = "";
     DOM.cAddress.value = "";
+    if (DOM.cZona) DOM.cZona.value = "";
     DOM.clientFormTitle.textContent = "Registrar Nuevo Cliente";
     DOM.btnSubmitClient.textContent = "Guardar Cliente";
 }
@@ -1638,13 +1644,35 @@ function populateZones() {
     DOM.zoneSelectInput.value = currentVal;
 }
 
+
+function updateDirZones() {
+    if (!DOM.clientDirZoneSelect) return;
+    const clients = LocalDB.getClients();
+    const zones = new Set();
+    clients.forEach(c => {
+        if (c.zona) zones.add(c.zona);
+    });
+    const currentVal = DOM.clientDirZoneSelect.value;
+    let html = '<option value="">Todas las Zonas</option>';
+    Array.from(zones).sort().forEach(z => {
+        html += `<option value="${z}">${z}</option>`;
+    });
+    DOM.clientDirZoneSelect.innerHTML = html;
+    DOM.clientDirZoneSelect.value = currentVal;
+}
+
 function renderClientsTable() {
+    if(DOM.clientDirZoneSelect) updateDirZones();
     if(DOM.zoneSelectInput) populateZones();
     const clients = LocalDB.getClients();
     const orders = LocalDB.getOrders();
     const searchVal = DOM.clientSearchInput.value.toLowerCase().trim();
+    const zoneFilter = DOM.clientDirZoneSelect ? DOM.clientDirZoneSelect.value : "";
 
     let filtered = clients;
+    if (zoneFilter !== "") {
+        filtered = filtered.filter(c => c.zona === zoneFilter);
+    }
     if (searchVal !== "") {
         filtered = filtered.filter(c => c.nombre.toLowerCase().includes(searchVal) || c.telefono.includes(searchVal));
     }
@@ -1672,6 +1700,7 @@ function renderClientsTable() {
                             </div>
                         </div>
                     </td>
+                    <td><span class="status-badge" style="background:#f1f5f9; color:#475569; font-weight:bold; font-size:11px;">${c.zona || '-'}</span></td>
                     <td><strong>${c.telefono}</strong></td>
                     <td><span class="ranking-qty">${purchaseCount}</span></td>
                     <td><strong>S/${totalSpent.toFixed(2)}</strong></td>
@@ -1749,6 +1778,7 @@ if (DOM.clientForm) {
         const phone = DOM.cPhone.value.trim();
         const email = DOM.cEmail.value.trim();
         const address = DOM.cAddress.value.trim();
+    const zona = DOM.cZona ? DOM.cZona.value.trim().toUpperCase() : "";
         const lat = document.getElementById("c-lat").value;
         const lng = document.getElementById("c-lng").value;
 
@@ -1764,6 +1794,7 @@ if (DOM.clientForm) {
             telefono: phone,
             email: email,
             address: address,
+        zona: zona,
             lat: lat,
             lng: lng,
             totalSpent: 0,
@@ -1853,6 +1884,7 @@ if (DOM.clientForm) {
 }
 
 if (DOM.clientSearchInput) {
+    if (DOM.clientDirZoneSelect) DOM.clientDirZoneSelect.addEventListener("change", renderClientsTable);
     DOM.clientSearchInput.addEventListener("input", renderClientsTable);
 }
 
