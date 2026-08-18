@@ -2386,10 +2386,21 @@ function initClientMap() {
         return;
     }
     
-    clientMap = L.map('client-map').setView([-12.046374, -77.042793], 13);
+    clientMap = L.map('client-map').setView([-12.046374, -77.042793], 13); // Fallback
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap'
     }).addTo(clientMap);
+    
+    // Si no hay coordenadas previas y el navegador soporta geolocalización, centrar en la ubicación actual
+    if (!document.getElementById("c-lat").value && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            if (!document.getElementById("c-lat").value) { // Verificar nuevamente por si el usuario ya hizo clic
+                clientMap.setView([pos.coords.latitude, pos.coords.longitude], 14);
+            }
+        }, () => {
+            // Silencioso si falla
+        }, { timeout: 3000 });
+    }
     
     // Permitir hacer clic para mover el pin
     clientMap.on('click', function(e) {
