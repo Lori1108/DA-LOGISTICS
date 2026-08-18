@@ -1349,6 +1349,72 @@ function renderHistoryTable() {
     });
 }
 
+// Editar pedido del historial (cargar al carrito)
+const btnEditOrder = document.getElementById("btn-edit-order");
+if (btnEditOrder) {
+    btnEditOrder.addEventListener("click", () => {
+        if (!AppState.selectedOrderForDetails) return;
+        
+        if (AppState.cart.length > 0) {
+            if (!confirm('Tus productos actuales en el carrito se perderán. ¿Deseas continuar editando este pedido?')) return;
+        }
+
+        const order = AppState.selectedOrderForDetails;
+        
+        // 1. Cargar productos al carrito
+        AppState.cart = JSON.parse(JSON.stringify(order.items)); // Copia profunda
+        
+        // 2. Establecer cliente
+        const clients = LocalDB.getClients();
+        const clientObj = clients.find(c => c.nombre === order.cliente);
+        if (clientObj) {
+            AppState.currentClient = clientObj;
+        } else {
+            // Si el cliente fue eliminado, creamos un objeto temporal
+            AppState.currentClient = { nombre: order.cliente, telefono: order.telefono, address: order.deliveryAddress, lat: order.deliveryLat, lng: order.deliveryLng };
+        }
+        
+        // 3. Eliminar el pedido original del historial y restaurar inventario
+        const orders = LocalDB.getOrders();
+        if (IS_SERVER) {
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open("DELETE", `${API_URL}/api/pedidos?id=${order.id}`, false);
+                xhr.send();
+                LocalDB.init();
+            } catch (err) {
+                console.warn("Error al eliminar pedido del servidor al editar", err);
+            }
+        } else {
+            // Restaurar inventario
+            const products = LocalDB.getProducts();
+            order.items.forEach(it => {
+                const p = products.find(prod => prod.id === it.id);
+                if (p) p.stock += it.qty;
+            });
+            LocalDB.saveProducts(products);
+
+            const updatedOrders = orders.filter(o => o.id !== order.id);
+            LocalDB.saveOrders(updatedOrders);
+            
+            renderCatalogTable();
+        }
+        
+        showOrderDetails(null);
+        renderHistoryTable();
+        
+        // 4. Cambiar a la pestaña de POS
+        renderCart();
+        DOM.clientSelect.value = clientObj ? clientObj.id : "";
+        DOM.navButtons.forEach(b => b.classList.remove("active"));
+        DOM.views.forEach(v => v.classList.remove("active"));
+        document.querySelector('[data-view="pos"]').classList.add("active");
+        document.getElementById("view-pos").classList.add("active");
+        
+        alert("El pedido ha sido cargado en el Punto de Venta para su edición.");
+    });
+}
+
 // Eliminar pedido del historial
 DOM.btnDeleteOrder.addEventListener("click", () => {
     if (!AppState.selectedOrderForDetails) return;
@@ -1368,8 +1434,18 @@ DOM.btnDeleteOrder.addEventListener("click", () => {
                 return;
             }
         } else {
+            // Restaurar inventario
+            const products = LocalDB.getProducts();
+            order.items.forEach(it => {
+                const p = products.find(prod => prod.id === it.id);
+                if (p) p.stock += it.qty;
+            });
+            LocalDB.saveProducts(products);
+            
             const updatedOrders = orders.filter(o => o.id !== order.id);
             LocalDB.saveOrders(updatedOrders);
+            
+            renderCatalogTable();
         }
         showOrderDetails(null);
         renderHistoryTable();
@@ -1684,16 +1760,36 @@ if (DOM.clientForm) {
             } else {
                 const index = clients.findIndex(item => item.id === id);
                 if (index > -1) {
+                    const oldName = clients[index].nombre;
                     clients[index].nombre = name;
                     clients[index].telefono = phone;
                     clients[index].email = email;
                     clients[index].address = address;
+                    clients[index].lat = lat;
+                    clients[index].lng = lng;
+                    
+                    // Actualizar pedidos pendientes de este cliente si cambia la dirección
+                    const orders = LocalDB.getOrders();
+                    let updatedOrders = false;
+                    orders.forEach(o => {
+                        if ((o.cliente === oldName || o.cliente === name) && o.deliveryStatus === 'Pendiente') {
+                            o.cliente = name;
+                            o.telefono = phone;
+                            o.deliveryAddress = address;
+                            o.deliveryLat = lat;
+                            o.deliveryLng = lng;
+                            updatedOrders = true;
+                        }
+                    });
+                    if (updatedOrders) {
+                        LocalDB.saveOrders(orders);
+                    }
+                    
                     alert(`Cliente "${name}" modificado correctamente.`);
                 }
             }
             LocalDB.saveClients(clients);
         }
-
         clearClientForm();
         renderClientsTable();
     });
