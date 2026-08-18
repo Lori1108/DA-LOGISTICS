@@ -71,17 +71,27 @@ window.switchTab = function(tabId) {
     renderDeliveriesAndMap(false); // don't refetch GPS every tab switch
 }
 
-window.toggleMobileView = function(view) {
+window.toggleMobileView = function(view, pushState = true) {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.getElementById(`nav-${view}`).classList.add('active');
     
     if (view === 'map') {
         document.body.classList.add('show-map');
         setTimeout(() => map.invalidateSize(), 300); // fix leaflet map render bug when hidden
+        if (pushState) history.pushState({view: 'map'}, '', '#map');
     } else {
         document.body.classList.remove('show-map');
+        if (pushState) history.pushState({view: 'list'}, '', '#list');
     }
 }
+
+window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.view) {
+        toggleMobileView(e.state.view, false);
+    } else {
+        toggleMobileView('list', false);
+    }
+});
 
 // Global colors for markers OptimoRoute style
 const colors = ['#f39c12', '#3498db', '#e74c3c', '#9b59b6', '#2ecc71', '#1abc9c', '#e67e22', '#34495e'];

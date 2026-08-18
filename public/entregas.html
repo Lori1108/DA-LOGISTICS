@@ -249,6 +249,24 @@
         .nav-item i {
             font-size: 20px;
         }
+        
+        .back-to-list-btn {
+            display: none;
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            color: #0f2b45;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-weight: 700;
+            z-index: 1000;
+            cursor: pointer;
+            border: 2px solid #0f2b45;
+            text-align: center;
+        }
 
         /* Responsive Mobile Layout */
         @media (max-width: 768px) {
@@ -273,6 +291,9 @@
                 display: none;
             }
             body.show-map .map-area {
+                display: block;
+            }
+            body.show-map .back-to-list-btn {
                 display: block;
             }
         }
@@ -306,8 +327,9 @@
             </div>
         </div>
 
-        <!-- Map Area -->
+        <!-- Map -->
         <div class="map-area">
+            <button class="back-to-list-btn" onclick="toggleMobileView('list')">⬅ VOLVER A LA LISTA</button>
             <div id="map"></div>
         </div>
     </div>
