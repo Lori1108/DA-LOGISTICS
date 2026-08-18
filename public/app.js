@@ -237,6 +237,7 @@ const DOM = {
     cName: document.getElementById("c-name"),
     cPhone: document.getElementById("c-phone"),
     cEmail: document.getElementById("c-email"),
+    cAddress: document.getElementById("c-address"),
     btnSubmitClient: document.getElementById("btn-submit-client"),
     btnClearClientForm: document.getElementById("btn-clear-client-form"),
     clientSearchInput: document.getElementById("client-search-input"),
@@ -831,6 +832,14 @@ function placeOrder() {
     const total = subtotal - discountAmount;
     const method = document.querySelector('input[name="payment-method"]:checked').value;
     
+    // Delivery Fields
+    const elDate = document.getElementById("delivery-date");
+    const elTime = document.getElementById("delivery-time");
+    const elAddress = document.getElementById("delivery-address");
+    const deliveryDate = elDate ? elDate.value : "";
+    const deliveryTime = elTime ? elTime.value : "";
+    const deliveryAddress = elAddress ? elAddress.value.trim() : "";
+    
     // Generar Folio
     const dateObj = new Date();
     const timestamp = dateObj.getFullYear() +
@@ -852,6 +861,10 @@ function placeOrder() {
         descuento: discountAmount,
         total: total,
         metodo: method,
+        deliveryDate: deliveryDate,
+        deliveryTime: deliveryTime,
+        deliveryAddress: deliveryAddress,
+        deliveryStatus: (deliveryDate || deliveryAddress) ? "Pendiente" : "Entregado",
         items: AppState.cart.map(it => ({
             id: it.product.id,
             nombre: it.product.nombre,
@@ -932,6 +945,13 @@ function placeOrder() {
             
             if (DOM.discountType) DOM.discountType.value = "none";
             if (DOM.discountValue) DOM.discountValue.value = "0";
+            
+            const elDate = document.getElementById("delivery-date");
+            const elTime = document.getElementById("delivery-time");
+            const elAddress = document.getElementById("delivery-address");
+            if(elDate) elDate.value = "";
+            if(elTime) elTime.value = "";
+            if(elAddress) elAddress.value = "";
 
             AppState.cart = [];
             renderCart();
@@ -964,6 +984,13 @@ function placeOrder() {
         
         if (DOM.discountType) DOM.discountType.value = "none";
         if (DOM.discountValue) DOM.discountValue.value = "0";
+
+        const elDate = document.getElementById("delivery-date");
+        const elTime = document.getElementById("delivery-time");
+        const elAddress = document.getElementById("delivery-address");
+        if(elDate) elDate.value = "";
+        if(elTime) elTime.value = "";
+        if(elAddress) elAddress.value = "";
 
         AppState.cart = [];
         renderCart();
@@ -1481,6 +1508,7 @@ function clearClientForm() {
     DOM.cName.value = "";
     DOM.cPhone.value = "";
     DOM.cEmail.value = "";
+    DOM.cAddress.value = "";
     DOM.clientFormTitle.textContent = "Registrar Nuevo Cliente";
     DOM.btnSubmitClient.textContent = "Guardar Cliente";
 }
@@ -1546,8 +1574,9 @@ function renderClientsTable() {
             if (c) {
                 DOM.editClientId.value = c.id;
                 DOM.cName.value = c.nombre;
-                DOM.cPhone.value = c.telefono;
+                DOM.cPhone.value = c.telefono || "";
                 DOM.cEmail.value = c.email || "";
+                DOM.cAddress.value = c.address || "";
                 DOM.clientFormTitle.textContent = "Editar Cliente: " + c.nombre;
                 DOM.btnSubmitClient.textContent = "Guardar Cambios";
                 DOM.clientForm.scrollIntoView({ behavior: 'smooth' });
@@ -1590,14 +1619,22 @@ if (DOM.clientForm) {
         const name = DOM.cName.value.trim();
         const phone = DOM.cPhone.value.trim();
         const email = DOM.cEmail.value.trim();
+        const address = DOM.cAddress.value.trim();
 
         const clients = LocalDB.getClients();
+
+        if(!name || !phone) {
+            return alert("Por favor, ingrese el nombre y el teléfono (campos obligatorios).");
+        }
 
         const clientData = {
             id: id || "",
             nombre: name,
             telefono: phone,
-            email: email
+            email: email,
+            address: address,
+            totalSpent: 0,
+            orders: []
         };
 
         if (IS_SERVER) {
@@ -1625,6 +1662,7 @@ if (DOM.clientForm) {
                     clients[index].nombre = name;
                     clients[index].telefono = phone;
                     clients[index].email = email;
+                    clients[index].address = address;
                     alert(`Cliente "${name}" modificado correctamente.`);
                 }
             }
@@ -1652,7 +1690,7 @@ if (DOM.clientSelectInput) {
         
         if (matches.length > 0) {
             matches.forEach(c => {
-                html += `<div class="client-dropdown-item" data-id="${c.id}" data-name="${c.nombre}" data-phone="${c.telefono}">${c.nombre} (${c.telefono})</div>`;
+                html += `<div class="client-dropdown-item" data-id="${c.id}" data-name="${c.nombre}" data-phone="${c.telefono}" data-address="${c.address || ''}">${c.nombre} (${c.telefono})</div>`;
             });
         } else {
             html += `<div class="client-dropdown-item" style="color:var(--text-secondary); cursor:default;">Registrar nuevo cliente al facturar...</div>`;
@@ -1668,12 +1706,16 @@ if (DOM.clientSelectInput) {
                 if (id) {
                     const name = item.getAttribute("data-name");
                     const phone = item.getAttribute("data-phone");
+                    const address = item.getAttribute("data-address");
                     
                     DOM.clientName.value = name;
                     DOM.clientPhone.value = phone;
                     
                     DOM.selectedClientNameDisplay.textContent = name;
                     DOM.selectedClientBadge.style.display = "flex";
+                    
+                    const elAddress = document.getElementById("delivery-address");
+                    if (elAddress && address) elAddress.value = address;
                     DOM.btnClearSelectedClient.style.display = "block";
                     DOM.clientSelectInput.value = "";
                 }
@@ -1700,6 +1742,8 @@ if (DOM.clientSelectInput) {
             DOM.selectedClientBadge.style.display = "none";
             DOM.btnClearSelectedClient.style.display = "none";
             DOM.clientSelectInput.value = "";
+            const elAddress = document.getElementById("delivery-address");
+            if (elAddress) elAddress.value = "";
         });
     }
 }
@@ -2159,14 +2203,14 @@ function exportClientsToExcel() {
     let csvContent = "\uFEFF"; // BOM para Excel
     csvContent += "DIRECTORIO DE CLIENTES - DA LOGISTICS\r\n";
     csvContent += `Fecha de Exportacion:;${new Date().toLocaleDateString()}\r\n\r\n`;
-    csvContent += "Nombre;Telefono;Correo;Compras;Total Gastado\r\n";
+    csvContent += "Nombre;Telefono;Correo;Direccion;Compras;Total Gastado\r\n";
     
     clients.forEach(c => {
         const clientOrders = orders.filter(o => o.cliente.toLowerCase() === c.nombre.toLowerCase());
         const purchaseCount = clientOrders.length;
         const totalSpent = clientOrders.reduce((sum, o) => sum + o.total, 0);
         
-        csvContent += `${c.nombre};${c.telefono};${c.email || "-"};${purchaseCount};S/${totalSpent.toFixed(2)}\r\n`;
+        csvContent += `${c.nombre};${c.telefono};${c.email || "-"};${c.address || "-"};${purchaseCount};S/${totalSpent.toFixed(2)}\r\n`;
     });
     
     const dateFormatted = new Date().toISOString().slice(0, 10);
@@ -2209,6 +2253,7 @@ function importClientsFromExcel(event) {
                     const name = cols[0].trim();
                     const phone = cols[1].trim();
                     const email = cols[2] ? cols[2].trim() : "";
+                    const address = cols[3] ? cols[3].trim() : "";
                     
                     // Ignorar la fila de nombres de columna
                     if (name.toLowerCase() === "nombre" || phone.toLowerCase() === "telefono" || name === "" || phone === "") {

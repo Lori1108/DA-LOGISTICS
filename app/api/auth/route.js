@@ -4,11 +4,19 @@ export async function POST(request) {
   try {
     const { username, password } = await request.json();
 
+    let role = null;
+
     if (username === 'BILO' && password === 'lorena123') {
-      const response = NextResponse.json({ success: true });
+      role = 'admin';
+    } else if (username === 'ROBIN' && password === 'entrega123') {
+      role = 'worker';
+    }
+
+    if (role) {
+      const response = NextResponse.json({ success: true, role });
       
       // Establecer la cookie de sesión (expira en 30 días)
-      response.cookies.set('bilo_auth', 'authenticated', {
+      response.cookies.set('bilo_auth', role, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

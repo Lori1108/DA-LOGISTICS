@@ -367,6 +367,11 @@
                                     <input type="email" id="c-email" placeholder="Ej. juan@correo.com">
                                 </div>
 
+                                <div class="form-group">
+                                    <label for="c-address">Dirección de Entrega</label>
+                                    <input type="text" id="c-address" placeholder="Ej. Calle Falsa 123">
+                                </div>
+
                                 <div class="form-actions">
                                     <button type="submit" class="btn-primary" id="btn-submit-client">Guardar Cliente</button>
                                     <button type="button" class="btn-secondary" id="btn-clear-client-form">Cancelar / Limpiar</button>
@@ -508,6 +513,16 @@
                 
                 <div class="selected-client-badge" id="selected-client-badge" style="display:none;">
                     Cliente: <strong id="selected-client-name-display">-</strong>
+                </div>
+
+                <!-- Datos de Entrega -->
+                <div class="delivery-details" style="margin-top: 12px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; display: block;">Datos de Entrega (Opcional)</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <input type="date" id="delivery-date" style="flex: 1; padding: 6px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; background: var(--bg-app); color: var(--text-primary);">
+                        <input type="time" id="delivery-time" style="flex: 1; padding: 6px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; background: var(--bg-app); color: var(--text-primary);">
+                    </div>
+                    <input type="text" id="delivery-address" placeholder="Dirección de entrega..." style="width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; background: var(--bg-app); color: var(--text-primary);">
                 </div>
             </div>
 

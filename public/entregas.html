@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Repartidor - DA LOGISTICS</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        body { background-color: var(--bg-app); color: var(--text-primary); font-family: var(--font-main); }
+        .delivery-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        .order-card { background: var(--bg-card); border-radius: var(--radius-md); padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--warning); border-bottom: 1px solid var(--border-color); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); }
+        .order-card.entregado { border-left-color: var(--success); opacity: 0.7; }
+        .order-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; font-size: 16px; }
+        .order-meta { color: var(--text-secondary); font-size: 14px; margin-bottom: 10px; line-height: 1.5; }
+        .order-items { background: var(--bg-app); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 15px; font-size: 13px; }
+        .item-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border-color); }
+        .item-row:last-child { border-bottom: none; }
+        .action-row { display: flex; justify-content: flex-end; gap: 10px; }
+    </style>
+</head>
+<body class="light-mode">
+    <div class="delivery-container">
+        <header class="header">
+            <img src="/logo.png" alt="DA LOGISTICS" style="height: 40px; border-radius: 8px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span style="font-weight: 600; color: var(--primary);">Repartidor</span>
+                <button class="btn-secondary" onclick="logout()" style="padding: 6px 12px; font-size: 12px;">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <h2 style="margin-bottom: 20px; color: var(--text-primary);">Rutas de Entrega</h2>
+        
+        <div id="deliveries-list">
+            <p style="text-align:center; color:var(--text-secondary);">Cargando entregas...</p>
+        </div>
+    </div>
+
+    <script src="/entregas.js"></script>
+</body>
+</html>
