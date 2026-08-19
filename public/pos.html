@@ -733,6 +733,64 @@
         </div>
     </div>
 
+    <!-- MODAL EDITAR PEDIDO -->
+    <div id="edit-order-modal" class="modal-overlay" style="display:none; z-index: 1800;">
+        <div id="edit-order-modal-card" class="modal-card" style="width: 640px; max-width: 95%; max-height: 92vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>✏️ Editar Pedido <span id="edit-order-folio" style="font-size:12px; color:var(--text-secondary);"></span></h3>
+                <button type="button" class="btn-close-modal" id="btn-close-edit-order">✕</button>
+            </div>
+            <div class="modal-body" style="padding: 18px;">
+                <input type="hidden" id="edit-order-id">
+                <div class="form-group">
+                    <label>Cliente *</label>
+                    <input type="text" id="edit-order-client" list="edit-client-datalist" placeholder="Nombre del cliente" style="width:100%; padding:9px 12px; border:1px solid var(--border-color); border-radius:8px; font-size:14px;">
+                    <datalist id="edit-client-datalist"></datalist>
+                </div>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="edit-order-phone" placeholder="Teléfono" style="width:100%; padding:9px 12px; border:1px solid var(--border-color); border-radius:8px; font-size:14px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Método de Pago</label>
+                        <select id="edit-order-method" style="width:100%; padding:9px 12px; border:1px solid var(--border-color); border-radius:8px; font-size:14px;">
+                            <option value="Efectivo">💵 Efectivo</option>
+                            <option value="Yape">📱 Yape</option>
+                            <option value="Plin">📱 Plin</option>
+                            <option value="Transferencia">🏦 Transferencia</option>
+                            <option value="Tarjeta">💳 Tarjeta</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>Productos del Pedido</span>
+                        <button type="button" class="btn-secondary btn-sm" id="btn-add-edit-item" style="padding:4px 10px; font-size:11px;">➕ Agregar Producto</button>
+                    </label>
+                    <datalist id="edit-product-datalist"></datalist>
+                    <div id="edit-order-items"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Descuento (S/)</label>
+                    <input type="number" id="edit-order-discount" value="0" min="0" step="0.01" style="width:100%; padding:9px 12px; border:1px solid var(--border-color); border-radius:8px; font-size:14px;" oninput="updateEditOrderTotals()">
+                </div>
+
+                <div class="order-details-summary" style="margin-top:6px;">
+                    <div class="summary-row"><span>Subtotal:</span><span id="edit-order-subtotal">S/0.00</span></div>
+                    <div class="summary-row"><span>Descuento:</span><span id="edit-order-discount-display">S/0.00</span></div>
+                    <div class="summary-row"><span>Total:</span><span id="edit-order-total" class="total-price">S/0.00</span></div>
+                </div>
+            </div>
+            <div class="modal-footer" style="display:flex; gap:10px; padding:14px 18px;">
+                <button type="button" class="btn-primary" id="btn-save-edit-order" style="flex:1; padding:12px; font-weight:700;">💾 Guardar Cambios</button>
+                <button type="button" class="btn-secondary" id="btn-cancel-edit-order" style="flex:1;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Venta Exitosa -->
     <div id="modal-sale-success" class="modal-overlay" style="display: none; z-index: 2000;">
         <div class="modal" style="max-width: 400px;">

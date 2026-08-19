@@ -1367,68 +1367,219 @@ function renderHistoryTable() {
     });
 }
 
-// Editar pedido del historial (cargar al carrito)
+// ===== EDITAR PEDIDO (modal directo, no borra el registro) =====
+const DOM_EDIT = {
+    modal: document.getElementById("edit-order-modal"),
+    folio: document.getElementById("edit-order-folio"),
+    id: document.getElementById("edit-order-id"),
+    client: document.getElementById("edit-order-client"),
+    phone: document.getElementById("edit-order-phone"),
+    method: document.getElementById("edit-order-method"),
+    items: document.getElementById("edit-order-items"),
+    discount: document.getElementById("edit-order-discount"),
+    discountDisplay: document.getElementById("edit-order-discount-display"),
+    subtotal: document.getElementById("edit-order-subtotal"),
+    total: document.getElementById("edit-order-total"),
+    datalist: document.getElementById("edit-client-datalist"),
+    btnClose: document.getElementById("btn-close-edit-order"),
+    btnCancel: document.getElementById("btn-cancel-edit-order"),
+    btnSave: document.getElementById("btn-save-edit-order"),
+    btnAddItem: document.getElementById("btn-add-edit-item")
+};
+
+let editOrderItems = [];
+
+function fillEditClientDatalist() {
+    if (!DOM_EDIT.datalist) return;
+    const clients = LocalDB.getClients();
+    DOM_EDIT.datalist.innerHTML = clients.map(c =>
+        `<option value="${(c.nombre || '').replace(/"/g, '&quot;')}"></option>`
+    ).join('');
+}
+
+function openEditOrderModal(order) {
+    if (!order || !DOM_EDIT.modal) return;
+
+    editOrderItems = JSON.parse(JSON.stringify(order.items || []));
+    DOM_EDIT.id.value = order.id || "";
+    DOM_EDIT.folio.textContent = order.folio ? ` · ${order.folio}` : "";
+    DOM_EDIT.client.value = order.cliente || "";
+    DOM_EDIT.phone.value = order.telefono || "";
+    DOM_EDIT.method.value = order.metodo || "Efectivo";
+    DOM_EDIT.discount.value = order.descuento || 0;
+
+    fillEditClientDatalist();
+    renderEditOrderItems();
+    updateEditOrderTotals();
+    DOM_EDIT.modal.style.display = "flex";
+}
+
+function closeEditOrderModal() {
+    if (DOM_EDIT.modal) DOM_EDIT.modal.style.display = "none";
+}
+
+function renderEditOrderItems() {
+    if (!DOM_EDIT.items) return;
+    const products = LocalDB.getProducts();
+    const productOptions = products.map(p =>
+        `<option value="${(p.nombre || '').replace(/"/g, '&quot;')}"></option>`
+    ).join('');
+    const presOptions = ["cajetilla", "paquete", "cajon"].map(p =>
+        `<option value="${p}">${p.charAt(0).toUpperCase() + p.slice(1)}</option>`
+    ).join('');
+    const productDatalist = document.getElementById("edit-product-datalist");
+    if (productDatalist) productDatalist.innerHTML = productOptions;
+
+    DOM_EDIT.items.innerHTML = editOrderItems.map((it, i) => `
+        <div class="edit-order-item" data-index="${i}">
+            <input type="text" class="edit-item-name" value="${(it.nombre || '').replace(/"/g, '&quot;')}" list="edit-product-datalist" placeholder="Producto" oninput="onEditItemChange(${i})">
+            <select class="edit-item-pres" onchange="onEditItemChange(${i})">
+                ${presOptions}
+            </select>
+            <input type="number" class="edit-item-qty" value="${it.qty}" min="1" step="1" oninput="onEditItemChange(${i})">
+            <input type="number" class="edit-item-price" value="${it.precio}" min="0" step="0.01" oninput="onEditItemChange(${i})">
+            <button type="button" class="item-remove-btn" onclick="removeEditOrderItem(${i})">✕</button>
+        </div>
+    `).join('');
+
+    // set each select to its presentation
+    editOrderItems.forEach((it, i) => {
+        const sel = DOM_EDIT.items.querySelector(`.edit-order-item[data-index="${i}"] .edit-item-pres`);
+        if (sel) sel.value = it.presentacion || 'cajetilla';
+    });
+}
+
+function addEditOrderItem() {
+    editOrderItems.push({
+        id: "manual_" + Date.now(),
+        nombre: "",
+        marca: "",
+        presentacion: "cajetilla",
+        qty: 1,
+        precio: 0,
+        costo: 0,
+        subtotal: 0
+    });
+    renderEditOrderItems();
+    updateEditOrderTotals();
+}
+
+function removeEditOrderItem(index) {
+    editOrderItems.splice(index, 1);
+    renderEditOrderItems();
+    updateEditOrderTotals();
+}
+
+function onEditItemChange(index) {
+    const row = DOM_EDIT.items.querySelector(`.edit-order-item[data-index="${index}"]`);
+    if (!row) return;
+    const it = editOrderItems[index];
+    if (!it) return;
+    it.nombre = row.querySelector(".edit-item-name").value.trim();
+    it.presentacion = row.querySelector(".edit-item-pres").value;
+    it.qty = parseInt(row.querySelector(".edit-item-qty").value, 10) || 0;
+    it.precio = parseFloat(row.querySelector(".edit-item-price").value) || 0;
+    it.subtotal = it.qty * it.precio;
+    updateEditOrderTotals();
+}
+
+function updateEditOrderTotals() {
+    const subtotal = editOrderItems.reduce((s, it) => s + (it.qty * it.precio), 0);
+    const desc = parseFloat(DOM_EDIT.discount.value) || 0;
+    const descCapped = Math.min(desc, subtotal);
+    const total = subtotal - descCapped;
+    DOM_EDIT.subtotal.textContent = "S/" + subtotal.toFixed(2);
+    DOM_EDIT.discountDisplay.textContent = "S/" + descCapped.toFixed(2);
+    DOM_EDIT.total.textContent = "S/" + total.toFixed(2);
+}
+
+// Guardar cambios del pedido editado
+function saveEditOrder() {
+    const orderId = DOM_EDIT.id.value;
+    const orders = LocalDB.getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order) { alert("Pedido no encontrado. Recarga la página."); return; }
+
+    const clientName = DOM_EDIT.client.value.trim();
+    if (!clientName) { alert("El nombre del cliente es obligatorio."); DOM_EDIT.client.focus(); return; }
+
+    const items = editOrderItems.filter(it => it.nombre !== "" && it.qty > 0);
+    if (items.length === 0) { alert("Debe haber al menos un producto."); return; }
+
+    // Guardar items editados (mantener ids/productos originales si no cambiaron)
+    const finalItems = editOrderItems.map(it => {
+        const original = (order.items || []).find(oi => oi.nombre === it.nombre && oi.presentacion === it.presentacion);
+        return {
+            id: (original && original.id) || it.id || "manual_" + Date.now(),
+            nombre: it.nombre,
+            marca: it.marca || "",
+            presentacion: it.presentacion,
+            qty: it.qty,
+            precio: it.precio,
+            costo: it.costo || 0,
+            subtotal: it.qty * it.precio
+        };
+    });
+
+    const subtotal = finalItems.reduce((s, it) => s + it.subtotal, 0);
+    const desc = Math.min(parseFloat(DOM_EDIT.discount.value) || 0, subtotal);
+    const total = subtotal - desc;
+
+    // Restaurar inventario del pedido original
+    const products = LocalDB.getProducts();
+    (order.items || []).forEach(it => {
+        const p = products.find(prod => prod.id === it.id);
+        if (p) {
+            let currentTotal = getProductTotalUnits(p);
+            let qtyToRestore = it.qty * getPresentationMultiplier(it.presentacion);
+            updateProductStockFromTotal(p, currentTotal + qtyToRestore);
+        }
+    });
+
+    // Aplicar inventario de los nuevos items
+    finalItems.forEach(it => {
+        let p = products.find(prod => prod.id === it.id);
+        if (!p) p = products.find(prod => prod.nombre === it.nombre);
+        if (p) {
+            let currentTotal = getProductTotalUnits(p);
+            let qtyToDeduct = it.qty * getPresentationMultiplier(it.presentacion);
+            updateProductStockFromTotal(p, currentTotal - qtyToDeduct);
+        }
+    });
+
+    // Actualizar el pedido (misma id y folio)
+    order.cliente = clientName;
+    order.telefono = DOM_EDIT.phone.value.trim() || "-";
+    order.metodo = DOM_EDIT.method.value;
+    order.subtotal = subtotal;
+    order.descuento = desc;
+    order.total = total;
+    order.items = finalItems;
+    // Actualizar nombre de cliente en pedidos pendientes relacionados
+    LocalDB.saveOrders(orders);
+    LocalDB.saveProducts(products);
+
+    closeEditOrderModal();
+    showOrderDetails(order);
+    renderHistoryTable();
+    renderCatalogTable();
+    updateInventoryStats();
+
+    alert(`Pedido ${order.folio} actualizado correctamente.`);
+}
+
 const btnEditOrder = document.getElementById("btn-edit-order");
 if (btnEditOrder) {
     btnEditOrder.addEventListener("click", () => {
         if (!AppState.selectedOrderForDetails) return;
-        
-        if (AppState.cart.length > 0) {
-            if (!confirm('Tus productos actuales en el carrito se perderán. ¿Deseas continuar editando este pedido?')) return;
-        }
-
-        const order = AppState.selectedOrderForDetails;
-        
-        // 1. Cargar productos al carrito
-        AppState.cart = JSON.parse(JSON.stringify(order.items)); // Copia profunda
-        
-        // 2. Establecer cliente
-        const clients = LocalDB.getClients();
-        const clientObj = clients.find(c => c.nombre === order.cliente);
-        if (clientObj) {
-            AppState.currentClient = clientObj;
-        } else {
-            // Si el cliente fue eliminado, creamos un objeto temporal
-            AppState.currentClient = { nombre: order.cliente, telefono: order.telefono, address: order.deliveryAddress, lat: order.deliveryLat, lng: order.deliveryLng };
-        }
-        
-        // 3. Eliminar el pedido original del historial y restaurar inventario
-        const orders = LocalDB.getOrders();
-        if (IS_SERVER) {
-            try {
-                const xhr = new XMLHttpRequest();
-                xhr.open("DELETE", `${API_URL}/api/pedidos?id=${order.id}`, false);
-                xhr.send();
-                LocalDB.init();
-            } catch (err) {
-                console.warn("Error al eliminar pedido del servidor al editar", err);
-            }
-        } else {
-            // Restaurar inventario
-            const products = LocalDB.getProducts();
-            order.items.forEach(it => {
-                const p = products.find(prod => prod.id === it.id);
-                if (p) p.stock += it.qty;
-            });
-            LocalDB.saveProducts(products);
-
-            const updatedOrders = orders.filter(o => o.id !== order.id);
-            LocalDB.saveOrders(updatedOrders);
-            
-            renderCatalogTable();
-        }
-        
-        showOrderDetails(null);
-        renderHistoryTable();
-        
-        // 4. Cambiar a la pestaña de POS
-        renderCart();
-        DOM.clientSelect.value = clientObj ? clientObj.id : "";
-        switchTab("pos-tab");
-        
-        alert("El pedido ha sido cargado en el Punto de Venta para su edición.");
+        openEditOrderModal(AppState.selectedOrderForDetails);
     });
 }
+
+if (DOM_EDIT.btnClose) DOM_EDIT.btnClose.addEventListener("click", closeEditOrderModal);
+if (DOM_EDIT.btnCancel) DOM_EDIT.btnCancel.addEventListener("click", closeEditOrderModal);
+if (DOM_EDIT.btnSave) DOM_EDIT.btnSave.addEventListener("click", saveEditOrder);
+if (DOM_EDIT.btnAddItem) DOM_EDIT.btnAddItem.addEventListener("click", addEditOrderItem);
 
 // Eliminar pedido del historial
 DOM.btnDeleteOrder.addEventListener("click", () => {

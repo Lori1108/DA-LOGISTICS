@@ -658,6 +658,71 @@ body {
     gap: 12px;
 }
 
+/* Modal de Edición de Pedido */
+.edit-order-item {
+    display: grid;
+    grid-template-columns: 1fr 110px 70px 90px 34px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 8px;
+    background-color: var(--bg-app);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+}
+.edit-order-item input,
+.edit-order-item select {
+    width: 100%;
+    padding: 7px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    min-width: 0;
+    box-sizing: border-box;
+}
+.edit-order-item .item-remove-btn {
+    border: none;
+    background: none;
+    color: var(--danger);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+}
+#edit-order-modal .modal-body label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--text-secondary);
+}
+#edit-order-modal .order-details-summary {
+    background-color: var(--bg-app);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+}
+#edit-order-modal .total-price {
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 17px;
+}
+@media (max-width: 560px) {
+    .edit-order-item {
+        grid-template-columns: 1fr 70px 50px 70px 30px;
+        gap: 5px;
+    }
+    .edit-order-item input,
+    .edit-order-item select {
+        padding: 6px 6px;
+        font-size: 12px;
+    }
+    #edit-order-modal .modal-body .form-row-2col {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Subida de Imagen */
 .image-upload-wrapper {
     display: flex;
