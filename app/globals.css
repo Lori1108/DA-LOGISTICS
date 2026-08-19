@@ -708,15 +708,29 @@ body {
     font-weight: 800;
     font-size: 17px;
 }
-@media (max-width: 560px) {
+@media (max-width: 640px) {
+    /* En móvil cada producto del pedido editable se convierte en una tarjeta apilada
+       (sin fila de 5 columnas -> nada de scroll horizontal) */
     .edit-order-item {
-        grid-template-columns: 1fr 70px 50px 70px 30px;
-        gap: 5px;
+        grid-template-columns: 1fr 60px 70px auto;
+        grid-template-areas:
+            "name name name remove"
+            "pres qty  price price";
+        gap: 6px;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
     }
+    .edit-order-item .edit-item-name { grid-area: name; }
+    .edit-order-item .edit-item-pres { grid-area: pres; }
+    .edit-order-item .edit-item-qty  { grid-area: qty; }
+    .edit-order-item .edit-item-price{ grid-area: price; }
+    .edit-order-item .item-remove-btn{ grid-area: remove; align-self: start; font-size: 15px; }
     .edit-order-item input,
     .edit-order-item select {
-        padding: 6px 6px;
-        font-size: 12px;
+        padding: 7px 8px;
+        font-size: 13px;
+        width: 100%;
     }
     #edit-order-modal .modal-body .form-row-2col {
         grid-template-columns: 1fr;

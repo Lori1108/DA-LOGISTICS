@@ -1331,12 +1331,12 @@ function renderHistoryTable() {
             const isSelected = AppState.selectedOrderForDetails && AppState.selectedOrderForDetails.id === o.id;
             html += `
                 <tr class="${isSelected ? 'selected' : ''}" data-id="${o.id}">
-                    <td><strong>${o.folio}</strong></td>
-                    <td>${o.cliente}</td>
-                    <td>${o.fecha}</td>
-                    <td><strong>S/${o.total.toFixed(2)}</strong></td>
-                    <td><span class="payment-badge">${o.metodo}</span></td>
-                    <td>
+                    <td data-label="Folio"><strong>${o.folio}</strong></td>
+                    <td data-label="Cliente">${o.cliente}</td>
+                    <td data-label="Fecha">${o.fecha}</td>
+                    <td data-label="Total"><strong>S/${o.total.toFixed(2)}</strong></td>
+                    <td data-label="Método"><span class="payment-badge">${o.metodo}</span></td>
+                    <td data-label="Acciones">
                         <button class="btn-secondary btn-sm btn-view-order" data-id="${o.id}" style="padding:4px 8px; font-size:11px;">Ver Detalle</button>
                     </td>
                 </tr>
@@ -1837,7 +1837,7 @@ function renderClientsTable() {
 
             html += `
                 <tr>
-                    <td>
+                    <td data-label="Cliente">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <div class="cashier-avatar" style="background-color:var(--primary); font-size:12px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700;">
                                 ${c.nombre.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase()}
@@ -1848,11 +1848,11 @@ function renderClientsTable() {
                             </div>
                         </div>
                     </td>
-                    <td><span class="status-badge" style="background:#f1f5f9; color:#475569; font-weight:bold; font-size:11px;">${c.zona || '-'}</span></td>
-                    <td><strong>${c.telefono}</strong></td>
-                    <td><span class="ranking-qty">${purchaseCount}</span></td>
-                    <td><strong>S/${totalSpent.toFixed(2)}</strong></td>
-                    <td>
+                    <td data-label="Zona"><span class="status-badge" style="background:#f1f5f9; color:#475569; font-weight:bold; font-size:11px;">${c.zona || '-'}</span></td>
+                    <td data-label="Contacto"><strong>${c.telefono}</strong></td>
+                    <td data-label="Compras"><span class="ranking-qty">${purchaseCount}</span></td>
+                    <td data-label="Total Gastado"><strong>S/${totalSpent.toFixed(2)}</strong></td>
+                    <td data-label="Acciones">
                         <div style="display:flex; gap:8px;">
                             <button class="btn-primary btn-sm btn-edit-client" data-id="${c.id}" style="padding:6px 10px; font-size:11px;">Editar</button>
                             <button class="btn-danger-outline btn-sm btn-delete-client" data-id="${c.id}">Eliminar</button>
