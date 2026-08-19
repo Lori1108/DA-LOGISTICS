@@ -1937,6 +1937,68 @@ tr:hover td {
         grid-template-columns: none;
     }
 
+    /* Catálogo de productos: cada cigarro como tarjeta, sin scroll horizontal */
+    #products-table {
+        display: block;
+        width: 100%;
+        font-size: 12px;
+    }
+    #products-table thead {
+        display: none;
+    }
+    #products-table tbody {
+        display: block;
+        width: 100%;
+    }
+    #products-table tr {
+        display: block;
+        width: 100%;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        background-color: var(--bg-card);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 12px;
+        padding: 4px 0;
+        box-sizing: border-box;
+    }
+    #products-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 14px;
+        border: none;
+        border-bottom: 1px dashed var(--border-color);
+        text-align: right;
+        box-sizing: border-box;
+        word-break: break-word;
+    }
+    #products-table td:last-child {
+        border-bottom: none;
+    }
+    #products-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 11px;
+        color: var(--text-secondary);
+        text-align: left;
+        flex-shrink: 0;
+    }
+    #products-table td:first-child {
+        justify-content: center;
+        padding: 10px 14px 4px;
+    }
+    #products-table td:first-child::before {
+        content: none;
+    }
+    #products-table .table-thumbnail {
+        width: 52px;
+        height: 52px;
+    }
+    #products-table td[data-label="Inventario (C/P/CJ)"] .stock-badge {
+        flex-shrink: 0;
+    }
+
     /* Ocultar barra lateral en su formato vertical, hacerla barra de navegación inferior */
     .sidebar {
         position: fixed;

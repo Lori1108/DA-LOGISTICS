@@ -1175,21 +1175,21 @@ function renderCatalogTable() {
 
             html += `
                 <tr>
-                    <td>${imgHTML}</td>
-                    <td>
+                    <td data-label="Foto">${imgHTML}</td>
+                    <td data-label="Cigarro / Marca">
                         <div style="font-weight:700; font-size:14px;">${p.nombre}</div>
                         <div class="table-product-brand">${p.marca}</div>
                     </td>
-                    <td><strong>S/${p.precio_cajetilla.toFixed(2)}</strong></td>
-                    <td><strong>S/${p.precio_paquete.toFixed(2)}</strong></td>
-                    <td><strong>S/${p.precio_cajon.toFixed(2)}</strong></td>
-                    <td>
+                    <td data-label="P. Cajetilla"><strong>S/${p.precio_cajetilla.toFixed(2)}</strong></td>
+                    <td data-label="P. Paquete"><strong>S/${p.precio_paquete.toFixed(2)}</strong></td>
+                    <td data-label="P. Cajón"><strong>S/${p.precio_cajon.toFixed(2)}</strong></td>
+                    <td data-label="Inventario (C/P/CJ)">
                         <span class="stock-badge ${(parseInt(p.stock_cajetilla) || 0) === 0 ? 'stock-empty' : ((parseInt(p.stock_cajetilla) || 0) <= 5 ? 'stock-low' : 'stock-ok')}">C: ${p.stock_cajetilla || 0}</span>
                         <span class="stock-badge ${(parseInt(p.stock_paquete) || 0) === 0 ? 'stock-empty' : ((parseInt(p.stock_paquete) || 0) <= 5 ? 'stock-low' : 'stock-ok')}">P: ${p.stock_paquete || 0}</span>
                         <span class="stock-badge ${(parseInt(p.stock_cajon) || 0) === 0 ? 'stock-empty' : ((parseInt(p.stock_cajon) || 0) <= 5 ? 'stock-low' : 'stock-ok')}">CJ: ${p.stock_cajon || 0}</span>
                     </td>
-                    <td><strong>${((parseInt(p.stock_cajetilla) || 0) + ((parseInt(p.stock_paquete) || 0) * 10) + ((parseInt(p.stock_cajon) || 0) * 500)).toLocaleString()} Caj.</strong></td>
-                    <td>
+                    <td data-label="Existencias Reales (Caj.)"><strong>${((parseInt(p.stock_cajetilla) || 0) + ((parseInt(p.stock_paquete) || 0) * 10) + ((parseInt(p.stock_cajon) || 0) * 500)).toLocaleString()} Caj.</strong></td>
+                    <td data-label="Acciones">
                         <div style="display:flex; gap:8px;">
                             <button class="btn-primary btn-sm btn-edit-prod" data-id="${p.id}" style="padding:6px 10px; font-size:11px;">Editar</button>
                             <button class="btn-danger-outline btn-sm btn-delete-prod" data-id="${p.id}">Eliminar</button>
