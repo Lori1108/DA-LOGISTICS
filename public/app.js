@@ -2317,6 +2317,7 @@ if (DOM.btnModalAddToCart) {
         DOM.productModal.style.display = "none";
         renderPOS();
         renderCart();
+        openCartIfMobile();
     });
 }
 
@@ -2324,6 +2325,12 @@ if (DOM.btnModalAddToCart) {
 const mobileCartToggle = document.getElementById("btn-mobile-cart-toggle");
 const closeInvoiceDrawer = document.getElementById("btn-close-invoice-drawer");
 const invoiceSidebar = document.getElementById("invoice-sidebar");
+
+function openCartIfMobile() {
+    if (window.innerWidth <= 1024 && invoiceSidebar) {
+        invoiceSidebar.classList.add("active-drawer");
+    }
+}
 
 const toggleCart = (e) => {
     if (e) e.stopPropagation();
