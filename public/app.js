@@ -1157,9 +1157,6 @@ function renderCatalogTable() {
     const searchVal = DOM.catalogSearchInput.value.toLowerCase().trim();
     
     let filtered = products;
-    if (zoneFilter !== "") {
-        filtered = filtered.filter(c => c.zona === zoneFilter);
-    }
     if (searchVal !== "") {
         filtered = filtered.filter(p => p.nombre.toLowerCase().includes(searchVal) || p.marca.toLowerCase().includes(searchVal));
     }
