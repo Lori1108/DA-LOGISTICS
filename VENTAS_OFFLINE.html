@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA LOGISTICS - Ventas sin Internet</title>
+<style>
+    :root {
+        --primary: #1B4A96;
+        --primary-dark: #12336B;
+        --accent: #79C143;
+        --bg: #F8FAFC;
+        --card: #FFFFFF;
+        --text: #1E293B;
+        --text2: #64748B;
+        --border: #E2E8F0;
+        --success: #10B981;
+        --success-light: #ECFDF5;
+        --danger: #EF4444;
+        --danger-light: #FEF2F2;
+        --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 90px; }
+    header { background: var(--primary); color: white; padding: 14px 16px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    header h1 { font-size: 17px; font-weight: 800; }
+    header p { font-size: 11px; color: #cbd5e1; margin-top: 2px; }
+    .container { padding: 14px; max-width: 640px; margin: 0 auto; }
+    .nav-tabs { display: flex; flex-wrap: wrap; margin-bottom: 14px; background: var(--card); border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid var(--border); overflow: hidden; }
+    .nav-tab { flex: 1 1 50%; padding: 14px 6px; text-align: center; font-weight: 700; cursor: pointer; background: var(--card); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); color: var(--text2); font-size: 14px; white-space: nowrap; min-width: 0; }
+    .nav-tab:nth-child(even) { border-right: none; }
+    .nav-tab.active { border-bottom: 3px solid var(--primary); color: var(--primary); }
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card h2 { font-size: 14px; font-weight: 800; color: var(--primary); margin-bottom: 12px; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 4px; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; color: #475569; }
+    select, input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; background: #fff; }
+    select:focus, input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,74,150,0.12); }
+    .btn { border: none; border-radius: 8px; padding: 14px 16px; font-weight: 700; cursor: pointer; font-size: 15px; width: 100%; touch-action: manipulation; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+    .btn-sm { width: auto; padding: 8px 12px; font-size: 12px; }
+    .btn-group { display: flex; gap: 8px; }
+    .btn-group .btn { flex: 1; }
+
+    .product-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eef2f7; padding: 10px 0; gap: 8px; flex-wrap: wrap; }
+    .product-info { flex: 1; min-width: 0; }
+    .product-name { font-weight: 700; font-size: 13.5px; }
+    .product-meta { font-size: 11px; color: var(--text2); }
+    .product-price { color: var(--accent); font-weight: 800; font-size: 13px; }
+    .product-price-sub { font-size: 12px; font-weight: 700; color: var(--success); margin-top: 2px; }
+    .qty-control { display: flex; align-items: center; gap: 8px; }
+    .btn-qty { background: #eef2f7; border: none; width: 36px; height: 36px; border-radius: 50%; font-weight: 800; font-size: 18px; cursor: pointer; color: var(--primary); touch-action: manipulation; }
+    .btn-qty:active { background: #d8e2f0; }
+    .btn-qty-remove { background: transparent; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; font-weight: 700; cursor: pointer; color: var(--danger); touch-action: manipulation; }
+    .btn-qty-remove:active { background: #fee2e2; }
+    .qty-input { width: 56px; text-align: center; font-weight: 800; padding: 8px 4px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; }
+
+    .cart-summary { background: var(--card); padding: 10px 14px; border-top: 2px solid var(--border); position: fixed; bottom: 0; left: 0; width: 100%; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 40; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+    .total-display { font-size: 20px; font-weight: 800; color: var(--primary); }
+    .total-label { font-size: 10px; color: var(--text2); font-weight: 600; }
+    .btn-checkout { background: var(--success); color: white; border: none; padding: 14px 16px; border-radius: 24px; font-weight: 800; font-size: 14px; cursor: pointer; touch-action: manipulation; white-space: nowrap; }
+
+    .order-card { background: white; padding: 12px; margin-bottom: 10px; border-radius: var(--radius); border-left: 4px solid var(--success); box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid var(--border); border-left-width: 4px; position: relative; }
+    .order-card-header { display: flex; justify-content: space-between; font-weight: 800; margin-bottom: 4px; font-size: 13px; }
+    .order-card-date { font-size: 11px; color: #888; margin-bottom: 5px; }
+    .order-items { font-size: 12px; color: #555; margin-bottom: 10px; }
+    .btn-delete-order { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+
+    .btn-export { background: var(--success); color: white; border: none; padding: 12px 16px; border-radius: 8px; width: 100%; font-weight: 800; margin-bottom: 12px; cursor: pointer; font-size: 14px; }
+    .btn-export-alt { background: var(--primary); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: #f1f5f9; text-align: left; padding: 8px 6px; color: #475569; font-size: 11px; text-transform: uppercase; }
+    td { padding: 8px 6px; border-bottom: 1px solid #eef2f7; }
+    .table-responsive { overflow-x: auto; }
+    .empty-msg { text-align: center; color: #94a3b8; padding: 24px 0; font-size: 13px; }
+
+    .badge-method { background: var(--success-light); color: var(--success); padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+
+    .toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: none; }
+    .toast.error { background: var(--danger); }
+    .toast.show { display: block; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); display: none; align-items: center; justify-content: center; z-index: 60; padding: 16px; }
+    .modal-overlay.show { display: flex; }
+    .modal-card { background: white; border-radius: 14px; padding: 18px; width: 100%; max-width: 440px; max-height: 88vh; overflow-y: auto; }
+    .modal-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--primary); }
+    .close-x { background: transparent; border: none; font-size: 24px; cursor: pointer; float: right; color: var(--text2); }
+
+    /* Aviso para iOS: si la página se abre en la vista previa de WhatsApp/Archivos,
+       NO se ejecuta JavaScript y todo aparece "muerto". Este aviso es CSS puro y
+       se muestra aunque el script no corra. */
+    .ios-hint { display: block; background: #FEF9C3; color: #713F12; border-bottom: 1px solid #FDE68A; padding: 10px 14px; font-size: 12px; line-height: 1.5; }
+    .ios-hint b { color: #92400E; }
+    .js-ok .ios-hint { display: none; }
+    @media (min-width: 700px) { .ios-hint { display: block; } .js-ok .ios-hint { display: none; } }
+
+    /* ===== PANTALLAS GRANDES (tablet/PC): pestañas en una sola fila ===== */
+    @media (min-width: 700px) {
+        .nav-tab { flex: 1 1 auto; font-size: 14px; padding: 14px 10px; }
+        .nav-tab:nth-child(even) { border-right: 1px solid var(--border); }
+    }
+
+    /* ===== MÓVIL: todo a ancho completo legible ===== */
+    @media (max-width: 480px) {
+        header h1 { font-size: 15px; }
+        header p { font-size: 10px; }
+        .container { padding: 10px; }
+        .btn-group { flex-wrap: wrap; }
+        .btn-group .btn { flex: 1 1 100%; }
+        .cart-summary { gap: 8px; }
+        .total-display { font-size: 18px; }
+    }
+</style>
+</head>
+<body>
+<div class="ios-hint">📱 <b>¿Ves esto en WhatsApp o en Archivos de iPhone?</b> iOS ya no ejecuta archivos HTML sueltos (la vista previa QuickLook no corre JavaScript). Para usar la app en tu iPhone: 1) entra <b>bilo-pos.vercel.app/bilo-offline.html</b> en <b>Safari</b> una sola vez (con internet), 2) toca <b>Compartir → "Añadir a Pantalla de Inicio"</b> y 3) ábrela desde el icono de la pantalla: funcionará <b>sin internet</b>.</div>
+<header>
+    <h1>DA LOGISTICS · Ventas sin Internet <span id="version-badge" style="display:inline-block;background:#12336B;color:#fff;font-size:10px;padding:3px 8px;border-radius:20px;vertical-align:middle;">v3</span></h1>
+    <p>1. Vende offline · 2. SUBE PEDIDOS con "Sincronizar Offline" en tu web</p>
+</header>
+
+<div class="toast" id="toast"></div>
+
+<div class="container">
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="sale">🛒 Vender</div>
+        <div class="nav-tab" data-tab="history">📋 Pedidos (<span id="orders-count">0</span>)</div>
+        <div class="nav-tab" data-tab="products">📦 Productos</div>
+        <div class="nav-tab" data-tab="clients">👥 Clientes</div>
+    </div>
+
+    <!-- ===== VENDER ===== -->
+    <div id="view-sale" class="view-section active">
+        <div class="card">
+            <h2>1. Cliente</h2>
+            <div class="form-group">
+                <label>Zona / Localidad</label>
+                <select id="zone-select" onchange="filterClients()"></select>
+            </div>
+            <div class="form-group">
+                <label>Cliente</label>
+                <select id="client-select"></select>
+                <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="openNewClient()">➕ Cliente Nuevo</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>2. Productos</h2>
+            <button class="btn btn-primary btn-sm" style="width:100%; margin-bottom:10px;" onclick="openManualProduct()">✍️ Escribir Producto Manual</button>
+            <div id="products-list"></div>
+        </div>
+        <div class="card">
+            <h2>3. Pago</h2>
+            <div class="form-group">
+                <label>Método de Pago</label>
+                <select id="payment-method">
+                    <option value="Efectivo">💵 Efectivo</option>
+                    <option value="Yape">📱 Yape</option>
+                    <option value="Plin">📱 Plin</option>
+                    <option value="Transferencia">🏦 Transferencia</option>
+                    <option value="Tarjeta">💳 Tarjeta</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HISTORIAL ===== -->
+    <div id="view-history" class="view-section">
+        <button class="btn-export" onclick="exportSyncJSON()">🚀 SUBIR PEDIDOS A MI WEB (JSON)</button>
+        <button class="btn-export btn-export-alt" onclick="exportOrdersExcel()">📊 DESCARGAR EXCEL DE VENTAS</button>
+        <button class="btn-export" style="background:#64748b;" onclick="exportOrdersJSON()">💾 Respaldar Pedidos (JSON)</button>
+        <div id="orders-list"></div>
+        <button class="btn" style="background: var(--danger); color: white; margin-top: 16px;" onclick="clearAllOrders()">🗑️ Borrar Todos los Pedidos</button>
+    </div>
+
+    <!-- ===== PRODUCTOS ===== -->
+    <div id="view-products" class="view-section">
+        <div class="card">
+            <h2>Agregar / Editar Producto</h2>
+            <div class="form-group"><label>Nombre del Cigarro *</label><input id="p-name" placeholder="Ej. Marlboro Red"></div>
+            <div class="form-group"><label>Marca *</label><input id="p-brand" placeholder="Ej. Marlboro"></div>
+            <div class="form-group"><label>Precio Cajetilla (S/) *</label><input type="number" id="p-caj" min="0" step="0.01" value="0"></div>
+            <div class="form-group"><label>Precio Paquete (S/) (Caja de 10)</label><input type="number" id="p-paq" min="0" step="0.01" value="0"></div>
+            <div class="form-group"><label>Precio Cajón (S/) (Cartón de 500)</label><input type="number" id="p-carton" min="0" step="0.01" value="0"></div>
+            <div class="form-group"><label>Costo Cajetilla (S/) (para margen)</label><input type="number" id="p-cost" min="0" step="0.01" value="0"></div>
+            <div class="form-group"><label>Stock Cajetillas disponibles</label><input type="number" id="p-stock" min="0" value="0"></div>
+            <input type="hidden" id="p-edit-id" value="">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveProduct()" id="p-save-btn">➕ Guardar Producto</button>
+                <button class="btn btn-outline" onclick="clearProductForm()">Limpiar</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>Catálogo Actual</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Cigarro</th><th>Marca</th><th>Caj.</th><th>Acciones</th></tr></thead>
+                    <tbody id="products-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CLIENTES ===== -->
+    <div id="view-clients" class="view-section">
+        <div class="card">
+            <h2>Agregar Cliente</h2>
+            <div class="form-group"><label>Nombre Completo *</label><input id="c-name" placeholder="Ej. Juan Pérez"></div>
+            <div class="form-group"><label>Teléfono / Celular *</label><input id="c-phone" placeholder="Ej. 976857886"></div>
+            <div class="form-group"><label>Zona / Localidad</label><input id="c-zona" placeholder="Ej. BELLAVISTA"></div>
+            <div class="form-group"><label>Dirección</label><input id="c-address" placeholder="Opcional"></div>
+            <input type="hidden" id="c-edit-id" value="">
+            <button class="btn btn-primary" onclick="saveClient()">➕ Guardar Cliente</button>
+        </div>
+        <div class="card">
+            <h2>Clientes</h2>
+            <button class="btn-export" onclick="exportClientsExcel()">⬇️ DESCARGAR CLIENTES (EXCEL)</button>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Nombre</th><th>Zona</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+                    <tbody id="clients-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BARRA PAGA / TOTAL -->
+<div id="cart-summary" class="cart-summary">
+    <div>
+        <div class="total-label">Total a Cobrar</div>
+        <div class="total-display" id="cart-total">S/0.00</div>
+    </div>
+    <button class="btn-checkout" onclick="placeOrder()">✅ Guardar Pedido</button>
+</div>
+
+<!-- MODAL PRODUCTO MANUAL -->
+<div class="modal-overlay" id="modal-manual-product">
+    <div class="modal-card">
+        <button class="close-x" onclick="closeManualProduct()">✕</button>
+        <h3>✍️ Producto Manual</h3>
+        <div class="form-group"><label>Nombre del Producto *</label><input id="mp-name" placeholder="Ej. Marlboro Red"></div>
+        <div class="form-group">
+            <label>Presentación</label>
+            <select id="mp-pres">
+                <option value="cajetilla">Cajetilla</option>
+                <option value="paquete">Paquete</option>
+                <option value="cajon">Cajón</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Precio Unitario (S/) *</label><input type="number" id="mp-price" min="0" step="0.01" value="0"></div>
+        <div class="form-group"><label>Cantidad *</label><input type="number" id="mp-qty" min="1" step="1" value="1"></div>
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="addManualProduct()">➕ Agregar a la Venta</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CLIENTE NUEVO -->
+<div class="modal-overlay" id="modal-new-client">
+    <div class="modal-card">
+        <button class="close-x" onclick="closeNewClient()">✕</button>
+        <h3>🧑 Nuevo Cliente</h3>
+        <div class="form-group"><label>Nombre Completo *</label><input id="nc-name" placeholder="Ej. Juan Pérez"></div>
+        <div class="form-group"><label>Teléfono / Celular *</label><input id="nc-phone" type="tel" placeholder="Ej. 976857886"></div>
+        <div class="form-group"><label>Zona / Localidad</label><input id="nc-zona" placeholder="Ej. BELLAVISTA"></div>
+        <div class="form-group"><label>Dirección</label><input id="nc-address" placeholder="Opcional"></div>
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="saveNewClient()">✅ Guardar y Seleccionar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONFIRMACIÓN -->
+<div class="modal-overlay" id="modal-success">
+    <div class="modal-card">
+        <button class="close-x" onclick="closeSuccess()">✕</button>
+        <h3 style="color: var(--success);">✅ ¡Venta Guardada!</h3>
+        <p style="font-size: 13px; color: var(--text2); margin-bottom: 14px;">Tu pedido quedó registrado. Ve a la pestaña <strong>Pedidos</strong> para descargar el Excel.</p>
+        <button class="btn btn-primary" onclick="closeSuccess()">Continuar</button>
+    </div>
+</div>
+
+<script>
+// ===== VERSIÓN Y COMPATIBILIDAD =====
+var APP_VERSION = 'v3-movil';
+/* Si el script se ejecuta, marcamos el body como "js-ok" para ocultar el aviso de iOS.
+   Si NO se ejecuta (vista previa de iOS), el aviso permanece visible. */
+try { document.documentElement.classList.add('js-ok'); } catch (e) {}
+/* Polyfills para navegadores antiguos: si estos métodos no existen, la página muere
+   silenciosamente y "no deja hacer nada". Los definimos manualmente. */
+if (!Array.prototype.forEach) Array.prototype.forEach = function(fn, ctx){ for (var i=0;i<this.length;i++) fn.call(ctx, this[i], i, this); };
+if (!Array.prototype.map) Array.prototype.map = function(fn, ctx){ var r=[]; for (var i=0;i<this.length;i++) r.push(fn.call(ctx, this[i], i, this)); return r; };
+if (!Array.prototype.filter) Array.prototype.filter = function(fn, ctx){ var r=[]; for (var i=0;i<this.length;i++) if (fn.call(ctx, this[i], i, this)) r.push(this[i]); return r; };
+if (!Array.prototype.find) Array.prototype.find = function(fn, ctx){ for (var i=0;i<this.length;i++) if (fn.call(ctx, this[i], i, this)) return this[i]; return undefined; };
+if (!Array.prototype.findIndex) Array.prototype.findIndex = function(fn, ctx){ for (var i=0;i<this.length;i++) if (fn.call(ctx, this[i], i, this)) return i; return -1; };
+if (!Array.prototype.reduce) Array.prototype.reduce = function(fn, init){ var hasInit = arguments.length > 1; var acc = hasInit ? init : this[0]; var i = hasInit ? 0 : 1; for (; i < this.length; i++) acc = fn(acc, this[i], i, this); return acc; };
+if (!String.prototype.padStart) String.prototype.padStart = function(t, s){ s = s || '0'; var str = String(this); while (str.length < t) str = s + str; return str; };
+if (!window.NodeList) window.NodeList = function(){};
+if (window.NodeList.prototype && !window.NodeList.prototype.forEach) window.NodeList.prototype.forEach = Array.prototype.forEach;
+
+/* Muestra errores del script en pantalla (en vez de dejarla "muerta") */
+window.onerror = function(msg, src, line){
+    try {
+        var e = document.getElementById('err-banner');
+        if (!e) { e = document.createElement('div'); e.id = 'err-banner'; e.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc2626;color:#fff;padding:10px 12px;font:12px/1.4 sans-serif;white-space:pre-wrap;'; document.body.insertBefore(e, document.body.firstChild); }
+        e.textContent = '⚠ ERROR: ' + msg + ' (línea ' + line + '). ' + APP_VERSION;
+        console.error(msg, src, line);
+    } catch (err2) {}
+};
+
+// ===== DATOS INICIALES (todos en el código para uso manual) =====
+// PRODUCTOS Y CLIENTES SE INCUSTRAN AUTOMÁTICAMENTE AQUÍ
+var SEED_PRODUCTS = [];
+var SEED_CLIENTS = [{"nombre":"Cliente General","telefono":"-","zona":"GENERAL"},{"nombre":"Lorena Diaz","telefono":"976857886","zona":"GENERAL","address":"-7.062523, -76.583961"},{"nombre":"YESSY FASANANDO","zona":"CASPIZAPA","address":"CASPIZAPA"},{"nombre":"YESSENIA PEREZ  41","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"WILDER MAYORISTA  41","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"VINA 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"VILMA","zona":"CENTRO AMERICA","address":"CENTRO AMERICA"},{"nombre":"VICTORIA GARCIA","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"THRUMAN  41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"TESSY  41","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"TERESA GONSALES 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"TERESA","zona":"SAN RAFAEL","address":"Eslabon"},{"nombre":"SARITA (LAS PREVIAS) 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"SALIVITH 41","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"RUBEN CARDENAS","zona":"PORVENIR","address":"PORVENIR"},{"nombre":"RUBEN 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"ROSITA  41","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"RODANIA  41","zona":"SAN JOSÉ","address":"SAN JOSÉ"},{"nombre":"REYNER SAJAMI","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"REYNA MUNDACA","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"PINCHI MENDOZA  41","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"PACO SEGURA  41","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"OLGA URQUIA","zona":"PUERTO RICO","address":"PUERTO RICO"},{"nombre":"NORMA YSUIZA","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"NELIDAD HERNADEZ  41","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"NAYELY 41","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"MIRIAN TUANAMA  41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"MARIZOL PALACIOS","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"MARILYN GOMEZ","zona":"CASPIZAPA","address":"CASPIZAPA"},{"nombre":"MARIELA  41","zona":"SAN JOSÉ","address":"SAN JOSÉ"},{"nombre":"MARIA LILA","zona":"LIMON","address":"LIMON"},{"nombre":"MARIA HERNANDEZ  41","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"MARIA ELENA  41","zona":"PORVENIR","address":"PORVENIR"},{"nombre":"MARIA DOMINGUEZ","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"MARIA BARAHONA  41","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"MARCEVI 41","zona":"PORVENIR","address":"PORVENIR"},{"nombre":"MAGUI BAR  41","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"MAGDALENA MORI 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"LUZ IDAURA  41","zona":"PORVENIR","address":"PORVENIR"},{"nombre":"LIZ PIZARRO 41","zona":"PORVENIR","address":"PORVENIR"},{"nombre":"LUCY INGRID","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"LILIANA GUEVARA","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"LILI 2 (HERMANITAS) 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"KETY LUZ","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"KENNY VASQUEZ","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"KARINA MINIMARKET  41","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"KARINA FABIAN  41","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"JUANA PUTPAÑA","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"JOSE TERCER PISO 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"JORGE SAN JUAN 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"JESSICA AMIGA DE ERIKA","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"IRAIDA CAMPOS 41","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"INVERSIONES CASPIZAPA","zona":"CASPIZAPA","address":"CASPIZAPA"},{"nombre":"HANER 41","zona":"PUERTO RICO","address":"PUERTO RICO"},{"nombre":"GLORIA","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"GLADYS JIMENEZ 41","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"GLADYS  41","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"GEMA RENGIFO 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"FLORENTINA","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"FELICITA INFANTE  41","zona":"LIMON","address":"LIMON"},{"nombre":"FARA INFANTE  41","zona":"LIMON","address":"LIMON"},{"nombre":"ETI  41","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"EDITHA DAVILA","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"EDDY IZUISA","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"DON LEO 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"CILES RONCAL","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"CARMELA  41","zona":"SAN JOSÉ","address":"SAN JOSÉ"},{"nombre":"BENITA (2 HERMANAS) 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"BEATRIZ (BAR)","zona":"SAN HILARION","address":"SAN HILARION"},{"nombre":"ANNY FALEN","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"ANGELICA MARIA","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"ALFREDO GARCIA 41","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"ADANEY","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"ACADEMIA","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"JEYSI","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"MUYUNA BEACH","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"SULEMA","zona":"LIBERTAD","address":"LIBERTAD"},{"nombre":"MARIA","zona":"SAN RAFAEL","address":"SAN RAFAEL"},{"nombre":"HEMMLES","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"YESSENIA 3ER PISO","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"ELIZABETH POZITO","zona":"PUERTO RICO","address":"PUERTO RICO"},{"nombre":"TATIANA CARDENAS","zona":"BELLAVISTA","address":"PACHIZA"},{"nombre":"MARIA KELLY","zona":"VAINILLA","address":"VAINILLA"},{"nombre":"ENRIQUE","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"KATYA","zona":"NUEVO MUNDO","address":"NUEVO MUNDO"},{"nombre":"HERMITAÑO","zona":"NUEVO LIMA","address":"NUEVO LIMA"},{"nombre":"CARRANZA","zona":"NUEVO LIMA","address":"NUEVO LIMA"},{"nombre":"LUIS ALBERTO","zona":"NUEVO LIMA","address":"NUEVO LIMA"},{"nombre":"MARCELA MENDOZA","zona":"VALPARAISO","address":"VALPARAISO"},{"nombre":"ORFITA","zona":"VALPARAISO","address":"VALPARAISO"},{"nombre":"JANETH ( RESTAURANT LA GATA)","zona":"VALPARAISO","address":"VALPARAISO"},{"nombre":"ZOILA","zona":"LA UNION","address":"LA UNION"},{"nombre":"ISMAEL CONTRERAS","zona":"LA UNION","address":"LA UNION"},{"nombre":"ELFEREZ OLIVERA","zona":"LA UNION","address":"LA UNION"},{"nombre":"WENINGER","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"MARIA JOSEFINA","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"ROSARIO RENGIFO","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"MARIA JERMET","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"ELSA FERNANDEZ","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"VANESA","zona":"CUSCO","address":"CUSCO"},{"nombre":"AURELIA","zona":"CUSCO","address":"CUSCO"},{"nombre":"MARIA PIZANGO","zona":"CUSCO","address":"CUSCO"},{"nombre":"LLOYSI","zona":"BARRANCA","address":"BARRANCA"},{"nombre":"DITER","zona":"BARRANCA","address":"BARRANCA"},{"nombre":"DARIO SILVA","zona":"BARRANCA","address":"BARRANCA"},{"nombre":"CARLOS ALBERTO","zona":"NUEVO LIMA","address":"NUEVO LIMA"},{"nombre":"DIANA MENDOZA","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"JANETH LUNA","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"THALIA","zona":"SANTA ELENA","address":"SANTA ELENA"},{"nombre":"EMITA","zona":"SANTA ELENA","address":"SANTA ELENA"},{"nombre":"EDGAR","zona":"SANTA ELENA","address":"SANTA ELENA"},{"nombre":"LESLY VILLANUEVA","zona":"CUSCO","address":"CUSCO"},{"nombre":"COMERCIAL JAKET","zona":"CUSCO","address":"CUSCO"},{"nombre":"GINNER FLORES","zona":"NUEVO LIMA","address":"NUEVO LIMA"},{"nombre":"JAIR","zona":"NUEVO LIMA","address":"NUEVO LIMA"},{"nombre":"GUERRERPO","zona":"NUEVO LIMA","address":"NUEVO LIMA"},{"nombre":"GUILLERMO","zona":"SANTA MARTHA","address":"SANTA MARTHA"},{"nombre":"ROSMARI SAAVEDRA","zona":"NUEVO LIMA","address":"NUEVO LIMA"},{"nombre":"FABIOLA PINEDO","zona":"NUEVO LIMA","address":"NUEVO LIMA"},{"nombre":"MARIA AGUILAR","zona":"VALPARAISO","address":"VALPARAISO"},{"nombre":"LILIANA TUANAMA","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"LEIDY HOJANAMA","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"ISELA USHIÑAHUA","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"CARLOS MELENDEZ","zona":"SANTA ELENA","address":"SANTA ELENA"},{"nombre":"BERTILDA","zona":"CUSCO","address":"CUSCO"},{"nombre":"YARI VELA","zona":"BARRANCA","address":"BARRANCA"},{"nombre":"NORMA IZUISA","zona":"LA UNION","address":"LA UNION"},{"nombre":"HERCULES","zona":"VIVERES","address":"VIVERES"},{"nombre":"ERIKA","zona":"COSTA RICA","address":"COSTA RICA"},{"nombre":"CARLOS","zona":"VIVERES","address":"VIVERES"},{"nombre":"GUIPSON","zona":"PAJARILLO","address":"PAJARILLO"},{"nombre":"ESTELA MOZOMBITE","zona":"LEDOY","address":"LEDOY"},{"nombre":"MAGALI","zona":"PAJARILLO","address":"PAJARILLO"},{"nombre":"MARIANA","zona":"LEDOY","address":"LEDOY"},{"nombre":"ENARTE CORAL","zona":"COSTA RICA","address":"COSTA RICA"},{"nombre":"ESTEBAN CAMPOS","zona":"SOLEDAD","address":"SOLEDAD"},{"nombre":"JUSTINA CULQUI","zona":"SOLEDAD","address":"SOLEDAD"},{"nombre":"CARDENAS DAVILA RODOLFO","zona":"LEDOY","address":"LEDOY"},{"nombre":"TUANAMA MARGARITA","zona":"LEDOY","address":"LEDOY"},{"nombre":"RUBER VASQUEZ","zona":"LEDOY","address":"LEDOY"},{"nombre":"RODOLFO","zona":"CONSUELO","address":"Sacancche"},{"nombre":"MARIA ANGELINA","zona":"LEDOY","address":"LEDOY"},{"nombre":"MILENA","zona":"LEDOY","address":"LEDOY"},{"nombre":"LEONOR","zona":"VIVERES","address":"VIVERES"},{"nombre":"NICOLAS","zona":"VIVERES","address":"VIVERES"},{"nombre":"MARLENI","zona":"VIVERES","address":"VIVERES"},{"nombre":"LILA FLOR","zona":"PAJARILLO","address":"PAJARILLO"},{"nombre":"ROYER","zona":"VIVERES","address":"VIVERES"},{"nombre":"NIEVES","zona":"PAJARILLO","address":"PAJARILLO"},{"nombre":"DORIS","zona":"PAJARILLO","address":"PAJARILLO"},{"nombre":"SHESHIRA","zona":"LEDOY","address":"LEDOY"},{"nombre":"JACINTA NENA","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"JAIME","zona":"SAN JOSE DE JUÑAO","address":"SAN JOSE DE JUÑAO"},{"nombre":"MARIXA","zona":"PAJARILLO","address":"PAJARILLO"},{"nombre":"TULA","zona":"DOS UNIDOS","address":"DOS UNIDOS"},{"nombre":"ERICK BODEGA TAVIN","zona":"COSTA RICA","address":"COSTA RICA"},{"nombre":"BODEGA CHAPATIN","zona":"LEDOY","address":"LEDOY"},{"nombre":"Kelly Pentagrama","zona":"BELLAVISTA","address":"BELLAVISTA"},{"nombre":"Rosa Katherine","zona":"HUAYABAMBA","address":"HUAYABAMBA"},{"nombre":"Matilde Pinedo","zona":"HUAYABAMBA","address":"HUAYABAMBA"},{"nombre":"Eudoberto","zona":"HUAYABAMBA","address":"HUAYABAMBA"},{"nombre":"Pepe","zona":"QUINILLA","address":"QUINILLA"},{"nombre":"Matutino La Deboradora","zona":"QUINILLA","address":"QUINILLA"},{"nombre":"Celinda Mozombite","zona":"HUINGUILLO","address":"HUINGUILLO"},{"nombre":"Maria Maza","zona":"PACHIZA","address":"PACHIZA"},{"nombre":"Lidia Toribio","zona":"PACHIZA","address":"PACHIZA"},{"nombre":"Martha","zona":"PACHIZA","address":"PACHIZA"},{"nombre":"Olmedo","zona":"PACHIZA","address":"PACHIZA"},{"nombre":"Lourdes","zona":"PACHIZA","address":"PACHIZA"},{"nombre":"Wildoro Ruiz","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"Jorge sangama","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"ELVIRA","zona":"SANTA ROSA","address":"SANTA ROSA"},{"nombre":"GROTY","zona":"SANTA ROSA","address":"SANTA ROSA"},{"nombre":"IZAC PARDO","zona":"PUERTO CANGREJO","address":"PUERTO CANGREJO"},{"nombre":"EDWAR EMERSON","zona":"PACHIZA","address":"PACHIZA"},{"nombre":"MARINA ROJAS","zona":"PACHIZA","address":"PACHIZA"},{"nombre":"DALMITH","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"ASTERIA","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"MARIA ISABEL","zona":"HUAYABAMBA","address":"HUAYABAMBA"},{"nombre":"LIVIS GUERRA","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"ESMERALDA PIMENTEL","zona":"LA VICTORIA","address":"LA VICTORIA"},{"nombre":"LIZ","zona":"LA VICTORIA","address":"LA VICTORIA"},{"nombre":"EDISA CAMPOS","zona":"SANTA ROSA","address":"SANTA ROSA"},{"nombre":"REILI ALEXANDRA","zona":"SAN JUAN","address":"SAN JUAN"},{"nombre":"MIRTHA CHUI","zona":"SAN JUAN","address":"SAN JUAN"},{"nombre":"PEDRO FLORES","zona":"SAN JUAN","address":"SAN JUAN"},{"nombre":"CASTILLO","zona":"JUANJUICILLO","address":"Pasarraya"},{"nombre":"PEDRO CORDOVA","zona":"PUERTO CANGREJO","address":"PUERTO CANGREJO"},{"nombre":"DAVID PARDO","zona":"PUERTO CANGREJO","address":"PUERTO CANGREJO"},{"nombre":"EDUARDO","zona":"PACHIZA","address":"PACHIZA"},{"nombre":"ISABEL CAMPOS","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"BAR LA PREVIA","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"SULLY","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"COMERCIAL BARCO","zona":"HUICUNGO","address":"HUICUNGO"},{"nombre":"LUIS SAUCEDO","zona":"JUANJUI","address":"JUANJUI"},{"nombre":"VERONICA","zona":"LOS JARDINES","address":"LOS JARDINES"},{"nombre":"ENEMECIO","zona":"PERUATE","address":"PERUATE"},{"nombre":"LITA ROSELITA","zona":"PERUATE","address":"PERUATE"},{"nombre":"ERIKA MIRELLA","zona":"PERUATE","address":"PERUATE"},{"nombre":"MAURA","zona":"PERUATE","address":"PERUATE"},{"nombre":"RONALD","zona":"CENTRO AMERICA","address":"CENTRO AMERICA"},{"nombre":"YOLANDA","zona":"CENTRO AMERICA","address":"CENTRO AMERICA"},{"nombre":"JANETH","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"ROSA YMELDA","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"LOISI TAPULLIMA","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"DELIO GONZALES","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"FERNANDO TALLER","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"ADAN RAMIREZ","zona":"SAN PABLO","address":"SAN PABLO"},{"nombre":"ERICK JHOAN","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"FRITZ","zona":"FAUSA LAMISTA","address":"FAUSA LAMISTA"},{"nombre":"LILI","zona":"SANTA ROSA","address":"SANTA ROSA"},{"nombre":"GLORIOSO","zona":"SANTA ROSA","address":"SANTA ROSA"},{"nombre":"MARIA BRIGIDA","zona":"SANTA VICTORIA","address":"SANTA VICTORIA"},{"nombre":"DELIA","zona":"PERUATE","address":"PERUATE"},{"nombre":"ERWIN","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"MARIANIT","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"BERMELITH","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"RICKY FLANGER","zona":"FAUSA LAMISTA","address":"FAUSA LAMISTA"},{"nombre":"LEYLI","zona":"FAUSA LAMISTA","address":"FAUSA LAMISTA"},{"nombre":"JACKELINE HUAMAN","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"LLOY","zona":"FAUSA LAMISTA","address":"FAUSA LAMISTA"},{"nombre":"RESTOBAR ASIA","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"RODRIGUEZ","zona":"SAN PABLO","address":"SAN PABLO"},{"nombre":"FELIZA","zona":"SAN PABLO","address":"SAN PABLO"},{"nombre":"MILDRET","zona":"SAN PABLO","address":"SAN PABLO"},{"nombre":"PETIT","zona":"SAN PABLO","address":"SAN PABLO"},{"nombre":"LLOLLITH","zona":"SANTA ROSA","address":"SANTA ROSA"},{"nombre":"URIAS","zona":"SANTA MARTHA","address":"SANTA MARTHA"},{"nombre":"CIDELIT AMAZIFUEN","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"LOTY","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"TERCERO RENGIFO","zona":"CONSUELO","address":"CONSUELO"},{"nombre":"Merlin","zona":"Tingo de saposoa","address":"Tingo de saposoa"},{"nombre":"Mauro","zona":"Tingo de saposoa","address":"Tingo de saposoa"},{"nombre":"Laura","zona":"Sacancche","address":"Sacancche"},{"nombre":"Julia","zona":"Sacancche","address":"Sacancche"},{"nombre":"Leonardo Cueva","zona":"Sacancche","address":"Sacancche"},{"nombre":"Beatriz","zona":"Sacancche","address":"Sacancche"},{"nombre":"Edy","zona":"Sacancche","address":"Sacancche"},{"nombre":"Leonardo VIA","zona":"Sacancche","address":"Sacancche"},{"nombre":"Rosa Luz","zona":"Sacancche","address":"Sacancche"},{"nombre":"Juan Rengifo","zona":"Sacancche","address":"Sacancche"},{"nombre":"Delina Rengifo","zona":"Sacancche","address":"Sacancche"},{"nombre":"Holanda alvares","zona":"Eslabon","address":"Eslabon"},{"nombre":"juan lucio","zona":"Eslabon","address":"Eslabon"},{"nombre":"Wilmer Rodrigues","zona":"Eslabon","address":"Eslabon"},{"nombre":"Rober billar","zona":"Eslabon","address":"Eslabon"},{"nombre":"Teolinda","zona":"Eslabon","address":"Eslabon"},{"nombre":"Elvira Jesús","zona":"Eslabon","address":"Eslabon"},{"nombre":"Gisell","zona":"Eslabon","address":"Eslabon"},{"nombre":"karmen","zona":"Eslabon","address":"Eslabon"},{"nombre":"valvina","zona":"Eslabon","address":"Eslabon"},{"nombre":"Delina Pereira Cardenas","zona":"Eslabon","address":"Eslabon"},{"nombre":"Dante","zona":"Piscuyacu","address":"Piscuyacu"},{"nombre":"Darvin Vasquez","zona":"Piscuyacu","address":"Piscuyacu"},{"nombre":"Antonio","zona":"Saposoa","address":"Saposoa"},{"nombre":"Oscar","zona":"Saposoa","address":"Saposoa"},{"nombre":"Dora","zona":"Shima","address":"Shima"},{"nombre":"Emiterio","zona":"Saposoa","address":"Saposoa"},{"nombre":"Rosa","zona":"Saposoa","address":"Saposoa"},{"nombre":"Distribuidora Nachi","zona":"Saposoa","address":"Saposoa"},{"nombre":"Sabrina RECREO VIA","zona":"Saposoa","address":"Saposoa"},{"nombre":"Bar casa blanca","zona":"Saposoa","address":"Saposoa"},{"nombre":"Alfonsa Pérez","zona":"San Regis","address":"San Regis"},{"nombre":"Luz Maria","zona":"Tanger","address":"Tanger"},{"nombre":"lidia","zona":"Tanger","address":"Tanger"},{"nombre":"Dalila Rios","zona":"Yacusisa","address":"Yacusisa"},{"nombre":"Andy","zona":"Yacusisa","address":"Yacusisa"},{"nombre":"Willian","zona":"Pasarraya","address":"Pasarraya"},{"nombre":"Belio","zona":"Pasarraya","address":"Pasarraya"},{"nombre":"Alfonso Fasabi","zona":"Pasarraya","address":"Pasarraya"},{"nombre":"Kelita","zona":"Pasarraya","address":"Pasarraya"},{"nombre":"Deisy","zona":"Nueva Vida","address":"Nueva Vida"},{"nombre":"Noemy","zona":"Nueva Vida","address":"Nueva Vida"},{"nombre":"Malca","zona":"Nueva Vida","address":"Nueva Vida"}];
+
+var LS_PRODUCTS = 'ventas_offline_products';
+var LS_CLIENTS  = 'ventas_offline_clients';
+var LS_ORDERS   = 'ventas_offline_orders';
+
+var products, clients, orders, cart = {};
+
+// ===== ALMACENAMIENTO SEGURO (si localStorage está bloqueado usa memoria) =====
+var MEMORY_STORE = {};
+function saveLS(key, value) {
+    try { localStorage.setItem(key, value); } catch(e) { MEMORY_STORE[key] = value; }
+}
+function getLS(key) {
+    try { return localStorage.getItem(key); } catch(e) { return MEMORY_STORE[key] || null; }
+}
+function deleteLS(key) {
+    try { localStorage.removeItem(key); } catch(e) { delete MEMORY_STORE[key]; }
+}
+
+function loadLS(key, fallback) {
+    try { return JSON.parse(getLS(key)) || fallback(); } catch(e) { return fallback(); }
+}
+
+function init() {
+    try {
+        // Productos SIEMPRE vacíos: todo se escribe manual al momento de vender
+        products = [];
+        deleteLS(LS_PRODUCTS);
+        saveProducts();
+        clients  = loadLS(LS_CLIENTS,  function(){ return SEED_CLIENTS.slice(); });
+        orders   = loadLS(LS_ORDERS,   function(){ return []; });
+        buildZones();
+        filterClients();
+        renderProducts();
+        renderProductsTable();
+        renderClientsTable();
+        updateHistory();
+    } catch (err) {
+        showToast('Error al iniciar: ' + err.message, true);
+        console.error(err);
+    }
+}
+
+function showToast(msg, isError) {
+    var t = document.getElementById('toast');
+    t.className = 'toast show' + (isError ? ' error' : '');
+    t.textContent = msg;
+    setTimeout(function(){ t.className = 'toast'; }, 2500);
+}
+
+// ===== PESTAÑAS =====
+var _tabs = document.querySelectorAll('.nav-tab');
+for (var _ti = 0; _ti < _tabs.length; _ti++) {
+    _tabs[_ti].addEventListener('click', function(el){
+        return function(){
+            var _a = document.querySelectorAll('.nav-tab');
+            for (var i = 0; i < _a.length; i++) _a[i].classList.remove('active');
+            var _v = document.querySelectorAll('.view-section');
+            for (var j = 0; j < _v.length; j++) _v[j].classList.remove('active');
+            el.classList.add('active');
+            var tab = el.getAttribute('data-tab');
+            document.getElementById('view-' + tab).classList.add('active');
+            document.getElementById('cart-summary').style.display = tab === 'sale' ? 'flex' : 'none';
+        };
+    }(_tabs[_ti]));
+}
+
+// ===== CLIENTES =====
+function buildZones() {
+    var zones = [];
+    clients.forEach(function(c){ if (c.zona && zones.indexOf(c.zona) === -1) zones.push(c.zona); });
+    zones.sort();
+    var sel = document.getElementById('zone-select');
+    sel.innerHTML = '<option value="">Todas las Zonas</option>' + zones.map(function(z){ return '<option value="' + z + '">' + z + '</option>'; }).join('');
+}
+
+function filterClients() {
+    var zone = document.getElementById('zone-select').value;
+    var sel = document.getElementById('client-select');
+    var filtered = clients.slice();
+    if (zone) filtered = filtered.filter(function(c){ return c.zona === zone; });
+    filtered.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+    sel.innerHTML = '<option value="">Seleccione un cliente...</option>' +
+        filtered.map(function(c){ return '<option value="' + c.nombre + '">' + c.nombre + ' (' + (c.telefono || '-') + ')</option>'; }).join('');
+}
+
+function saveClient() {
+    var name = document.getElementById('c-name').value.trim();
+    var phone = document.getElementById('c-phone').value.trim();
+    var zona = document.getElementById('c-zona').value.trim() || 'GENERAL';
+    var address = document.getElementById('c-address').value.trim();
+    var editId = document.getElementById('c-edit-id').value;
+    if (!name || !phone) { showToast('Nombre y teléfono son obligatorios', true); return; }
+    if (editId) {
+        var c = clients.find(function(x){ return x.id === editId; });
+        if (c) { c.nombre = name; c.telefono = phone; c.zona = zona; c.address = address; }
+        showToast('Cliente actualizado');
+    } else {
+        clients.push({ id: 'c_' + Date.now(), nombre: name, telefono: phone, zona: zona, address: address });
+        showToast('Cliente agregado');
+    }
+    saveClients();
+    clearClientForm();
+    buildZones();
+    filterClients();
+    renderClientsTable();
+}
+
+function editClient(id) {
+    var c = clients.find(function(x){ return x.id === id; });
+    if (!c) return;
+    document.getElementById('c-name').value = c.nombre || '';
+    document.getElementById('c-phone').value = c.telefono || '';
+    document.getElementById('c-zona').value = c.zona || '';
+    document.getElementById('c-address').value = c.address || '';
+    document.getElementById('c-edit-id').value = c.id;
+    document.getElementById('view-clients').scrollIntoView({ behavior: 'smooth' });
+}
+
+function deleteClient(id) {
+    if (!confirm('¿Eliminar este cliente?')) return;
+    clients = clients.filter(function(x){ return x.id !== id; });
+    saveClients();
+    buildZones();
+    filterClients();
+    renderClientsTable();
+}
+
+function clearClientForm() {
+    document.getElementById('c-name').value = '';
+    document.getElementById('c-phone').value = '';
+    document.getElementById('c-zona').value = '';
+    document.getElementById('c-address').value = '';
+    document.getElementById('c-edit-id').value = '';
+}
+
+// ===== CLIENTE NUEVO (dentro de la venta) =====
+function openNewClient() {
+    document.getElementById('nc-name').value = '';
+    document.getElementById('nc-phone').value = '';
+    document.getElementById('nc-zona').value = '';
+    document.getElementById('nc-address').value = '';
+    document.getElementById('modal-new-client').classList.add('show');
+    setTimeout(function(){ document.getElementById('nc-name').focus(); }, 50);
+}
+
+function closeNewClient() {
+    document.getElementById('modal-new-client').classList.remove('show');
+}
+
+function saveNewClient() {
+    var name = document.getElementById('nc-name').value.trim();
+    var phone = document.getElementById('nc-phone').value.trim();
+    var zona = document.getElementById('nc-zona').value.trim() || 'GENERAL';
+    var address = document.getElementById('nc-address').value.trim();
+    if (!name || !phone) { showToast('Nombre y teléfono son obligatorios', true); return; }
+
+    var existing = clients.find(function(c){ return c.nombre === name && c.telefono === phone; });
+    if (!existing) {
+        existing = { id: 'c_' + Date.now(), nombre: name, telefono: phone, zona: zona, address: address };
+        clients.push(existing);
+        saveClients();
+        buildZones();
+    }
+
+    document.getElementById('zone-select').value = zona;
+    filterClients();
+    var sel = document.getElementById('client-select');
+    sel.value = name;
+    closeNewClient();
+    showToast('Cliente "' + name + '" seleccionado');
+}
+
+// ===== PRODUCTO MANUAL (escribirlo directamente al vender) =====
+function openManualProduct() {
+    document.getElementById('mp-name').value = '';
+    document.getElementById('mp-pres').value = 'cajetilla';
+    document.getElementById('mp-price').value = '0';
+    document.getElementById('mp-qty').value = '1';
+    document.getElementById('modal-manual-product').classList.add('show');
+    setTimeout(function(){ document.getElementById('mp-name').focus(); }, 50);
+}
+
+function closeManualProduct() {
+    document.getElementById('modal-manual-product').classList.remove('show');
+}
+
+function addManualProduct() {
+    var name = document.getElementById('mp-name').value.trim();
+    var pres = document.getElementById('mp-pres').value;
+    var price = parseFloat(document.getElementById('mp-price').value) || 0;
+    var qty = parseInt(document.getElementById('mp-qty').value, 10) || 1;
+    if (!name) { showToast('Ingresa el nombre del producto', true); return; }
+    if (price <= 0) { showToast('Ingresa el precio unitario', true); return; }
+
+    var key = 'manual_' + name + '_' + pres;
+    if (cart[key] === undefined) {
+        cart[key] = {
+            product: { id: 'manual_' + Date.now(), nombre: name, marca: '', costo_cajetilla: 0 },
+            presentation: pres,
+            qty: 0,
+            price: price
+        };
+    }
+    cart[key].qty += qty;
+    closeManualProduct();
+    renderProducts();
+    updateTotal();
+    showToast('Producto "' + name + '" agregado a la venta');
+}
+
+function renderClientsTable() {
+    var body = document.getElementById('clients-table');
+    if (clients.length === 0) { body.innerHTML = '<tr><td colspan="4" class="empty-msg">Sin clientes. Agrega uno arriba.</td></tr>'; return; }
+    body.innerHTML = clients.map(function(c){
+        return '<tr>' +
+            '<td style="font-weight:700;">' + (c.nombre || '-') + '</td>' +
+            '<td>' + (c.zona || '-') + '</td>' +
+            '<td>' + (c.telefono || '-') + '</td>' +
+            '<td><div class="btn-group">' +
+                '<button class="btn btn-sm btn-outline" onclick="editClient(\'' + c.id + '\')">✏️</button>' +
+                '<button class="btn btn-sm btn-outline" style="color:var(--danger);" onclick="deleteClient(\'' + c.id + '\')">🗑️</button>' +
+            '</div></td></tr>';
+    }).join('');
+}
+
+// ===== CARRITO DE LA VENTA =====
+var PRES_LABEL = { 'cajetilla': 'Cajetilla', 'paquete': 'Paquete', 'cajon': 'Cajón' };
+
+function safeCartKey(key) {
+    return encodeURIComponent(String(key)).replace(/%/g, '_');
+}
+
+function renderProducts() {
+    var list = document.getElementById('products-list');
+    var html = '';
+    var keys = Object.keys(cart);
+    keys.sort();
+    keys.forEach(function(key){
+        var it = cart[key];
+        if (!it || !it.qty) return;
+        var line = it.marca ? it.marca + ' · ' : '';
+        var k = safeCartKey(key);
+        html += '<div class="product-item">' +
+            '<div class="product-info">' +
+                '<div class="product-name">' + it.product.nombre + '</div>' +
+                '<div class="product-meta">' + line + (PRES_LABEL[it.presentation] || it.presentation) + ' · S/' + Number(it.price).toFixed(2) + ' c/u</div>' +
+                '<div class="product-price-sub">Subtotal: S/' + Number(it.qty * it.price).toFixed(2) + '</div>' +
+            '</div>' +
+            '<div class="qty-control">' +
+                '<button class="btn-qty" onclick="changeQty(\'' + k + '\', -1)">−</button>' +
+                '<input type="number" class="qty-input" id="qty-' + k + '" value="' + it.qty + '" min="0" onchange="manualQty(\'' + k + '\')">' +
+                '<button class="btn-qty" onclick="changeQty(\'' + k + '\', 1)">+</button>' +
+                '<button class="btn-qty-remove" onclick="removeFromCart(\'' + k + '\')" title="Quitar">✕</button>' +
+            '</div></div>';
+    });
+    list.innerHTML = html || '<p class="empty-msg">Sin productos. Usa "✍️ Escribir Producto Manual" o agrega en la pestaña Productos.</p>';
+}
+
+function safeCartKey(key) {
+    return encodeURIComponent(String(key)).replace(/%/g, '_');
+}
+
+function findCartKey(k) {
+    if (cart[k]) return k;
+    var real = Object.keys(cart).find(function(x){ return safeCartKey(x) === k; });
+    return real;
+}
+
+function changeQty(k, delta) {
+    var real = findCartKey(k);
+    if (!real) return;
+    cart[real].qty += delta;
+    if (cart[real].qty < 0) cart[real].qty = 0;
+    renderProducts();
+    updateTotal();
+}
+
+function manualQty(k) {
+    var real = findCartKey(k);
+    if (!real) return;
+    var el = document.getElementById('qty-' + k);
+    if (el) {
+        var val = parseInt(el.value, 10) || 0;
+        if (val < 0) val = 0;
+        cart[real].qty = val;
+        renderProducts();
+        updateTotal();
+    }
+}
+
+function removeFromCart(k) {
+    var real = findCartKey(k);
+    if (!real) return;
+    delete cart[real];
+    renderProducts();
+    updateTotal();
+}
+
+function updateTotal() {
+    var total = 0;
+    for (var key in cart) if (cart[key]) total += cart[key].qty * cart[key].price;
+    document.getElementById('cart-total').innerText = 'S/' + total.toFixed(2);
+}
+
+function saveProduct() {
+    var name = document.getElementById('p-name').value.trim();
+    var brand = document.getElementById('p-brand').value.trim();
+    var editId = document.getElementById('p-edit-id').value;
+    if (!name || !brand) { showToast('Nombre y marca son obligatorios', true); return; }
+    var p = {
+        id: editId || String(Date.now()),
+        nombre: name,
+        marca: brand,
+        descripcion: '',
+        precio_cajetilla: parseFloat(document.getElementById('p-caj').value) || 0,
+        precio_paquete: parseFloat(document.getElementById('p-paq').value) || 0,
+        precio_cajon: parseFloat(document.getElementById('p-carton').value) || 0,
+        costo_cajetilla: parseFloat(document.getElementById('p-cost').value) || 0,
+        stock_cajetilla: parseInt(document.getElementById('p-stock').value, 10) || 0,
+        stock_paquete: 0,
+        stock_cajon: 0,
+        ruta_imagen: ''
+    };
+    if (editId) {
+        var i = products.findIndex(function(x){ return x.id === editId; });
+        if (i > -1) { p.id = editId; products[i] = p; }
+        showToast('Producto actualizado');
+    } else {
+        products.push(p);
+        showToast('Producto agregado');
+    }
+    saveProducts();
+    clearProductForm();
+    renderProductsTable();
+    renderProducts();
+}
+
+function editProduct(id) {
+    var p = products.find(function(x){ return x.id === id; });
+    if (!p) return;
+    document.getElementById('p-name').value = p.nombre;
+    document.getElementById('p-brand').value = p.marca;
+    document.getElementById('p-caj').value = p.precio_cajetilla || 0;
+    document.getElementById('p-paq').value = p.precio_paquete || 0;
+    document.getElementById('p-carton').value = p.precio_cajon || 0;
+    document.getElementById('p-cost').value = p.costo_cajetilla || 0;
+    document.getElementById('p-stock').value = p.stock_cajetilla || 0;
+    document.getElementById('p-edit-id').value = p.id;
+    document.getElementById('p-save-btn').textContent = '💾 Guardar Cambios';
+    document.getElementById('view-products').scrollIntoView({ behavior: 'smooth' });
+}
+
+function deleteProduct(id) {
+    if (!confirm('¿Eliminar este producto?')) return;
+    products = products.filter(function(x){ return x.id !== id; });
+    for (var key in cart) if (key.indexOf(id + '_') === 0) delete cart[key];
+    saveProducts();
+    renderProductsTable();
+    renderProducts();
+}
+
+function clearProductForm() {
+    document.getElementById('p-name').value = '';
+    document.getElementById('p-brand').value = '';
+    document.getElementById('p-caj').value = '0';
+    document.getElementById('p-paq').value = '0';
+    document.getElementById('p-carton').value = '0';
+    document.getElementById('p-cost').value = '0';
+    document.getElementById('p-stock').value = '0';
+    document.getElementById('p-edit-id').value = '';
+    document.getElementById('p-save-btn').textContent = '➕ Guardar Producto';
+}
+
+function renderProductsTable() {
+    var body = document.getElementById('products-table');
+    if (products.length === 0) { body.innerHTML = '<tr><td colspan="4" class="empty-msg">Sin productos.</td></tr>'; return; }
+    body.innerHTML = products.map(function(p){
+        var stock = (parseInt(p.stock_cajetilla)||0) + ' Caj. + ' + (parseInt(p.stock_paquete)||0) + ' Paq. + ' + (parseInt(p.stock_cajon)||0) + ' Cj.';
+        return '<tr>' +
+            '<td style="font-weight:700;">' + p.nombre + '</td>' +
+            '<td>' + p.marca + '</td>' +
+            '<td style="white-space:nowrap;">S/' + Number(p.precio_cajetilla||0).toFixed(2) + '<br><span style="font-size:10px;color:var(--text2);">' + stock + '</span></td>' +
+            '<td><div class="btn-group">' +
+                '<button class="btn btn-sm btn-outline" onclick="editProduct(\'' + p.id + '\')">✏️</button>' +
+                '<button class="btn btn-sm btn-outline" style="color:var(--danger);" onclick="deleteProduct(\'' + p.id + '\')">🗑️</button>' +
+            '</div></td></tr>';
+    }).join('');
+}
+
+// ===== GUARDAR EN LOCALSTORAGE =====
+function saveProducts() { saveLS(LS_PRODUCTS, JSON.stringify(products)); }
+function saveClients()  { saveLS(LS_CLIENTS,  JSON.stringify(clients)); }
+function saveOrders()   { saveLS(LS_ORDERS,   JSON.stringify(orders)); }
+
+// ===== PEDIDO =====
+function placeOrder() {
+    var clientName = document.getElementById('client-select').value;
+    if (!clientName) { showToast('Seleccione un cliente', true); return; }
+
+    var items = [], total = 0;
+    for (var key in cart) {
+        var it = cart[key];
+        if (!it || it.qty <= 0) continue;
+        var sub = it.qty * it.price;
+        total += sub;
+        items.push({
+            id: it.product.id,
+            nombre: it.product.nombre,
+            marca: it.product.marca,
+            presentacion: it.presentation,
+            qty: it.qty,
+            precio: it.price,
+            costo: it.presentation === 'cajetilla' ? (it.product.costo_cajetilla || 0) : 0,
+            subtotal: sub
+        });
+    }
+    if (items.length === 0) { showToast('No ha agregado productos', true); return; }
+
+    var client = clients.find(function(c){ return c.nombre === clientName; });
+    var now = new Date();
+    var timestamp = now.getFullYear() +
+        String(now.getMonth()+1).padStart(2,'0') +
+        String(now.getDate()).padStart(2,'0') +
+        String(now.getHours()).padStart(2,'0') +
+        String(now.getMinutes()).padStart(2,'0') +
+        String(now.getSeconds()).padStart(2,'0');
+
+    var order = {
+        id: timestamp,
+        folio: 'PED-' + timestamp,
+        cliente: clientName,
+        telefono: client ? client.telefono : '-',
+        fecha: now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+        subtotal: total,
+        descuento: 0,
+        total: total,
+        metodo: document.getElementById('payment-method').value,
+        deliveryAddress: client ? (client.address || '') : '',
+        deliveryLat: '',
+        deliveryLng: '',
+        deliveryStatus: 'Pendiente',
+        items: items
+    };
+
+    orders.push(order);
+    saveOrders();
+
+    for (var k in cart) if (cart[k]) cart[k].qty = 0;
+    renderProducts();
+    updateTotal();
+    updateHistory();
+    document.getElementById('client-select').value = '';
+
+    products.forEach(function(prod){
+        items.filter(function(it){ return it.id === prod.id; }).forEach(function(it){
+            var mult = it.presentacion === 'cajon' ? 500 : (it.presentacion === 'paquete' ? 10 : 1);
+            var totalUnits = (parseInt(prod.stock_cajetilla)||0) + ((parseInt(prod.stock_paquete)||0)*10) + ((parseInt(prod.stock_cajon)||0)*500);
+            totalUnits = Math.max(0, totalUnits - it.qty * mult);
+            prod.stock_cajon = Math.floor(totalUnits / 500);
+            var rem = totalUnits % 500;
+            prod.stock_paquete = Math.floor(rem / 10);
+            prod.stock_cajetilla = rem % 10;
+        });
+    });
+    saveProducts();
+
+    document.getElementById('modal-success').classList.add('show');
+}
+
+function closeSuccess() { document.getElementById('modal-success').classList.remove('show'); }
+
+// ===== HISTORIAL =====
+function updateHistory() {
+    document.getElementById('orders-count').innerText = orders.length;
+    var list = document.getElementById('orders-list');
+    if (orders.length === 0) { list.innerHTML = '<p class="empty-msg" style="padding: 30px 0;">Aún no hay pedidos registrados.</p>'; return; }
+    var html = '';
+    orders.slice().reverse().forEach(function(o){
+        html += '<div class="order-card">' +
+            '<div class="order-card-header"><span>' + (o.cliente || '-') + '</span><span>S/' + Number(o.total).toFixed(2) + '</span></div>' +
+            '<div class="order-card-date">' + o.folio + ' · ' + (o.fecha || '') + ' · <span class="badge-method">' + o.metodo + '</span></div>' +
+            '<div class="order-items">' + (o.items || []).map(function(it){ return it.qty + 'x ' + it.nombre + ' (' + it.presentacion + ')'; }).join(', ') + '</div>' +
+            '<button class="btn-delete-order" onclick="deleteOrder(\'' + o.id + '\')">Eliminar</button>' +
+        '</div>';
+    });
+    list.innerHTML = html;
+}
+
+function deleteOrder(id) {
+    if (!confirm('¿Borrar este pedido? No se puede deshacer.')) return;
+    orders = orders.filter(function(o){ return o.id !== id; });
+    saveOrders();
+    updateHistory();
+}
+
+function clearAllOrders() {
+    if (!confirm('¿ESTÁS SEGURO? Esto borrará TODOS los pedidos.')) return;
+    orders = [];
+    saveOrders();
+    updateHistory();
+    showToast('Todos los pedidos fueron borrados');
+}
+
+// ===== DESCARGAS =====
+function downloadFile(name, content, mime) {
+    var blob = new Blob([content], { type: mime || 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 300);
+}
+
+function csvEscape(v) {
+    return String(v == null ? '' : v).replace(/;/g, ',').replace(/\n/g, ' ').replace(/\r/g, ' ');
+}
+
+function dateFile() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+// ===== ARCHIVO PARA SUBIR A TU WEB (SINCRONIZAR OFFLINE) =====
+// Formato JSON exacto que /app.js espera en "Sincronizar Offline":
+// array de pedidos como los que crea tu POS (id, folio, cliente, items, total, metodo...)
+function exportSyncJSON() {
+    if (orders.length === 0) { showToast('No hay pedidos para sincronizar', true); return; }
+    var payload = orders.map(function(o){
+        return {
+            id: o.id,
+            folio: o.folio,
+            cliente: o.cliente,
+            telefono: o.telefono,
+            fecha: o.fecha,
+            subtotal: o.subtotal,
+            descuento: o.descuento,
+            total: o.total,
+            metodo: o.metodo,
+            deliveryAddress: o.deliveryAddress || '',
+            deliveryLat: o.deliveryLat || '',
+            deliveryLng: o.deliveryLng || '',
+            deliveryStatus: o.deliveryStatus || 'Pendiente',
+            items: (o.items || []).map(function(it){
+                return {
+                    id: it.id,
+                    nombre: it.nombre,
+                    marca: it.marca || '',
+                    presentacion: it.presentacion,
+                    qty: it.qty,
+                    precio: it.precio,
+                    costo: it.costo || 0,
+                    subtotal: it.subtotal
+                };
+            })
+        };
+    });
+    downloadFile('bilo_pedidos_sync.json', JSON.stringify(payload), 'application/json');
+    showToast('Archivo de pedidos generado. Súbelo con "Sincronizar Offline"');
+}
+
+function exportOrdersExcel() {
+    if (orders.length === 0) { showToast('No hay pedidos para exportar', true); return; }
+
+    var bom = '\uFEFF';
+    var out = bom + 'HISTORIAL DE VENTAS OFF-LINE - DA LOGISTICS\r\n';
+    out += 'Fecha de Exportacion:;' + new Date().toLocaleString() + '\r\n\r\n';
+    out += 'Folio;Fecha;Cliente;Telefono;Zona;Metodo de Pago;Producto;Marca;Presentacion;Cantidad;Precio Unitario;Subtotal Item;Total Venta;Estado\r\n';
+
+    orders.forEach(function(o){
+        var cliente = clients.find(function(c){ return c.nombre === o.cliente; });
+        var zona = cliente ? (cliente.zona || '') : '';
+        (o.items || []).forEach(function(it){
+            out += csvEscape(o.folio) + ';' + csvEscape(o.fecha) + ';' + csvEscape(o.cliente) + ';' + csvEscape(o.telefono) + ';'
+                + csvEscape(zona) + ';' + csvEscape(o.metodo) + ';' + csvEscape(it.nombre) + ';' + csvEscape(it.marca || '') + ';'
+                + csvEscape(it.presentacion) + ';' + it.qty + ';' + Number(it.precio).toFixed(2) + ';' + Number(it.subtotal).toFixed(2) + ';'
+                + Number(o.total).toFixed(2) + ';' + csvEscape(o.deliveryStatus || 'Pendiente') + '\r\n';
+        });
+    });
+
+    var byMethod = {};
+    orders.forEach(function(o){ byMethod[o.metodo] = (byMethod[o.metodo] || 0) + (Number(o.total)||0); });
+    out += '\r\n=== RESUMEN POR METODO DE PAGO ===\r\n';
+    out += 'Metodo de Pago;Total Acumulado\r\n';
+    Object.keys(byMethod).forEach(function(m){ out += csvEscape(m) + ';S/' + Number(byMethod[m]).toFixed(2) + '\r\n'; });
+
+    var totalGeneral = orders.reduce(function(s,o){ return s + (Number(o.total)||0); }, 0);
+    out += '\r\nTOTAL GENERAL;S/' + Number(totalGeneral).toFixed(2) + '\r\n';
+    out += 'Cantidad de Pedidos;' + orders.length + '\r\n';
+
+    downloadFile('Ventas_Offline_' + dateFile() + '.csv', out, 'text/csv;charset=utf-8;');
+    showToast('Excel descargado');
+}
+
+function exportOrdersJSON() {
+    if (orders.length === 0) { showToast('No hay pedidos para respaldar', true); return; }
+    downloadFile('bilo_pedidos_backup_' + dateFile() + '.json', JSON.stringify(orders, null, 2), 'application/json');
+}
+
+function exportClientsExcel() {
+    if (clients.length === 0) { showToast('No hay clientes para exportar', true); return; }
+    var bom = '\uFEFF';
+    var out = bom + 'DIRECTORIO DE CLIENTES - DA LOGISTICS\r\n';
+    out += 'Fecha de Exportacion:;' + new Date().toLocaleDateString() + '\r\n\r\n';
+    out += 'Nombre;Telefono;Correo;Direccion;Compras;Total Gastado\r\n';
+    clients.forEach(function(c){
+        var compras = orders.filter(function(o){ return o.cliente === c.nombre; });
+        var total = compras.reduce(function(s,o){ return s + (Number(o.total)||0); }, 0);
+        out += csvEscape(c.nombre) + ';' + csvEscape(c.telefono) + ';;' + csvEscape(c.address || '') + ';' + compras.length + ';S/' + total.toFixed(2) + '\r\n';
+    });
+    downloadFile('Clientes_CRM_' + dateFile() + '.csv', out, 'text/csv;charset=utf-8;');
+    showToast('Clientes descargados');
+}
+
+// START
+init();
+</script>
+</body>
+</html>

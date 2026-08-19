@@ -1,0 +1,31 @@
+{
+  "name": "DA LOGISTICS - Ventas sin Internet",
+  "short_name": "DA Ventas",
+  "description": "POS offline: vende y registra pedidos sin conexión.",
+  "start_url": "/bilo-offline.html",
+  "scope": "/bilo-offline.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1B4A96",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
