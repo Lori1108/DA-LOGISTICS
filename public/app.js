@@ -2871,11 +2871,45 @@ window.handleOfflineUpload = function(event) {
     const reader = new FileReader();
     reader.onload = async function(e) {
         try {
-            const uploadedOrders = JSON.parse(e.target.result);
-            if (!Array.isArray(uploadedOrders)) throw new Error("Formato inválido.");
+            const loaded = JSON.parse(e.target.result);
+            
+            // Formato nuevo: { orders: [...], products: [...] }
+            // Formato viejo: array de pedidos directos
+            const uploadedOrders = Array.isArray(loaded) ? loaded : (Array.isArray(loaded.orders) ? loaded.orders : []);
+            const uploadedProducts = Array.isArray(loaded) ? [] : (Array.isArray(loaded.products) ? loaded.products : []);
+            
+            if (!Array.isArray(uploadedOrders) || (uploadedOrders.length === 0 && uploadedProducts.length === 0)) {
+                throw new Error("Formato inválido.");
+            }
             
             let orders = LocalDB.getOrders();
             let products = LocalDB.getProducts();
+            
+            // 1) Agregar productos nuevos que vienen del POS Offline y aún no existen en la web
+            let addedProducts = 0;
+            const newProductIds = {};
+            uploadedProducts.forEach(pr => {
+                if (pr && pr.id && !products.find(p => p.id === pr.id)) {
+                    products.push({
+                        id: pr.id,
+                        nombre: pr.nombre || "",
+                        marca: pr.marca || "",
+                        descripcion: pr.descripcion || "",
+                        precio_cajetilla: Number(pr.precio_cajetilla) || 0,
+                        costo_cajetilla: Number(pr.costo_cajetilla) || 0,
+                        precio_paquete: Number(pr.precio_paquete) || 0,
+                        costo_paquete: Number(pr.costo_paquete) || 0,
+                        precio_cajon: Number(pr.precio_cajon) || 0,
+                        costo_cajon: Number(pr.costo_cajon) || 0,
+                        stock_cajetilla: parseInt(pr.stock_cajetilla) || 0,
+                        stock_paquete: parseInt(pr.stock_paquete) || 0,
+                        stock_cajon: parseInt(pr.stock_cajon) || 0,
+                        ruta_imagen: pr.ruta_imagen || ""
+                    });
+                    newProductIds[pr.id] = true;
+                    addedProducts++;
+                }
+            });
             
             let newCount = 0;
             
@@ -2885,10 +2919,12 @@ window.handleOfflineUpload = function(event) {
                     orders.push(o);
                     newCount++;
                     
-                    // Descontar inventario
+                    // Descontar inventario SOLO de productos que ya existían en la web.
+                    // Los productos recién agregados ya vienen con su stock descontado
+                    // de las ventas hechas en el teléfono.
                     o.items.forEach(item => {
                         const prod = products.find(p => p.id === item.id);
-                        if (prod) {
+                        if (prod && !newProductIds[item.id]) {
                             let currentTotal = getProductTotalUnits(prod);
                             let qtyToDeduct = item.qty * getPresentationMultiplier(item.presentacion);
                             updateProductStockFromTotal(prod, currentTotal - qtyToDeduct);
@@ -2897,17 +2933,20 @@ window.handleOfflineUpload = function(event) {
                 }
             });
             
-            if (newCount > 0) {
+            if (newCount > 0 || addedProducts > 0) {
                 LocalDB.saveOrders(orders);
                 LocalDB.saveProducts(products);
                 if (IS_SERVER) {
                     saveAllDataToServer(products, orders, LocalDB.getClients());
                 }
-                alert(`¡Se sincronizaron ${newCount} pedidos correctamente!`);
-                renderProductsGrid();
+                let msg = `¡Se sincronizaron ${newCount} pedidos!`;
+                if (addedProducts > 0) msg += ` Se agregaron ${addedProducts} productos nuevos al catálogo.`;
+                alert(msg);
+                renderPOS();
+                renderCatalogTable();
                 if(DOM.historyTableBody) renderHistoryTable();
             } else {
-                alert('No se encontraron pedidos nuevos en el archivo.');
+                alert('No se encontraron pedidos ni productos nuevos en el archivo.');
             }
             
         } catch (err) {

@@ -845,40 +845,61 @@ function dateFile() {
 
 // ===== ARCHIVO PARA SUBIR A TU WEB (SINCRONIZAR OFFLINE) =====
 // Formato JSON exacto que /app.js espera en "Sincronizar Offline":
-// array de pedidos como los que crea tu POS (id, folio, cliente, items, total, metodo...)
+// { orders: [pedidos], products: [productos] } — la web agrega productos nuevos
+// y descuenta inventario de los pedidos.
 function exportSyncJSON() {
-    if (orders.length === 0) { showToast('No hay pedidos para sincronizar', true); return; }
-    var payload = orders.map(function(o){
-        return {
-            id: o.id,
-            folio: o.folio,
-            cliente: o.cliente,
-            telefono: o.telefono,
-            fecha: o.fecha,
-            subtotal: o.subtotal,
-            descuento: o.descuento,
-            total: o.total,
-            metodo: o.metodo,
-            deliveryAddress: o.deliveryAddress || '',
-            deliveryLat: o.deliveryLat || '',
-            deliveryLng: o.deliveryLng || '',
-            deliveryStatus: o.deliveryStatus || 'Pendiente',
-            items: (o.items || []).map(function(it){
-                return {
-                    id: it.id,
-                    nombre: it.nombre,
-                    marca: it.marca || '',
-                    presentacion: it.presentacion,
-                    qty: it.qty,
-                    precio: it.precio,
-                    costo: it.costo || 0,
-                    subtotal: it.subtotal
-                };
-            })
-        };
-    });
+    if (orders.length === 0 && products.length === 0) { showToast('No hay pedidos ni productos para sincronizar', true); return; }
+    var payload = {
+        products: products.map(function(pr){
+            return {
+                id: pr.id,
+                nombre: pr.nombre,
+                marca: pr.marca || '',
+                descripcion: pr.descripcion || '',
+                precio_cajetilla: Number(pr.precio_cajetilla) || 0,
+                costo_cajetilla: Number(pr.costo_cajetilla) || 0,
+                precio_paquete: Number(pr.precio_paquete) || 0,
+                costo_paquete: Number(pr.costo_paquete) || 0,
+                precio_cajon: Number(pr.precio_cajon) || 0,
+                costo_cajon: Number(pr.costo_cajon) || 0,
+                stock_cajetilla: parseInt(pr.stock_cajetilla, 10) || 0,
+                stock_paquete: parseInt(pr.stock_paquete, 10) || 0,
+                stock_cajon: parseInt(pr.stock_cajon, 10) || 0,
+                ruta_imagen: pr.ruta_imagen || ''
+            };
+        }),
+        orders: orders.map(function(o){
+            return {
+                id: o.id,
+                folio: o.folio,
+                cliente: o.cliente,
+                telefono: o.telefono,
+                fecha: o.fecha,
+                subtotal: o.subtotal,
+                descuento: o.descuento,
+                total: o.total,
+                metodo: o.metodo,
+                deliveryAddress: o.deliveryAddress || '',
+                deliveryLat: o.deliveryLat || '',
+                deliveryLng: o.deliveryLng || '',
+                deliveryStatus: o.deliveryStatus || 'Pendiente',
+                items: (o.items || []).map(function(it){
+                    return {
+                        id: it.id,
+                        nombre: it.nombre,
+                        marca: it.marca || '',
+                        presentacion: it.presentacion,
+                        qty: it.qty,
+                        precio: it.precio,
+                        costo: it.costo || 0,
+                        subtotal: it.subtotal
+                    };
+                })
+            };
+        })
+    };
     downloadFile('bilo_pedidos_sync.json', JSON.stringify(payload), 'application/json');
-    showToast('Archivo de pedidos generado. Súbelo con "Sincronizar Offline"');
+    showToast('Archivo generado con ' + payload.orders.length + ' pedidos y ' + payload.products.length + ' productos. Súbelo con "Sincronizar Offline"');
 }
 
 function exportOrdersExcel() {
