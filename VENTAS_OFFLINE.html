@@ -243,8 +243,14 @@
 <div class="modal-overlay" id="modal-manual-product">
     <div class="modal-card">
         <button class="close-x" onclick="closeManualProduct()">✕</button>
-        <h3>✍️ Producto Manual</h3>
-        <div class="form-group"><label>Nombre del Producto *</label><input id="mp-name" placeholder="Ej. Marlboro Red"></div>
+        <h3>✍️ Agregar Producto</h3>
+        <div class="form-group">
+            <label>Del Catálogo (opcional)</label>
+            <select id="mp-catalog" onchange="pickCatalogProduct(this)">
+                <option value="">— Elegir del catálogo —</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Nombre del Producto *</label><input id="mp-name" placeholder="Ej. Golden rojo"></div>
         <div class="form-group">
             <label>Presentación</label>
             <select id="mp-pres">
@@ -255,6 +261,7 @@
         </div>
         <div class="form-group"><label>Precio Unitario (S/) *</label><input type="number" id="mp-price" min="0" step="0.01" value="0"></div>
         <div class="form-group"><label>Cantidad *</label><input type="number" id="mp-qty" min="1" step="1" value="1"></div>
+        <input type="hidden" id="mp-edit-id" value="">
         <div class="btn-group">
             <button class="btn btn-primary" onclick="addManualProduct()">➕ Agregar a la Venta</button>
         </div>
@@ -323,6 +330,20 @@ var LS_PRODUCTS = 'ventas_offline_products';
 var LS_CLIENTS  = 'ventas_offline_clients';
 var LS_ORDERS   = 'ventas_offline_orders';
 
+// ===== CATÁLOGO FIJO: productos que SIEMPRE se venden =====
+// Los precios/stock se ajustan en la pestaña Productos (se guardan en el teléfono).
+var DEFAULT_PRODUCTS = [
+    { id: 'golden_rojo',           nombre: 'Golden rojo',           marca: 'Golden',      descripcion: '', precio_cajetilla: 0, costo_cajetilla: 0, precio_paquete: 0, costo_paquete: 0, precio_cajon: 0, costo_cajon: 0, stock_cajetilla: 0, stock_paquete: 0, stock_cajon: 0, ruta_imagen: '' },
+    { id: 'golden_verde',          nombre: 'Golden verde',          marca: 'Golden',      descripcion: '', precio_cajetilla: 0, costo_cajetilla: 0, precio_paquete: 0, costo_paquete: 0, precio_cajon: 0, costo_cajon: 0, stock_cajetilla: 0, stock_paquete: 0, stock_cajon: 0, ruta_imagen: '' },
+    { id: 'pine_mora_convertible', nombre: 'Pine mora convertible', marca: 'Pine',        descripcion: '', precio_cajetilla: 0, costo_cajetilla: 0, precio_paquete: 0, costo_paquete: 0, precio_cajon: 0, costo_cajon: 0, stock_cajetilla: 0, stock_paquete: 0, stock_cajon: 0, ruta_imagen: '' },
+    { id: 'pine_sandia_conv',      nombre: 'Pine sandía convertible', marca: 'Pine',      descripcion: '', precio_cajetilla: 0, costo_cajetilla: 0, precio_paquete: 0, costo_paquete: 0, precio_cajon: 0, costo_cajon: 0, stock_cajetilla: 0, stock_paquete: 0, stock_cajon: 0, ruta_imagen: '' },
+    { id: 'pine_mango_conv',       nombre: 'Pine mango convertible', marca: 'Pine',       descripcion: '', precio_cajetilla: 0, costo_cajetilla: 0, precio_paquete: 0, costo_paquete: 0, precio_cajon: 0, costo_cajon: 0, stock_cajetilla: 0, stock_paquete: 0, stock_cajon: 0, ruta_imagen: '' },
+    { id: 'carnival_sandia',       nombre: 'Carnival sandía',       marca: 'Carnival',    descripcion: '', precio_cajetilla: 0, costo_cajetilla: 0, precio_paquete: 0, costo_paquete: 0, precio_cajon: 0, costo_cajon: 0, stock_cajetilla: 0, stock_paquete: 0, stock_cajon: 0, ruta_imagen: '' },
+    { id: 'carnival_mango',        nombre: 'Carnival mango',        marca: 'Carnival',    descripcion: '', precio_cajetilla: 0, costo_cajetilla: 0, precio_paquete: 0, costo_paquete: 0, precio_cajon: 0, costo_cajon: 0, stock_cajetilla: 0, stock_paquete: 0, stock_cajon: 0, ruta_imagen: '' },
+    { id: 'lucky_strike_cenicero', nombre: 'Lucky strike cenicero', marca: 'Lucky Strike', descripcion: '', precio_cajetilla: 0, costo_cajetilla: 0, precio_paquete: 0, costo_paquete: 0, precio_cajon: 0, costo_cajon: 0, stock_cajetilla: 0, stock_paquete: 0, stock_cajon: 0, ruta_imagen: '' },
+    { id: 'lucky_florcita',        nombre: 'Lucky florcita',        marca: 'Lucky',       descripcion: '', precio_cajetilla: 0, costo_cajetilla: 0, precio_paquete: 0, costo_paquete: 0, precio_cajon: 0, costo_cajon: 0, stock_cajetilla: 0, stock_paquete: 0, stock_cajon: 0, ruta_imagen: '' }
+];
+
 var products, clients, orders, cart = {};
 
 // ===== ALMACENAMIENTO SEGURO (si localStorage está bloqueado usa memoria) =====
@@ -343,9 +364,17 @@ function loadLS(key, fallback) {
 
 function init() {
     try {
-        // Productos SIEMPRE vacíos: todo se escribe manual al momento de vender
-        products = [];
-        deleteLS(LS_PRODUCTS);
+        // Catálogo SIEMPRE disponible: se siembran los productos fijos (con precios/stock
+        // que el usuario ajuste) y se conservan en el teléfono. Si hay datos viejos
+        // guardados sin los fijos, se fusionan para que siempre existan.
+        products = loadLS(LS_PRODUCTS, function(){
+            return DEFAULT_PRODUCTS.map(function(p){ return JSON.parse(JSON.stringify(p)); });
+        });
+        if (!Array.isArray(products)) products = [];
+        DEFAULT_PRODUCTS.forEach(function(dp){
+            var existente = products.some(function(p){ return p && p.id === dp.id; });
+            if (!existente) products.push(JSON.parse(JSON.stringify(dp)));
+        });
         saveProducts();
         clients  = loadLS(LS_CLIENTS,  function(){ return SEED_CLIENTS.slice(); });
         orders   = loadLS(LS_ORDERS,   function(){ return []; });
@@ -492,11 +521,37 @@ function saveNewClient() {
 }
 
 // ===== PRODUCTO MANUAL (escribirlo directamente al vender) =====
+function fillCatalogSelect() {
+    var sel = document.getElementById('mp-catalog');
+    if (sel) {
+        var opts = '<option value="">— Elegir del catálogo —</option>' + products.map(function(p){
+            var label = p.nombre + (p.precio_cajetilla > 0 ? ' · S/' + Number(p.precio_cajetilla).toFixed(2) : '');
+            return '<option value="' + p.id + '">' + label + '</option>';
+        }).join('');
+        sel.innerHTML = opts;
+    }
+}
+
+function pickCatalogProduct(sel) {
+    var id = sel ? sel.value : '';
+    if (!id) return;
+    var p = products.find(function(x){ return x.id === id; });
+    if (!p) return;
+    document.getElementById('mp-name').value = p.nombre;
+    var price = parseFloat(document.getElementById('mp-price').value) || 0;
+    if (price === 0 && p.precio_cajetilla > 0) document.getElementById('mp-price').value = p.precio_cajetilla;
+    document.getElementById('mp-edit-id').value = id;
+}
+
 function openManualProduct() {
     document.getElementById('mp-name').value = '';
-    document.getElementById('mp-pres').value = 'cajetilla';
     document.getElementById('mp-price').value = '0';
     document.getElementById('mp-qty').value = '1';
+    document.getElementById('mp-pres').value = 'cajetilla';
+    document.getElementById('mp-edit-id').value = '';
+    fillCatalogSelect();
+    var sel = document.getElementById('mp-catalog');
+    if (sel) sel.value = '';
     document.getElementById('modal-manual-product').classList.add('show');
     setTimeout(function(){ document.getElementById('mp-name').focus(); }, 50);
 }
@@ -513,10 +568,13 @@ function addManualProduct() {
     if (!name) { showToast('Ingresa el nombre del producto', true); return; }
     if (price <= 0) { showToast('Ingresa el precio unitario', true); return; }
 
-    var key = 'manual_' + name + '_' + pres;
+    var catalogId = document.getElementById('mp-edit-id').value;
+    var key = (catalogId || 'manual_' + name) + '_' + pres;
     if (cart[key] === undefined) {
         cart[key] = {
-            product: { id: 'manual_' + Date.now(), nombre: name, marca: '', costo_cajetilla: 0 },
+            product: catalogId
+                ? { id: catalogId, nombre: name, marca: '', costo_cajetilla: 0 }
+                : { id: 'manual_' + Date.now(), nombre: name, marca: '', costo_cajetilla: 0 },
             presentation: pres,
             qty: 0,
             price: price
