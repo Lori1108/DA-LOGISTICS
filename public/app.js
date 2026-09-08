@@ -206,6 +206,7 @@ const DOM = {
     prodName: document.getElementById("prod-name"),
     prodBrand: document.getElementById("prod-brand"),
     prodDesc: document.getElementById("prod-desc"),
+    prodFlete: document.getElementById("prod-flete"),
     priceCajetilla: document.getElementById("price-cajetilla"),
     costCajetilla: document.getElementById("cost-cajetilla"),
     stockCajetilla: document.getElementById("stock-cajetilla"),
@@ -281,6 +282,7 @@ const DOM = {
     // Descuentos en Carrito
     discountType: document.getElementById("discount-type"),
     discountValue: document.getElementById("discount-value"),
+    fleteValue: document.getElementById("flete-value"),
     discountTotalRow: document.getElementById("discount-total-row"),
     summaryDiscount: document.getElementById("summary-discount"),
     
@@ -969,6 +971,7 @@ function placeOrder() {
             
             if (DOM.discountType) DOM.discountType.value = "none";
             if (DOM.discountValue) DOM.discountValue.value = "0";
+    if (DOM.fleteValue) DOM.fleteValue.value = "0.00";
             
             const elDate = document.getElementById("delivery-date");
             const elTime = document.getElementById("delivery-time");
@@ -1056,6 +1059,7 @@ function clearCatalogForm() {
     DOM.prodName.value = "";
     DOM.prodBrand.value = "";
     DOM.prodDesc.value = "";
+    if(DOM.prodFlete) DOM.prodFlete.value = "0.00";
     DOM.priceCajetilla.value = "0.00";
     DOM.costCajetilla.value = "0.00";
     DOM.stockCajetilla.value = "0";
@@ -1088,6 +1092,7 @@ DOM.catalogForm.addEventListener("submit", function(e) {
     const name = DOM.prodName.value.trim();
     const brand = DOM.prodBrand.value.trim();
     const desc = DOM.prodDesc.value.trim();
+        const flete = parseFloat(DOM.prodFlete ? DOM.prodFlete.value : 0) || 0;
     const pCajetilla = parseFloat(DOM.priceCajetilla.value) || 0;
     const cCajetilla = parseFloat(DOM.costCajetilla.value) || 0;
     const pPaquete = parseFloat(DOM.pricePaquete.value) || 0;
@@ -1105,6 +1110,7 @@ DOM.catalogForm.addEventListener("submit", function(e) {
         nombre: name,
         marca: brand,
         descripcion: desc,
+            flete: flete,
         precio_cajetilla: pCajetilla,
         costo_cajetilla: cCajetilla,
         precio_paquete: pPaquete,

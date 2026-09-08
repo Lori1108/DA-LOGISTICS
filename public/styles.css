@@ -1982,6 +1982,18 @@ tr:hover td {
     .catalog-list-container {
         height: auto !important;
         overflow: visible !important;
+        padding: 12px; /* reduce padding on mobile */
+    }
+    
+    .catalog-list-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .catalog-actions-row {
+        flex-wrap: wrap;
+        width: 100%;
     }
 
     .history-layout {
@@ -1994,6 +2006,15 @@ tr:hover td {
     .history-details-container {
         height: auto !important;
         overflow: visible !important;
+        padding: 12px;
+    }
+    .history-list-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .history-actions-row {
+        flex-wrap: wrap;
     }
 
     /* Ajustar Cabecera para pantallas más estrechas */
@@ -2024,7 +2045,8 @@ tr:hover td {
         overflow-x: hidden;
     }
     .table-responsive {
-        overflow-x: hidden;
+        overflow-x: auto; /* allow scroll if needed */
+        width: 100%;
     }
     .app-container {
         display: flex;
