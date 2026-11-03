@@ -1,15 +1,14 @@
+"use client";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  // Ignore TypeScript type errors during production build – safe for now.
   typescript: {
+    // Ignora errores de TypeScript en producción (no usamos TS extensivamente)
     ignoreBuildErrors: true,
   },
-  // You can add other custom config here (e.g., redirects, rewrites).
-};
-
-module.exports = {
-  ...nextConfig,
+  // Necesario para transpilar paquetes que no están pre‑compilados (google‑map‑react)
   transpilePackages: ['google-map-react'],
 };
+
+module.exports = nextConfig;
