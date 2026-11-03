@@ -2,21 +2,31 @@
   "name": "bilo-pos",
   "version": "1.0.0",
   "private": true,
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && prisma migrate deploy && node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
+    "bcryptjs": "^3.0.3",
+    "haversine-distance": "^1.2.4",
+    "leaflet": "^1.9.4",
     "next": "^14.2.14",
+    "pg": "^8.23.1",
     "react": "^18",
     "react-dom": "^18",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "prisma": "^5.20.0"
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "prisma": "^5.20.0",
+    "typescript": "7.0.2"
   }
 }

@@ -1,40 +1,35 @@
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+
+const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
-    const { username, password } = await request.json();
-
-    let role = null;
-
-    if (username === 'BILO' && password === 'lorena123') {
-      role = 'admin';
-    } else if (username === 'trabajo' && password === 'entrega123') {
-      role = 'worker';
+    const { email, password } = await request.json();
+    if (!email || !password) {
+      return NextResponse.json({ success: false, message: 'Faltan credenciales' }, { status: 400 });
     }
-
-    if (role) {
-      const response = NextResponse.json({ success: true, role });
-      
-      // Establecer la cookie de sesión (expira en 30 días)
-      response.cookies.set('bilo_auth', role, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 30, // 30 días
-        path: '/',
-      });
-      
-      return response;
-    } else {
-      return NextResponse.json(
-        { success: false, message: 'Credenciales incorrectas' },
-        { status: 401 }
-      );
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ success: false, message: 'Usuario no encontrado' }, { status: 401 });
     }
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return NextResponse.json({ success: false, message: 'Contraseña incorrecta' }, { status: 401 });
+    }
+    // Set cookie with role
+    const response = NextResponse.json({ success: true, role: user.role, name: user.name });
+    response.cookies.set('bilo_auth', user.role, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30,
+      path: '/',
+    });
+    return response;
   } catch (error) {
-    return NextResponse.json(
-      { success: false, message: 'Error procesando la solicitud' },
-      { status: 500 }
-    );
+    console.error(error);
+    return NextResponse.json({ success: false, message: 'Error interno' }, { status: 500 });
   }
 }

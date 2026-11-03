@@ -7,8 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  VENTAS
+  ENTREGAS
+  PREVENTA
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  role     Role
+  name     String
+}
+
 model StoreData {
-  id        Int      @id @default(1)
+  id        Int      @id @default(autoincrement())
   products  Json     @default("[]")
   orders    Json     @default("[]")
   clients   Json     @default("[]")

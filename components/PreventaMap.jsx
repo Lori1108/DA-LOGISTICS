@@ -1,93 +1,83 @@
+"use client";
 import React, { useEffect, useState } from 'react';
-import GoogleMapReact from 'google-map-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-// Simple marker component
-const Marker = ({ color, text }) => (
-  <div
-    style={{
-      color: '#fff',
-      background: color,
-      padding: '4px 8px',
-      borderRadius: '4px',
-      fontSize: '12px',
-      textAlign: 'center',
-    }}
-  >
-    {text}
-  </div>
-);
+// Helper to create a colored div icon
+const createDivIcon = (label, color) => {
+  const html = `
+    <div style="
+      background-color:${color};
+      width:28px;height:28px;border-radius:50%;
+      display:flex;justify-content:center;align-items:center;
+      color:white;font-weight:bold;font-size:14px;
+      border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);
+    ">${label}</div>`;
+  return L.divIcon({ html, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
+};
 
 export default function PreventaMap({ assignedIds }) {
-  const [sellerPos, setSellerPos] = useState({ lat: -12.0464, lng: -77.0428 }); // default Lima
+  const [map, setMap] = useState(null);
   const [bodegas, setBodegas] = useState([]);
 
-  // Watch seller position
+  // Initialize map once
   useEffect(() => {
-    const watcher = navigator.geolocation.watchPosition(
-      pos => {
-        setSellerPos({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      },
-      err => console.error(err),
-      { enableHighAccuracy: true, maximumAge: 10000, timeout: 6000 }
-    );
-    return () => navigator.geolocation.clearWatch(watcher);
+    const init = L.map('preventa-map', { zoomControl: false }).setView([-12.046374, -77.042793], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(init);
+    L.control.zoom({ position: 'topright' }).addTo(init);
+    setMap(init);
+    return () => {
+      init.remove();
+    };
   }, []);
 
-  // Load bodegas info (including status)
+  // Load bodegas data when assignedIds change
   useEffect(() => {
     if (!assignedIds?.length) {
       setBodegas([]);
       return;
     }
     const fetchData = async () => {
-      const res = await fetch(
-        `/api/preventa/bodegas?ids=${assignedIds.join(',')}`
-      );
+      const res = await fetch(`/api/preventa/bodegas?ids=${assignedIds.join(',')}`);
       const data = (await res.json()) || [];
       setBodegas(data);
     };
     fetchData();
   }, [assignedIds]);
 
-  const handleCheckIn = async bodegaId => {
-    const res = await fetch('/api/preventa/checks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bodegaId }),
+  // Render markers whenever map and bodegas are ready
+  useEffect(() => {
+    if (!map) return;
+    // Clear previous markers
+    map.eachLayer((layer) => {
+      if (layer instanceof L.Marker) map.removeLayer(layer);
     });
-    if (res.ok) {
-      // Refresh status
-      setBodegas(prev =>
-        prev.map(b =>
-          b.id === bodegaId ? { ...b, status: 'OFRECIDO' } : b
-        )
-      );
-    }
-  };
 
-  return (
-    <div style={{ height: '100%', width: '100%' }}>
-      <GoogleMapReact
-        bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_GMAPS_KEY }}
-        center={sellerPos}
-        defaultZoom={13}
-      >
-        {/* Seller marker */}
-        <Marker lat={sellerPos.lat} lng={sellerPos.lng} color="#0000ff" text="Yo" />
-        {/* Bodega markers */}
-        {bodegas.map(b => (
-          <Marker
-            key={b.id}
-            lat={b.lat}
-            lng={b.lng}
-            color={b.status === 'OFRECIDO' ? '#00ff00' : '#ffff00'}
-            text={b.nombre}
-            onClick={() => {
-              if (b.status !== 'OFRECIDO') handleCheckIn(b.id);
-            }}
-          />
-        ))}
-      </GoogleMapReact>
-    </div>
-  );
+    bodegas.forEach((b) => {
+      const color = b.status === 'OFRECIDO' ? '#00ff00' : '#ffff00'; // green or yellow
+      const label = b.status === 'OFRECIDO' ? '✔' : b.id;
+      const marker = L.marker([b.lat, b.lng], { icon: createDivIcon(label, color) }).addTo(map);
+      marker.bindPopup(`<b>${b.nombre}</b>`);
+      if (b.status !== 'OFRECIDO') {
+        marker.on('click', async () => {
+          // Mark as offered / visited
+          await fetch('/api/preventa/checks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bodegaId: b.id }),
+          });
+          // Update local state to reflect change
+          setBodegas((prev) =>
+            prev.map((item) =>
+              item.id === b.id ? { ...item, status: 'OFRECIDO' } : item
+            )
+          );
+        });
+      }
+    });
+  }, [map, bodegas]);
+
+  return <div id="preventa-map" style={{ height: '100%', width: '100%' }} />;
 }

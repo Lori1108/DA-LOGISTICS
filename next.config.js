@@ -7,8 +7,7 @@ const nextConfig = {
     // Ignora errores de TypeScript en producción (no usamos TS extensivamente)
     ignoreBuildErrors: true,
   },
-  // Necesario para transpilar paquetes que no están pre‑compilados (google‑map‑react)
-  transpilePackages: ['google-map-react'],
+  // google-map-react ya no se usa; se eliminó la configuración de transpilePackages
 };
 
 module.exports = nextConfig;
