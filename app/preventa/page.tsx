@@ -3,37 +3,34 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PreventaMap from '../../components/PreventaMap';
 
-// Simple API helpers – adjust endpoint names if they differ in your backend
-const fetchDistricts = async (): Promise<string[]> => {
-  const res = await fetch('/api/preventa/districts');
-  return res.ok ? await res.json() : [];
-};
-
-const fetchBodegas = async (district: string): Promise<any[]> => {
-  const res = await fetch(`/api/preventa/bodegas?district=${encodeURIComponent(district)}`);
+// Helper to fetch all bodegas (no sector filter, we filter client‑side)
+const fetchBodegas = async (): Promise<any[]> => {
+  const res = await fetch('/api/preventa/bodegas');
   return res.ok ? await res.json() : [];
 };
 
 export default function PreventaDashboard() {
-  const [districts, setDistricts] = useState<string[]>([]);
-  const [selectedDistrict, setSelectedDistrict] = useState('');
   const [bodegas, setBodegas] = useState<any[]>([]);
+  const [sectors, setSectors] = useState<string[]>([]);
+  const [selectedSector, setSelectedSector] = useState('');
   const [assigned, setAssigned] = useState<Set<number>>(new Set());
 
+  // Load bodegas once and derive the list of unique sectors
   useEffect(() => {
-    fetchDistricts().then(setDistricts);
+    fetchBodegas().then((data) => {
+      setBodegas(data);
+      const uniq = Array.from(new Set(data.map((b) => b.sector)));
+      setSectors(uniq);
+    });
   }, []);
 
-  useEffect(() => {
-    if (selectedDistrict) {
-      fetchBodegas(selectedDistrict).then(setBodegas);
-    } else {
-      setBodegas([]);
-    }
-  }, [selectedDistrict]);
+  // Apply sector filter (if any)
+  const displayed = selectedSector
+    ? bodegas.filter((b) => b.sector === selectedSector)
+    : bodegas;
 
   const toggleAssign = (id: number) => {
-    setAssigned(prev => {
+    setAssigned((prev) => {
       const copy = new Set(prev);
       if (copy.has(id)) copy.delete(id);
       else copy.add(id);
@@ -42,16 +39,17 @@ export default function PreventaDashboard() {
   };
 
   const assignAll = () => {
-    const allIds = bodegas.map(b => b.id);
+    const allIds = displayed.map((b) => b.id);
     setAssigned(new Set(allIds));
   };
 
   const saveRoute = async () => {
     const route = Array.from(assigned);
-    const res = await fetch('/api/preventa/routes', {
+    const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+    const res = await fetch('/api/preventa/assign', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bodegaIds: route }),
+      body: JSON.stringify({ bodegaIds: route, date: today }),
     });
     if (res.ok) alert('Ruta guardada');
     else alert('Error al guardar la ruta');
@@ -61,26 +59,32 @@ export default function PreventaDashboard() {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Panel Preventa</h1>
       <div className="mb-4">
-        <label className="mr-2">Distrito:</label>
+        <label className="mr-2">Sector:</label>
         <select
-          value={selectedDistrict}
-          onChange={e => setSelectedDistrict(e.target.value)}
+          value={selectedSector}
+          onChange={(e) => setSelectedSector(e.target.value)}
           className="border rounded p-1"
         >
-          <option value="">--Selecciona--</option>
-          {districts.map(d => (
-            <option key={d} value={d}>
-              {d}
+          <option value="">--Todas--</option>
+          {sectors.map((s) => (
+            <option key={s} value={s}>
+              {s}
             </option>
           ))}
         </select>
       </div>
-      {selectedDistrict && (
+      {displayed.length > 0 && (
         <>
-          <button onClick={assignAll} className="bg-blue-500 text-white px-3 py-1 rounded mr-2">
+          <button
+            onClick={assignAll}
+            className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
+          >
             Asignar todas
           </button>
-          <button onClick={saveRoute} className="bg-green-600 text-white px-3 py-1 rounded">
+          <button
+            onClick={saveRoute}
+            className="bg-green-600 text-white px-3 py-1 rounded"
+          >
             Guardar Ruta
           </button>
         </>
@@ -89,9 +93,9 @@ export default function PreventaDashboard() {
         {/* Bodegas list */}
         <div className="overflow-y-auto max-h-96 border rounded p-2">
           <h2 className="font-semibold mb-2">Bodegas</h2>
-          {bodegas.map(b => (
+          {displayed.map((b) => (
             <div key={b.id} className="flex items-center justify-between py-1 border-b">
-              <span>{b.nombre}</span>
+              <span>{b.nombre} ({b.sector})</span>
               <input
                 type="checkbox"
                 checked={assigned.has(b.id)}

@@ -27,6 +27,14 @@ export async function POST(request) {
       maxAge: 60 * 60 * 24 * 30,
       path: '/',
     });
+    // Also set user ID for later queries
+    response.cookies.set('bilo_user', String(user.id), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30,
+      path: '/',
+    });
     return response;
   } catch (error) {
     console.error(error);

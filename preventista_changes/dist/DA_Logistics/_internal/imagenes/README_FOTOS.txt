@@ -1,0 +1,1 @@
+En esta carpeta se guardarán automáticamente las fotos de los cigarros que subas desde el sistema.

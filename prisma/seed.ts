@@ -15,7 +15,7 @@ async function main() {
     create: {
       email: 'admin@bilo.com',
       password: hash,
-      role: 'admin', // ensure this matches your enum values
+      role: 'ADMIN', // matches Role enum
       name: 'Administrador',
     },
   });
@@ -27,7 +27,7 @@ async function main() {
     create: {
       email: 'preventa1@bilo.com',
       password: hash,
-      role: 'preventa',
+      role: 'PREVENTA',
       name: 'Preventista 1',
     },
   });
@@ -38,7 +38,7 @@ async function main() {
     create: {
       email: 'preventa2@bilo.com',
       password: hash,
-      role: 'preventa',
+      role: 'PREVENTA',
       name: 'Preventista 2',
     },
   });
