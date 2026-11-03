@@ -1,16 +1,17 @@
+"use client";
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import PreventaMap from '@/components/PreventaMap';
+import PreventaMap from '../../components/PreventaMap';
 
 // Simple API helpers – adjust endpoint names if they differ in your backend
-const fetchDistricts = async () => {
+const fetchDistricts = async (): Promise<string[]> => {
   const res = await fetch('/api/preventa/districts');
-  return res.ok ? res.json() : [];
+  return res.ok ? await res.json() : [];
 };
 
-const fetchBodegas = async (district: string) => {
+const fetchBodegas = async (district: string): Promise<any[]> => {
   const res = await fetch(`/api/preventa/bodegas?district=${encodeURIComponent(district)}`);
-  return res.ok ? res.json() : [];
+  return res.ok ? await res.json() : [];
 };
 
 export default function PreventaDashboard() {
@@ -59,7 +60,6 @@ export default function PreventaDashboard() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Panel Preventa</h1>
-
       <div className="mb-4">
         <label className="mr-2">Distrito:</label>
         <select
@@ -75,7 +75,6 @@ export default function PreventaDashboard() {
           ))}
         </select>
       </div>
-
       {selectedDistrict && (
         <>
           <button onClick={assignAll} className="bg-blue-500 text-white px-3 py-1 rounded mr-2">
@@ -86,7 +85,6 @@ export default function PreventaDashboard() {
           </button>
         </>
       )}
-
       <div className="grid grid-cols-2 gap-4 mt-6">
         {/* Bodegas list */}
         <div className="overflow-y-auto max-h-96 border rounded p-2">
@@ -107,7 +105,6 @@ export default function PreventaDashboard() {
           <PreventaMap assignedIds={Array.from(assigned)} />
         </div>
       </div>
-
       <div className="mt-4">
         <Link href="/">
           <a className="text-blue-600 underline">Volver al inicio</a>
