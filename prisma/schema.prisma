@@ -7,65 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  VENTAS
-  ENTREGAS
-  PREVENTA
-}
-
-model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  password String
-  role     Role
-  name     String
-  // Relations
-  routeAssignments RouteAssignment[]
-  visitChecks      VisitCheck[]
-}
-
 model StoreData {
-  id        Int      @id @default(autoincrement())
+  id        Int      @id @default(1)
   products  Json     @default("[]")
   orders    Json     @default("[]")
   clients   Json     @default("[]")
   updatedAt DateTime @updatedAt
-}
-
-// Bodega (warehouse) that a preventista can visit
-model Bodega {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  sector    String   // e.g., "Bellavista", "Bajo Biavo"
-  lat       Float
-  lng       Float
-  // Relations
-  routeAssignments RouteAssignment[]
-  visitChecks      VisitCheck[]
-}
-
-// Assignment of bodegas to a preventista for a given day
-model RouteAssignment {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  bodega      Bodega   @relation(fields: [bodegaId], references: [id])
-  bodegaId    Int
-  date        DateTime // date of the assigned route (yyyy-mm-dd)
-  @@unique([userId, bodegaId, date], name: "userId_bodegaId_date")
-}
-
-// Check‑in record when a preventista visita una bodega
-model VisitCheck {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  bodega      Bodega   @relation(fields: [bodegaId], references: [id])
-  bodegaId    Int
-  timestamp   DateTime @default(now())
-  lat         Float    // GPS coordinates at check‑in time
-  lng         Float
-  status      String   @default("OFRECIDO") // could be OFRECIDO, PENDIENTE, etc.
-  @@unique([userId, bodegaId])
 }
