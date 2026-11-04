@@ -65,11 +65,14 @@
   .pin-vendor { background: #9333ea; border: 2px solid #fff; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
 
   /* Ficha de bodega (hoja inferior) */
-  .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 600; background: #fff; border-radius: 18px 18px 0 0; box-shadow: 0 -6px 24px rgba(0,0,0,.2); padding: 14px 16px 16px; transform: translateY(110%); transition: transform .2s ease; max-height: 70%; overflow: auto; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 600; background: #fff; border-radius: 18px 18px 0 0; box-shadow: 0 -6px 24px rgba(0,0,0,.2); padding: 14px 16px 16px; transform: translateY(110%); transition: transform .2s ease; max-height: 75%; overflow: auto; }
   .sheet.show { transform: translateY(0); }
   .sheet .grab { width: 40px; height: 4px; background: #d0d6dd; border-radius: 4px; margin: 0 auto 10px; }
-  .sheet h3 { margin: 0 0 4px; font-size: 18px; }
-  .sheet .meta { color: var(--suave); font-size: 13px; margin-bottom: 10px; line-height: 1.5; }
+  .sheet h3 { margin: 0 0 6px; font-size: 18px; }
+  .sheet .meta { color: var(--suave); font-size: 13px; margin-bottom: 10px; line-height: 1.6; }
+  .client-phone-box { background: #f0f6ff; border: 1px solid #d0e2ff; border-radius: 10px; padding: 9px 12px; margin: 8px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .client-phone-box b { color: var(--azul); font-size: 14px; }
+  .client-phone-box a { background: var(--azul2); color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; white-space: nowrap; }
   .estado { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
   .estado.p { background: #fff3cd; color: #8a6400; } .estado.o { background: #dff5e6; color: #146c2e; }
   .btn { border: 0; border-radius: 10px; padding: 13px 14px; font-size: 15px; font-weight: 700; width: 100%; }
@@ -81,7 +84,7 @@
   .row2 > * { flex: 1; }
   a.btn { display: block; text-align: center; text-decoration: none; }
 
-  /* Armar ruta / Resumen */
+  /* Armar ruta / Clientes / Resumen */
   .wrap { padding: 14px; max-width: 900px; margin: 0 auto; }
   .card { background: #fff; border: 1px solid var(--borde); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
   .card h2 { font-size: 16px; margin: 0 0 10px; }
@@ -89,18 +92,21 @@
   select, input[type=text], input[type=date], input[type=search] { width: 100%; padding: 11px 12px; border: 1px solid var(--borde); border-radius: 10px; font-size: 15px; background: #fff; font-family: inherit; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .lista { list-style: none; margin: 0; padding: 0; }
-  .item { display: flex; align-items: center; gap: 10px; padding: 11px 2px; border-bottom: 1px solid var(--borde); }
+  .item { display: flex; align-items: center; gap: 10px; padding: 12px 2px; border-bottom: 1px solid var(--borde); flex-wrap: wrap; }
   .item:last-child { border-bottom: 0; }
-  .item .info { flex: 1; min-width: 0; }
-  .item .info b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item .info small { color: var(--suave); font-size: 12px; }
-  .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; margin-left: 4px; }
+  .item .info { flex: 1; min-width: 200px; }
+  .item .info b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .item .info .tel-line { display: inline-block; font-size: 13px; color: var(--azul2); font-weight: 700; margin: 2px 0; text-decoration: none; }
+  .item .info small { display: block; color: var(--suave); font-size: 12px; }
+  .item-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-top: 4px; margin-right: 4px; }
   .tag.gris { background: #eef2f6; color: var(--suave); } .tag.verde { background: #dff5e6; color: #146c2e; }
   .tag.amar { background: #fff3cd; color: #8a6400; } .tag.morado { background: #f3e8ff; color: #7e22ce; }
-  .btn-mini { border: 0; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .btn-mini { border: 0; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 700; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
   .btn-mini.add { background: #e6efff; color: var(--azul2); }
   .btn-mini.del { background: #fde8e7; color: var(--rojo); }
   .btn-mini.move { background: #f3e8ff; color: #7e22ce; }
+  .btn-mini.ok { background: #dff5e6; color: #146c2e; }
   .btn-mini.off { background: #f1f3f5; color: #9aa5b1; }
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
   .stat { background: var(--gris); border-radius: 12px; padding: 12px; }
@@ -158,23 +164,23 @@
       <button class="fab" id="btnVerTodo" title="Ver todas">🗺️</button>
     </div>
     <div class="empty-map" id="emptyMap" style="display:none">
-      <b id="emptyMsg">Aún no hay bodegas en esta ruta de hoy.</b><br><br>
-      <button class="btn btn-azul" id="btnArmarDesdeMapa" onclick="irTab('ruta')">Armar ruta ahora</button>
+      <b id="emptyMsg">Aún no hay clientes en esta ruta de hoy.</b><br><br>
+      <button class="btn btn-azul" id="btnArmarDesdeMapa" onclick="irTab('ruta')">Asignar ruta ahora</button>
     </div>
     <div class="sheet" id="ficha"></div>
   </section>
 
-  <!-- ==================== ARMAR RUTA ==================== -->
+  <!-- ==================== RUTA / CLIENTES ==================== -->
   <section class="tab" id="tab-ruta">
     <div class="wrap">
       <div class="card">
-        <h2 id="rTitulo">🧭 Armar ruta de hoy</h2>
-        <div class="grid2">
+        <h2 id="rTitulo">🧭 Ruta de hoy</h2>
+        <div class="grid2" id="gridFiltrosRuta">
           <div>
             <label class="lbl">Zona / Distrito</label>
             <select id="fZona"></select>
           </div>
-          <div>
+          <div id="boxFiltroMostrar">
             <label class="lbl">Mostrar</label>
             <select id="fMostrar">
               <option value="todas">Todas</option>
@@ -184,9 +190,9 @@
           </div>
         </div>
         <div style="margin-top:10px">
-          <input type="search" id="fBuscar" placeholder="Buscar bodega por nombre o dirección…">
+          <input type="search" id="fBuscar" placeholder="Buscar cliente por nombre, teléfono o dirección…">
         </div>
-        <div class="row2" style="margin-top:12px">
+        <div class="row2" id="boxBotonesRuta" style="margin-top:12px;display:none">
           <button class="btn btn-azul" id="btnAgregarZona">➕ Asignar todas</button>
           <button class="btn btn-rojo" id="btnQuitarZona">➖ Quitar todas</button>
         </div>
@@ -228,13 +234,13 @@
       <div class="card">
         <h2>⏱️ Registro cronológico de visitas</h2>
         <div class="tbl-wrap"><table>
-          <thead><tr><th>#</th><th>Bodega</th><th>Llegada</th><th>Check</th><th>Permanencia</th><th>Traslado</th></tr></thead>
+          <thead><tr><th>#</th><th>Cliente / Teléfono</th><th>Llegada</th><th>Check</th><th>Permanencia</th><th>Traslado</th></tr></thead>
           <tbody id="hTabla"></tbody>
         </table></div>
-        <p class="muted" style="margin:8px 0 0">La <b>llegada</b> se calcula con el GPS del celular del vendedor (punto a menos de 80 m de la bodega). Si no hay GPS, se usa la hora del check.</p>
+        <p class="muted" style="margin:8px 0 0">La <b>llegada</b> se calcula con el GPS del celular del vendedor (punto a menos de 80 m del cliente). Si no hay GPS, se usa la hora del check.</p>
       </div>
       <div class="card">
-        <h2>🟡 Bodegas pendientes (<span id="hNPend">0</span>)</h2>
+        <h2>🟡 Clientes pendientes (<span id="hNPend">0</span>)</h2>
         <ul class="lista" id="hPendientes"></ul>
       </div>
       <div class="card" id="boxCerrar" style="display:none">
@@ -253,7 +259,7 @@
 
 <nav class="bottom">
   <button data-tab="mapa" class="active"><span class="ic">🗺️</span>Mapa</button>
-  <button data-tab="ruta"><span class="ic">🧭</span>Armar ruta</button>
+  <button data-tab="ruta" id="btnNavRuta"><span class="ic">📋</span><span id="lblNavRuta">Clientes</span></button>
   <button data-tab="resumen"><span class="ic">📊</span>Resumen</button>
 </nav>
 
@@ -275,7 +281,7 @@ const S = {
   fechaSel: null,          // fecha consultada (null = hoy)
   miPos: null,             // { lat, lng, acc, t } para preventista en ruta
   ultimoGpsEnviado: null,
-  selId: null,             // bodega abierta en la ficha
+  selId: null,             // cliente abierto en la ficha
   tab: 'mapa',
 };
 const $ = (id) => document.getElementById(id);
@@ -317,7 +323,6 @@ async function api(method, body) {
     url += '?' + p.toString();
   }
   const payload = body ? { ...body } : undefined;
-  // Si admin envía acción POST, adjuntar siempre el vendedorId seleccionado
   if (payload && S.data?.esAdmin && !payload.vendedorId && S.data?.vendedor?.id) {
     payload.vendedorId = S.vendedorSel || S.data.vendedor.id;
   }
@@ -367,6 +372,7 @@ function pintarCabecera() {
   $('lblNombre').textContent = esAdmin ? 'Administrador BILO' : d.me.nombre;
   $('lblFecha').textContent = fechaBonita(d.fecha) + (d.fecha === d.hoy ? ' · hoy' : '');
   $('btnPos').style.display = esAdmin ? '' : 'none';
+  $('lblNavRuta').textContent = esAdmin ? 'Armar ruta' : 'Clientes';
 
   // Barra de selección de vendedor para Admin (BILO)
   $('adminBar').style.display = esAdmin ? 'flex' : 'none';
@@ -381,10 +387,10 @@ function pintarCabecera() {
   const b = $('banner');
   let msg = '';
   if (esAdmin) {
-    msg = `Creando / monitoreando la ruta de <b>${esc(d.vendedor.nombre)}</b> para ${esc(fechaBonita(d.fecha))}.`;
-    if (d.cerradaAt) msg += ` (Jornada cerrada a las ${hora(d.cerradaAt)})`;
+    msg = `Administrando y monitoreando la ruta de <b>${esc(d.vendedor.nombre)}</b> (${esc(fechaBonita(d.fecha))}).`;
+    if (d.cerradaAt) msg += ` · 🔒 Jornada cerrada a las ${hora(d.cerradaAt)}`;
   } else if (d.fecha !== d.hoy) {
-    msg = `Estás viendo el historial del ${esc(fechaBonita(d.fecha))}. <a onclick="volverAHoy()">Volver a hoy</a>`;
+    msg = `Estás viendo tu historial del ${esc(fechaBonita(d.fecha))}. <a onclick="volverAHoy()">Volver a hoy</a>`;
   } else if (d.cerradaAt) {
     msg = `🔒 Tu jornada de hoy fue cerrada a las ${hora(d.cerradaAt)}.`;
   }
@@ -431,6 +437,7 @@ function pintarPines() {
     hecho ? ofre++ : pend++;
     if (b.lat == null) return;
     const m = L.marker([b.lat, b.lng], { icon: icono(hecho ? 'o' : 'p', b.n, S.selId === b.id), zIndexOffset: hecho ? 0 : 500 });
+    m.bindTooltip(`${b.n}. ${b.nombre}${b.telefono ? ' · 📞 ' + b.telefono : ''}`);
     m.on('click', () => abrirFicha(b.id));
     m.addTo(capaBodegas);
   });
@@ -471,14 +478,18 @@ function pintarMapa() {
     }
   }
 
-  // Mensaje si no hay bodegas
+  // Mensaje si no hay clientes en ruta
   const empty = $('emptyMap');
   if (!lista.length) {
     empty.style.display = '';
-    $('emptyMsg').textContent = d.esAdmin
-      ? `Aún no has asignado bodegas a ${d.vendedor.nombre} para hoy.`
-      : 'Aún no tienes bodegas asignadas en tu ruta de hoy.';
-    $('btnArmarDesdeMapa').textContent = d.esAdmin ? 'Asignar bodegas ahora' : 'Ver catálogo de bodegas';
+    if (d.esAdmin) {
+      $('emptyMsg').textContent = `Aún no has asignado clientes a ${d.vendedor.nombre} para hoy.`;
+      $('btnArmarDesdeMapa').style.display = '';
+      $('btnArmarDesdeMapa').textContent = 'Asignar ruta ahora';
+    } else {
+      $('emptyMsg').textContent = 'Aún no tienes clientes asignados para hoy. El administrador asignará tu ruta.';
+      $('btnArmarDesdeMapa').style.display = 'none';
+    }
   } else {
     empty.style.display = 'none';
   }
@@ -501,7 +512,7 @@ function verTodo() {
   if (pts.length) map.fitBounds(pts, { padding: [50, 50], maxZoom: 16 });
 }
 
-// ---- Ficha de bodega ----
+// ---- Ficha de cliente/bodega (muestra Nombre y Teléfono claramente) ----
 function abrirFicha(id, soloRefrescar) {
   const d = S.data, b = d.porId.get(id);
   if (!b) return cerrarFicha();
@@ -524,24 +535,35 @@ function abrirFicha(id, soloRefrescar) {
         ? `<button class="btn btn-sec" onclick="desmarcar('${esc(id)}')">↩️ Deshacer visita (marcado por error)</button>`
         : `<button class="btn btn-check" id="btnCheck" onclick="marcar('${esc(id)}')">✅ Marcar como Ofrecido / Visitado</button>`;
     } else {
-      // Admin viendo la ficha
       acciones = chk
         ? `<button class="btn btn-sec" onclick="desmarcar('${esc(id)}')">↩️ Quitar marca de visita (Admin)</button>`
-        : `<p class="muted" style="margin:4px 0 8px">El vendedor marcará esta visita cuando esté en la bodega.</p>`;
+        : `<p class="muted" style="margin:4px 0 8px">El preventista marcará esta visita cuando llegue al cliente.</p>`;
     }
   }
+
+  const bloqueTelefono = b.telefono
+    ? `<div class="client-phone-box">
+         <div><small style="color:var(--suave);display:block;font-size:11px">TELÉFONO DEL CLIENTE</small><b>📞 ${esc(b.telefono)}</b></div>
+         <a href="tel:${esc(b.telefono)}">Llamar</a>
+       </div>`
+    : `<div class="client-phone-box">
+         <div><small style="color:var(--suave);display:block;font-size:11px">TELÉFONO DEL CLIENTE</small><b style="color:var(--suave)">Sin teléfono registrado</b></div>
+       </div>`;
 
   $('ficha').innerHTML = `
     <div class="grab"></div>
     <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
-      <h3>${n ? n + '. ' : ''}${esc(b.nombre)}</h3>
+      <div>
+        <small style="color:var(--suave);font-weight:700;font-size:11px">CLIENTE ${n ? '#' + n : ''}</small>
+        <h3>👤 ${esc(b.nombre)}</h3>
+      </div>
       <button class="btn-mini off" onclick="cerrarFicha()">✕</button>
     </div>
+    ${bloqueTelefono}
     <div class="meta">
       ${chk ? `<span class="estado o">🟢 Ofrecido · ${hora(chk.createdAt)}</span>` : `<span class="estado p">🟡 Pendiente de visita</span>`}
-      <br>📍 ${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}${dist}
-      ${b.telefono ? `<br>📞 <a href="tel:${esc(b.telefono)}">${esc(b.telefono)}</a>` : ''}
-      ${b.lat == null ? '<br>⚠️ Esta bodega no tiene coordenadas registradas' : ''}
+      <br>📍 Zona: <b>${esc(b.zona)}</b>${b.direccion ? ' · ' + esc(b.direccion) : ''}${dist}
+      ${b.lat == null ? '<br>⚠️ Este cliente no tiene coordenadas GPS registradas' : ''}
     </div>
     ${acciones}
     <div class="row2">
@@ -556,6 +578,15 @@ function cerrarFicha() {
   S.selId = null;
   $('ficha').classList.remove('show');
   if (S.data) pintarPines();
+}
+
+function verClienteEnMapa(id) {
+  const b = S.data?.porId?.get(id);
+  irTab('mapa');
+  setTimeout(() => {
+    if (b && b.lat != null) map.setView([b.lat, b.lng], 17);
+    abrirFicha(id);
+  }, 80);
 }
 
 // ---- Check-in de visita ----
@@ -575,9 +606,9 @@ async function marcar(id) {
   const d = S.data;
   const btn = $('btnCheck'); if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
   const pos = await posicionParaCheck();
-  // Cambio optimista e inmediato a verde 🟢
   d.checkPor.set(id, { bodegaId: id, createdAt: new Date().toISOString(), lat: pos?.lat, lng: pos?.lng });
-  pintarPines(); abrirFicha(id, true);
+  pintarPines();
+  if (S.selId === id) abrirFicha(id, true);
   const r = await accion(
     { action: 'check', bodegaId: id, lat: pos?.lat, lng: pos?.lng, exactitud: pos?.acc },
     pos ? '🟢 Visita registrada' : '🟢 Visita registrada (sin GPS)'
@@ -586,13 +617,13 @@ async function marcar(id) {
 }
 
 async function desmarcar(id) {
-  if (!confirm('¿Deshacer el check de esta bodega?')) return;
+  if (!confirm('¿Deshacer el check de este cliente?')) return;
   await accion({ action: 'desmarcar', bodegaId: id }, 'Check eliminado');
 }
 
 // ---- Geolocalización en vivo del preventista (watchPosition) ----
 function iniciarGPS() {
-  if (S.data?.esAdmin) return; // Admin no envía su GPS, solo consulta el de los vendedores
+  if (S.data?.esAdmin) return;
   if (!navigator.geolocation) { $('gpsStatus').innerHTML = '<span class="dot y"></span>GPS no disponible'; return; }
   navigator.geolocation.watchPosition(onPos, onPosError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 });
 }
@@ -635,15 +666,20 @@ function enviarGps(pos) {
 }
 
 // =============================================================================
-// ARMAR RUTA (BILO O PREVENTISTA)
+// PESTAÑA 2: ARMAR RUTA (SOLO ADMIN) / MIS CLIENTES (PREVENTISTA)
 // =============================================================================
 function bodegasFiltradas() {
   const d = S.data;
-  const zona = $('fZona').value, mostrar = $('fMostrar').value;
+  const zona = $('fZona').value;
+  const mostrar = d.esAdmin ? $('fMostrar').value : 'mia';
   const q = $('fBuscar').value.trim().toLowerCase();
   return d.bodegas.filter(b => {
     if (zona && b.zona !== zona) return false;
-    if (q && !(b.nombre.toLowerCase().includes(q) || b.direccion.toLowerCase().includes(q))) return false;
+    if (q && !(
+      b.nombre.toLowerCase().includes(q) ||
+      (b.telefono && b.telefono.toLowerCase().includes(q)) ||
+      b.direccion.toLowerCase().includes(q)
+    )) return false;
     if (mostrar === 'mia' && !d.enRuta.has(b.id)) return false;
     if (mostrar === 'libres' && (d.enRuta.has(b.id) || d.ocupadasSet.has(b.id))) return false;
     return true;
@@ -668,59 +704,76 @@ function pintarRuta() {
   const esAdmin = d.esAdmin;
   const puedeEditar = d.puedeEditarRuta;
 
+  // Mostrar/ocultar controles exclusivos del Administrador
+  $('boxBotonesRuta').style.display = esAdmin ? 'flex' : 'none';
+  $('boxFiltroMostrar').style.display = esAdmin ? '' : 'none';
+  $('gridFiltrosRuta').style.gridTemplateColumns = esAdmin ? '1fr 1fr' : '1fr';
+
   $('rTitulo').textContent = esAdmin
-    ? `🧭 Asignando ruta a ${d.vendedor.nombre} (${d.ruta.length} bodegas)`
-    : `🧭 Mi ruta de hoy: ${d.ruta.length} bodegas`;
+    ? `🧭 Asignar ruta a ${d.vendedor.nombre} (${d.ruta.length} clientes)`
+    : `📋 Mis clientes de hoy (${d.ruta.length})`;
 
   const lista = bodegasFiltradas();
-  const libres = lista.filter(b => !d.enRuta.has(b.id) && !d.ocupadasSet.has(b.id));
-  const mias = lista.filter(b => d.enRuta.has(b.id) && !d.checkPor.has(b.id));
-  const zonaTxt = $('fZona').value ? ' de ' + $('fZona').value : '';
 
-  $('btnAgregarZona').textContent = esAdmin
-    ? `➕ Asignar todas${zonaTxt} a ${d.vendedor.nombre} (${libres.length})`
-    : `➕ Agregar todas${zonaTxt} (${libres.length})`;
+  if (esAdmin) {
+    const libres = lista.filter(b => !d.enRuta.has(b.id) && !d.ocupadasSet.has(b.id));
+    const mias = lista.filter(b => d.enRuta.has(b.id) && !d.checkPor.has(b.id));
+    const zonaTxt = $('fZona').value ? ' de ' + $('fZona').value : '';
 
-  $('btnQuitarZona').textContent = `➖ Quitar todas (${mias.length})`;
-  $('btnAgregarZona').disabled = !puedeEditar || !libres.length;
-  $('btnQuitarZona').disabled = !puedeEditar || !mias.length;
+    $('btnAgregarZona').textContent = `➕ Asignar todas${zonaTxt} a ${d.vendedor.nombre} (${libres.length})`;
+    $('btnQuitarZona').textContent = `➖ Quitar todas (${mias.length})`;
+    $('btnAgregarZona').disabled = !puedeEditar || !libres.length;
+    $('btnQuitarZona').disabled = !puedeEditar || !mias.length;
 
-  $('rAyuda').textContent = !puedeEditar
-    ? 'Solo lectura: esta jornada está cerrada o no corresponde a hoy.'
-    : (esAdmin
-      ? `Selecciona un sector o zona y asígnalas a ${d.vendedor.nombre} con un solo clic. También puedes reasignar o sumar individuales.`
-      : 'Puedes ver las bodegas que te asignó el administrador o sumar bodegas adicionales según tu conveniencia.');
+    $('rAyuda').textContent = puedeEditar
+      ? `Selecciona una zona para asignar sus clientes a ${d.vendedor.nombre} con un clic, o asigna/quita uno por uno.`
+      : 'Esta jornada está cerrada o es de una fecha pasada (solo lectura).';
+  } else {
+    $('rAyuda').textContent = 'Lista de clientes asignados por el administrador para tu recorrido de hoy.';
+  }
 
   if (!lista.length) {
-    $('listaBodegas').innerHTML = '<li class="muted" style="padding:10px 0">No hay bodegas con ese filtro.</li>';
+    $('listaBodegas').innerHTML = `<li class="muted" style="padding:12px 0">${
+      esAdmin ? 'No hay clientes con ese filtro.' : 'No tienes clientes asignados en esta vista.'
+    }</li>`;
     return;
   }
 
   $('listaBodegas').innerHTML = lista.slice(0, 400).map(b => {
     const n = d.enRuta.get(b.id);
-    const chk = d.checkPor.has(b.id);
+    const chk = d.checkPor.get(b.id);
     const otroVendedorId = d.asigMap ? d.asigMap.get(b.id) : null;
     const estaEnOtro = d.ocupadasSet.has(b.id);
 
-    let btn = '';
-    if (chk) {
-      btn = `<button class="btn-mini off" disabled>Visitada</button>`;
-    } else if (n) {
-      btn = `<button class="btn-mini del" ${!puedeEditar ? 'disabled' : ''} onclick="quitar(['${esc(b.id)}'])">Quitar</button>`;
-    } else if (estaEnOtro) {
-      if (esAdmin) {
-        const otroNombre = d.vendedores.find(x => x.id === otroVendedorId)?.nombre || 'otro vendedor';
-        btn = `<button class="btn-mini move" ${!puedeEditar ? 'disabled' : ''} onclick="reasignar(['${esc(b.id)}'])">🔁 Pasar a ${esc(d.vendedor.nombre)}</button>`;
+    const telHtml = b.telefono
+      ? `<a class="tel-line" href="tel:${esc(b.telefono)}">📞 Tel: ${esc(b.telefono)}</a>`
+      : `<span class="tel-line" style="color:var(--suave);font-weight:500">📞 Sin teléfono</span>`;
+
+    // Botones según si es Administrador o Preventista
+    let accionesHtml = '';
+    if (esAdmin) {
+      if (chk) {
+        accionesHtml = `<button class="btn-mini off" disabled>Visitado</button>`;
+      } else if (n) {
+        accionesHtml = `<button class="btn-mini del" ${!puedeEditar ? 'disabled' : ''} onclick="quitar(['${esc(b.id)}'])">Quitar</button>`;
+      } else if (estaEnOtro) {
+        accionesHtml = `<button class="btn-mini move" ${!puedeEditar ? 'disabled' : ''} onclick="reasignar(['${esc(b.id)}'])">🔁 Pasar a ${esc(d.vendedor.nombre)}</button>`;
       } else {
-        btn = `<button class="btn-mini off" disabled>Otro vendedor</button>`;
+        accionesHtml = `<button class="btn-mini add" ${!puedeEditar ? 'disabled' : ''} onclick="agregar(['${esc(b.id)}'])">➕ Asignar</button>`;
       }
     } else {
-      btn = `<button class="btn-mini add" ${!puedeEditar ? 'disabled' : ''} onclick="agregar(['${esc(b.id)}'])">➕ Asignar</button>`;
+      // Preventista: ve teléfono, botón para ubicar en el mapa y botón de marcar visitado
+      const btnMapa = `<button class="btn-mini add" onclick="verClienteEnMapa('${esc(b.id)}')">📍 Mapa</button>`;
+      const btnLlamar = b.telefono ? `<a class="btn-mini add" href="tel:${esc(b.telefono)}">📞 Llamar</a>` : '';
+      const btnVisitar = (!chk && d.puedeMarcar)
+        ? `<button class="btn-mini ok" onclick="marcar('${esc(b.id)}')">✅ Visitado</button>`
+        : '';
+      accionesHtml = `<div class="item-actions">${btnLlamar}${btnMapa}${btnVisitar}</div>`;
     }
 
     let etiqueta = '';
-    if (chk) etiqueta = '<span class="tag verde">🟢 Visitada</span>';
-    else if (n) etiqueta = `<span class="tag amar">🟡 #${n} en ruta</span>`;
+    if (chk) etiqueta = `<span class="tag verde">🟢 Ofrecido · ${hora(chk.createdAt)}</span>`;
+    else if (n) etiqueta = `<span class="tag amar">🟡 #${n} Pendiente</span>`;
     else if (estaEnOtro && esAdmin) {
       const otroNombre = d.vendedores.find(x => x.id === otroVendedorId)?.nombre || 'otro vendedor';
       etiqueta = `<span class="tag morado">En ${esc(otroNombre)}</span>`;
@@ -728,25 +781,30 @@ function pintarRuta() {
 
     return `<li class="item">
       <div class="info">
-        <b>${n ? n + '. ' : ''}${esc(b.nombre)}</b>
-        <small>${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small>
-        ${etiqueta}
-        ${b.lat == null ? '<span class="tag gris">sin ubicación</span>' : ''}
-      </div>${btn}</li>`;
+        <b>👤 ${n ? n + '. ' : ''}${esc(b.nombre)}</b>
+        ${telHtml}
+        <small>📍 ${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small>
+        <div>
+          ${etiqueta}
+          ${b.lat == null ? '<span class="tag gris">sin coordenadas GPS</span>' : ''}
+        </div>
+      </div>
+      ${accionesHtml}
+    </li>`;
   }).join('');
 }
 
 function agregar(ids) {
   return accion({ action: 'agregar', bodegaIds: ids }, r =>
-    r.omitidas ? `✅ ${r.agregadas} asignadas (${r.omitidas} ya estaban en otra ruta)` : `✅ ${r.agregadas} bodega(s) asignadas`);
+    r.omitidas ? `✅ ${r.agregadas} asignados (${r.omitidas} ya estaban en otra ruta)` : `✅ ${r.agregadas} cliente(s) asignados`);
 }
 
 function reasignar(ids) {
-  return accion({ action: 'agregar', bodegaIds: ids, reasignar: true }, r => `✅ ${r.agregadas} bodega(s) reasignadas a ${S.data.vendedor.nombre}`);
+  return accion({ action: 'agregar', bodegaIds: ids, reasignar: true }, r => `✅ ${r.agregadas} cliente(s) reasignados a ${S.data.vendedor.nombre}`);
 }
 
 function quitar(ids) {
-  return accion({ action: 'quitar', bodegaIds: ids }, r => `Se quitaron ${r.quitadas} bodega(s) de la ruta`);
+  return accion({ action: 'quitar', bodegaIds: ids }, r => `Se quitaron ${r.quitadas} cliente(s) de la ruta`);
 }
 
 $('btnAgregarZona').onclick = () => {
@@ -758,7 +816,7 @@ $('btnAgregarZona').onclick = () => {
 $('btnQuitarZona').onclick = () => {
   const d = S.data;
   const ids = bodegasFiltradas().filter(b => d.enRuta.has(b.id) && !d.checkPor.has(b.id)).map(b => b.id);
-  if (ids.length && confirm(`¿Quitar ${ids.length} bodega(s) de la ruta de ${d.vendedor.nombre}?`)) quitar(ids);
+  if (ids.length && confirm(`¿Quitar ${ids.length} cliente(s) de la ruta de ${d.vendedor.nombre}?`)) quitar(ids);
 };
 
 ['fZona', 'fMostrar'].forEach(id => $(id).addEventListener('change', pintarRuta));
@@ -774,7 +832,7 @@ function calcularVisitas() {
   const gps = (d.gps || []).map(g => ({ lat: g.lat, lng: g.lng, t: new Date(g.createdAt).getTime() }));
   let prevT = null;
   return d.checks.map((c, i) => {
-    const b = d.porId.get(c.bodegaId) || { nombre: '(bodega)', zona: '' };
+    const b = d.porId.get(c.bodegaId) || { nombre: '(cliente)', zona: '', telefono: '' };
     const tCheck = new Date(c.createdAt).getTime();
     const ref = (b.lat != null) ? { lat: b.lat, lng: b.lng } : (c.lat != null ? { lat: c.lat, lng: c.lng } : null);
     let tLlegada = tCheck;
@@ -821,7 +879,7 @@ function pintarResumen() {
   const promMs = promedio.length ? promedio.reduce((s, v) => s + v.permanencia, 0) / promedio.length : null;
 
   $('hStats').innerHTML = [
-    ['🟢 Ofrecidas', ofre], ['🟡 Pendientes', pend], ['Total en ruta', total], ['Avance', pct + '%'],
+    ['🟢 Ofrecidos', ofre], ['🟡 Pendientes', pend], ['Total en ruta', total], ['Avance', pct + '%'],
     ['Primera visita', visitas[0] ? hora(visitas[0].c.createdAt) : '—'],
     ['Última visita', tFin ? hora(new Date(tFin).toISOString()) : '—'],
     ['Duración jornada', t0 && tFin ? dur(tFin - t0) : '—'],
@@ -832,7 +890,11 @@ function pintarResumen() {
 
   $('hTabla').innerHTML = visitas.length ? visitas.map(v => `<tr>
       <td><span class="num">${v.n}</span></td>
-      <td><b>${esc(v.b.nombre)}</b><br><small class="muted">${esc(v.b.zona || '')}${v.c.lat == null ? ' · sin GPS' : ''}</small></td>
+      <td>
+        <b>👤 ${esc(v.b.nombre)}</b><br>
+        <small style="color:var(--azul2);font-weight:700">${v.b.telefono ? '📞 ' + esc(v.b.telefono) : 'Sin teléfono'}</small>
+        <small class="muted"> · ${esc(v.b.zona || '')}${v.c.lat == null ? ' · sin GPS' : ''}</small>
+      </td>
       <td>${hora(new Date(v.tLlegada).toISOString())}</td>
       <td>${hora(v.c.createdAt)}</td>
       <td>${v.permanencia > 0 ? dur(v.permanencia) : '—'}</td>
@@ -842,10 +904,13 @@ function pintarResumen() {
   const pendientes = bodegasDeRuta().filter(b => !d.checkPor.has(b.id));
   $('hNPend').textContent = pendientes.length;
   $('hPendientes').innerHTML = pendientes.length ? pendientes.map(b =>
-    `<li class="item"><div class="info"><b>${b.n}. ${esc(b.nombre)}</b><small>${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small></div></li>`).join('')
-    : '<li class="muted" style="padding:8px 0">¡Sin pendientes! Todas las bodegas fueron visitadas 🎉</li>';
+    `<li class="item"><div class="info">
+      <b>${b.n}. 👤 ${esc(b.nombre)}</b>
+      ${b.telefono ? `<a class="tel-line" href="tel:${esc(b.telefono)}">📞 Tel: ${esc(b.telefono)}</a>` : `<span class="tel-line" style="color:var(--suave);font-weight:500">📞 Sin teléfono</span>`}
+      <small>📍 ${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small>
+    </div></li>`).join('')
+    : '<li class="muted" style="padding:8px 0">¡Sin pendientes! Todos los clientes fueron visitados 🎉</li>';
 
-  // Opciones de cerrar / reabrir jornada
   $('boxCerrar').style.display = (d.fecha === d.hoy && !d.cerradaAt) ? '' : 'none';
   $('boxReabrir').style.display = (esAdmin && d.fecha === d.hoy && !!d.cerradaAt) ? '' : 'none';
 
@@ -862,31 +927,29 @@ function pintarMapaHist(visitas, pendientes) {
   capaHist.clearLayers();
   const d = S.data, pts = [];
 
-  // Rastro GPS continuo del vendedor
   if (d.gps && d.gps.length > 1) {
     const g = d.gps.map(p => [p.lat, p.lng]);
     L.polyline(g, { color: '#7aa7e8', weight: 3, dashArray: '4 6' }).addTo(capaHist);
     pts.push(...g);
   }
 
-  // Línea cronológica entre visitas
   const conPos = visitas.filter(v => v.lat != null);
   if (conPos.length > 1) {
     L.polyline(conPos.map(v => [v.lat, v.lng]), { color: '#1b4a96', weight: 4 }).addTo(capaHist);
   }
 
-  // Pines de visitas ofrecidas con su número de orden
   conPos.forEach(v => {
     pts.push([v.lat, v.lng]);
     L.marker([v.lat, v.lng], { icon: icono('o', v.n), zIndexOffset: 1000 })
-      .bindPopup(`<b>${v.n}. ${esc(v.b.nombre)}</b><br>Llegada: ${hora(new Date(v.tLlegada).toISOString())}<br>Check: ${hora(v.c.createdAt)}`)
+      .bindPopup(`<b>${v.n}. ${esc(v.b.nombre)}</b><br>${v.b.telefono ? '📞 ' + esc(v.b.telefono) + '<br>' : ''}Llegada: ${hora(new Date(v.tLlegada).toISOString())}<br>Check: ${hora(v.c.createdAt)}`)
       .addTo(capaHist);
   });
 
-  // Pines pendientes
   pendientes.filter(b => b.lat != null).forEach(b => {
     pts.push([b.lat, b.lng]);
-    L.marker([b.lat, b.lng], { icon: icono('p', '·') }).bindPopup(`<b>${esc(b.nombre)}</b><br>Pendiente`).addTo(capaHist);
+    L.marker([b.lat, b.lng], { icon: icono('p', '·') })
+      .bindPopup(`<b>${esc(b.nombre)}</b><br>${b.telefono ? '📞 ' + esc(b.telefono) + '<br>' : ''}Pendiente`)
+      .addTo(capaHist);
   });
 
   if (pts.length) setTimeout(() => mapHist.fitBounds(pts, { padding: [30, 30], maxZoom: 16 }), 80);
@@ -905,7 +968,7 @@ $('hVendedor').addEventListener('change', () => {
 
 $('btnCerrar').onclick = () => {
   const pend = Math.max(S.data.ruta.length - S.data.checks.length, 0);
-  if (confirm(`¿Cerrar la jornada de hoy de ${S.data.vendedor.nombre}?${pend ? `\nQuedan ${pend} bodega(s) pendientes.` : ''}`)) {
+  if (confirm(`¿Cerrar la jornada de hoy de ${S.data.vendedor.nombre}?${pend ? `\nQuedan ${pend} cliente(s) pendientes.` : ''}`)) {
     accion({ action: 'cerrar' }, '🔒 Jornada cerrada');
   }
 };
@@ -961,8 +1024,6 @@ $('btnRelogin').onclick = salir;
     await cargar();
     iniciarGPS();
 
-    // Si es BILO (Admin) viendo el día de hoy: refrescar automáticamente cada 30 segundos
-    // para seguir el avance y recorrido de los preventistas en tiempo real
     setInterval(() => {
       const d = S.data;
       if (d && d.esAdmin && d.fecha === d.hoy && !document.hidden) {
