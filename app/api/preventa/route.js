@@ -4,11 +4,13 @@
 //   POST /api/preventa  { action, vendedorId, ... }
 //
 // Reglas de negocio y autorización:
-//   - SOLO el Administrador (BILO) puede crear y modificar las rutas (agregar,
-//     quitar o reasignar clientes/bodegas a cada preventista).
+//   - SOLO el Administrador (BILO) puede crear y modificar las rutas del día,
+//     y gestionar las Rutas Guardadas / Plantillas (ej. "Lunes", "Martes").
 //   - Cada Preventista (preventa1 / preventa2) SOLO visualiza los clientes
 //     asignados a su propia ruta (con nombre, teléfono, zona y ubicación),
-//     marca sus visitas (Ofrecido / Visitado) y transmite su recorrido GPS.
+//     marca sus visitas (Ofrecido / Visitado), transmite su recorrido GPS,
+//     y puede agregar/actualizar el número de teléfono de sus clientes
+//     (actualizándose en todo el sistema: POS, Clientes, Pedidos, Entregas y Preventa).
 // =============================================================================
 import { NextResponse } from 'next/server';
 import {
@@ -18,6 +20,7 @@ import {
   VENDEDORES,
   hoyLima,
   getBodegas,
+  actualizarTelefonoCliente,
 } from '../../../lib/preventa';
 
 export const dynamic = 'force-dynamic';
@@ -40,7 +43,7 @@ function idsValidos(lista, bodegasPorId) {
 }
 
 // -----------------------------------------------------------------------------
-// GET: jornada de un vendedor en una fecha
+// GET: jornada de un vendedor en una fecha (+ rutas guardadas para el admin)
 // -----------------------------------------------------------------------------
 export async function GET(request) {
   try {
@@ -62,7 +65,7 @@ export async function GET(request) {
       vendedorId = VENDEDORES[pedido] ? pedido : Object.keys(VENDEDORES)[0];
     }
 
-    const [todasBodegas, ruta, ocupadasRaw, checks, gps, jornada] = await Promise.all([
+    const [todasBodegas, ruta, ocupadasRaw, checks, gps, jornada, plantillasRaw] = await Promise.all([
       getBodegas(),
       prisma.$queryRaw`
         SELECT bodega_id AS "bodegaId", orden FROM preventa_ruta
@@ -85,6 +88,12 @@ export async function GET(request) {
       prisma.$queryRaw`
         SELECT cerrada_at AS "cerradaAt" FROM preventa_jornada
         WHERE vendedor_id = ${vendedorId} AND fecha = ${fecha}`,
+      esAdmin
+        ? prisma.$queryRaw`
+            SELECT id, nombre, bodega_ids AS "bodegaIds", updated_at AS "updatedAt"
+            FROM preventa_plantilla
+            ORDER BY id ASC`
+        : Promise.resolve([]),
     ]);
 
     const cerradaAt = jornada[0]?.cerradaAt || null;
@@ -106,6 +115,19 @@ export async function GET(request) {
       ? ocupadasRaw.filter((r) => r.vendedorId !== vendedorId).map((r) => r.bodegaId)
       : [];
 
+    // Normalizar plantillas (rutas guardadas)
+    const idsExistentes = new Set(todasBodegas.map((b) => b.id));
+    const plantillas = esAdmin
+      ? plantillasRaw.map((p) => ({
+          id: p.id,
+          nombre: p.nombre,
+          bodegaIds: Array.isArray(p.bodegaIds)
+            ? p.bodegaIds.map(String).filter((id) => idsExistentes.has(id))
+            : [],
+          updatedAt: p.updatedAt,
+        }))
+      : [];
+
     return NextResponse.json({
       me: { role: ses.role, vendedorId: ses.vendedorId, nombre: ses.nombre },
       vendedor: { id: vendedorId, nombre: VENDEDORES[vendedorId].nombre },
@@ -123,6 +145,7 @@ export async function GET(request) {
       ruta,
       ocupadas: ocupadasPorOtro,
       asignaciones: esAdmin ? asignaciones : undefined,
+      plantillas: esAdmin ? plantillas : undefined,
       checks,
       gps,
     });
@@ -133,7 +156,7 @@ export async function GET(request) {
 }
 
 // -----------------------------------------------------------------------------
-// POST: acciones sobre la jornada de hoy
+// POST: acciones sobre la jornada, teléfono de clientes y rutas guardadas
 // -----------------------------------------------------------------------------
 export async function POST(request) {
   try {
@@ -159,6 +182,95 @@ export async function POST(request) {
 
     const fecha = hoyLima();
 
+    // ---- Actualizar teléfono de un cliente (permitido a Preventista en su ruta y a Admin) ----
+    if (body.action === 'telefono') {
+      const id = String(body.bodegaId || '').trim();
+      if (!id) return err(400, 'Falta el cliente');
+      if (!esAdmin) {
+        const asignada = await prisma.$queryRaw`
+          SELECT 1 FROM preventa_ruta WHERE vendedor_id = ${v} AND bodega_id = ${id} LIMIT 1`;
+        if (!asignada.length) {
+          return err(403, 'Solo puedes actualizar el teléfono de clientes asignados a tu ruta');
+        }
+      }
+      const resTel = await actualizarTelefonoCliente(id, body.telefono);
+      return NextResponse.json({ ok: true, ...resTel });
+    }
+
+    // ---- Gestión de Rutas Guardadas / Plantillas (SOLO ADMINISTRADOR) ----
+    if (body.action === 'crear_plantilla') {
+      if (!esAdmin) return err(403, 'Solo el administrador puede guardar rutas');
+      const nombre = String(body.nombre || '').trim().slice(0, 80);
+      if (!nombre) return err(400, 'Escribe un nombre para la ruta (ej. Lunes)');
+      const bodegas = await getBodegas();
+      const porId = new Map(bodegas.map((b) => [b.id, b]));
+      const ids = idsValidos(body.bodegaIds || [], porId);
+      const jsonIds = JSON.stringify(ids);
+      const rows = await prisma.$queryRaw`
+        INSERT INTO preventa_plantilla (nombre, bodega_ids, updated_at)
+        VALUES (${nombre}, ${jsonIds}::jsonb, (now() AT TIME ZONE 'UTC'))
+        RETURNING id, nombre, bodega_ids AS "bodegaIds"`;
+      return NextResponse.json({ ok: true, plantilla: rows[0] });
+    }
+
+    if (body.action === 'editar_plantilla') {
+      if (!esAdmin) return err(403, 'Solo el administrador puede editar rutas guardadas');
+      const pid = parseInt(body.plantillaId, 10);
+      if (!Number.isFinite(pid)) return err(400, 'Ruta guardada inválida');
+      const rows = await prisma.$queryRaw`
+        SELECT id, nombre, bodega_ids AS "bodegaIds" FROM preventa_plantilla WHERE id = ${pid}`;
+      if (!rows.length) return err(404, 'Ruta guardada no encontrada');
+
+      const bodegas = await getBodegas();
+      const porId = new Map(bodegas.map((b) => [b.id, b]));
+      const actuales = Array.isArray(rows[0].bodegaIds)
+        ? rows[0].bodegaIds.map(String).filter((id) => porId.has(id))
+        : [];
+      const entrantes = idsValidos(body.bodegaIds || [], porId);
+
+      let nuevaLista = actuales;
+      if (body.modo === 'agregar') {
+        const set = new Set(actuales);
+        for (const id of entrantes) {
+          if (!set.has(id)) {
+            set.add(id);
+            nuevaLista.push(id);
+          }
+        }
+      } else if (body.modo === 'quitar') {
+        const quitarSet = new Set(
+          Array.isArray(body.bodegaIds) ? body.bodegaIds.map(String) : []
+        );
+        nuevaLista = actuales.filter((id) => !quitarSet.has(id));
+      } else if (body.modo === 'set') {
+        nuevaLista = entrantes;
+      }
+
+      const nuevoNombre = body.nombre
+        ? String(body.nombre).trim().slice(0, 80)
+        : rows[0].nombre;
+      const jsonIds = JSON.stringify(nuevaLista);
+
+      await prisma.$executeRaw`
+        UPDATE preventa_plantilla
+        SET nombre = ${nuevoNombre}, bodega_ids = ${jsonIds}::jsonb, updated_at = (now() AT TIME ZONE 'UTC')
+        WHERE id = ${pid}`;
+
+      return NextResponse.json({
+        ok: true,
+        plantilla: { id: pid, nombre: nuevoNombre, bodegaIds: nuevaLista },
+      });
+    }
+
+    if (body.action === 'eliminar_plantilla') {
+      if (!esAdmin) return err(403, 'Solo el administrador puede eliminar rutas guardadas');
+      const pid = parseInt(body.plantillaId, 10);
+      if (!Number.isFinite(pid)) return err(400, 'Ruta guardada inválida');
+      await prisma.$executeRaw`DELETE FROM preventa_plantilla WHERE id = ${pid}`;
+      return NextResponse.json({ ok: true });
+    }
+
+    // ---- Acciones sobre la ruta activa de HOY ----
     const cerrada = await prisma.$queryRaw`
       SELECT 1 FROM preventa_jornada WHERE vendedor_id = ${v} AND fecha = ${fecha}`;
     if (cerrada.length && body.action !== 'reabrir') {
@@ -167,6 +279,62 @@ export async function POST(request) {
     }
 
     switch (body.action) {
+      // ---- Asignar una Ruta Guardada (ej. "Lunes") a un preventista hoy (SOLO ADMIN) ----
+      case 'aplicar_plantilla': {
+        if (!esAdmin) return err(403, 'Solo el administrador puede asignar rutas');
+        const pid = parseInt(body.plantillaId, 10);
+        if (!Number.isFinite(pid)) return err(400, 'Ruta guardada inválida');
+        const rows = await prisma.$queryRaw`
+          SELECT id, nombre, bodega_ids AS "bodegaIds" FROM preventa_plantilla WHERE id = ${pid}`;
+        if (!rows.length) return err(404, 'Ruta guardada no encontrada');
+
+        const bodegas = await getBodegas();
+        const porId = new Map(bodegas.map((b) => [b.id, b]));
+        const ids = idsValidos(rows[0].bodegaIds || [], porId);
+        if (!ids.length) return err(400, `La ruta "${rows[0].nombre}" aún no tiene clientes guardados`);
+
+        // Si reemplazar !== false, limpiamos los clientes aún no visitados hoy de este preventista
+        // para que su ruta del día quede exactamente como la ruta guardada
+        if (body.reemplazar !== false) {
+          await prisma.$executeRaw`
+            DELETE FROM preventa_ruta
+            WHERE vendedor_id = ${v} AND fecha = ${fecha}
+              AND bodega_id NOT IN (
+                SELECT bodega_id FROM preventa_check WHERE vendedor_id = ${v} AND fecha = ${fecha})`;
+        }
+
+        const max = await prisma.$queryRaw`
+          SELECT COALESCE(MAX(orden), 0)::int AS m FROM preventa_ruta
+          WHERE vendedor_id = ${v} AND fecha = ${fecha}`;
+        const base = max[0].m;
+
+        let agregadas = 0;
+        if (body.reasignar) {
+          agregadas = await prisma.$executeRaw`
+            INSERT INTO preventa_ruta (vendedor_id, fecha, bodega_id, orden, created_at)
+            SELECT ${v}, ${fecha}, t.id, ${base}::int + t.n::int, (now() AT TIME ZONE 'UTC')
+            FROM unnest(${ids}::text[]) WITH ORDINALITY AS t(id, n)
+            ON CONFLICT (fecha, bodega_id) DO UPDATE SET vendedor_id = EXCLUDED.vendedor_id, orden = EXCLUDED.orden`;
+        } else {
+          agregadas = await prisma.$executeRaw`
+            INSERT INTO preventa_ruta (vendedor_id, fecha, bodega_id, orden, created_at)
+            SELECT ${v}, ${fecha}, t.id, ${base}::int + t.n::int, (now() AT TIME ZONE 'UTC')
+            FROM unnest(${ids}::text[]) WITH ORDINALITY AS t(id, n)
+            ON CONFLICT (fecha, bodega_id) DO NOTHING`;
+        }
+
+        const totalRuta = await prisma.$queryRaw`
+          SELECT COUNT(*)::int AS c FROM preventa_ruta WHERE vendedor_id = ${v} AND fecha = ${fecha}`;
+
+        return NextResponse.json({
+          ok: true,
+          nombre: rows[0].nombre,
+          agregadas,
+          totalEnRuta: Number(totalRuta[0]?.c ?? agregadas),
+          omitidas: ids.length - agregadas,
+        });
+      }
+
       // ---- Agregar bodegas a la ruta (SOLO ADMINISTRADOR) ----
       case 'agregar': {
         if (!esAdmin) {

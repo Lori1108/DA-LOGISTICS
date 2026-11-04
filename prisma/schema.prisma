@@ -82,3 +82,13 @@ model PreventaJornada {
   @@id([vendedorId, fecha])
   @@map("preventa_jornada")
 }
+
+// Plantillas de rutas guardadas por el administrador (ej. "Lunes", "Martes")
+model PreventaPlantilla {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  bodegaIds Json     @default("[]") @map("bodega_ids")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("preventa_plantilla")
+}

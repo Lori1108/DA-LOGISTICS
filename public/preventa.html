@@ -70,9 +70,11 @@
   .sheet .grab { width: 40px; height: 4px; background: #d0d6dd; border-radius: 4px; margin: 0 auto 10px; }
   .sheet h3 { margin: 0 0 6px; font-size: 18px; }
   .sheet .meta { color: var(--suave); font-size: 13px; margin-bottom: 10px; line-height: 1.6; }
-  .client-phone-box { background: #f0f6ff; border: 1px solid #d0e2ff; border-radius: 10px; padding: 9px 12px; margin: 8px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .client-phone-box { background: #f0f6ff; border: 1px solid #d0e2ff; border-radius: 10px; padding: 9px 12px; margin: 8px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .client-phone-box b { color: var(--azul); font-size: 14px; }
-  .client-phone-box a { background: var(--azul2); color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .client-phone-box .phone-btns { display: flex; gap: 6px; align-items: center; }
+  .client-phone-box a, .client-phone-box button { background: var(--azul2); color: #fff; border: 0; text-decoration: none; padding: 6px 11px; border-radius: 8px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .client-phone-box button.edit-tel { background: #dce8ff; color: var(--azul2); }
   .estado { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
   .estado.p { background: #fff3cd; color: #8a6400; } .estado.o { background: #dff5e6; color: #146c2e; }
   .btn { border: 0; border-radius: 10px; padding: 13px 14px; font-size: 15px; font-weight: 700; width: 100%; }
@@ -80,6 +82,7 @@
   .btn-sec { background: #eef2f6; color: var(--texto); }
   .btn-azul { background: var(--azul2); color: #fff; }
   .btn-rojo { background: #fde8e7; color: var(--rojo); }
+  .btn-morado { background: #7e22ce; color: #fff; }
   .row2 { display: flex; gap: 8px; margin-top: 8px; }
   .row2 > * { flex: 1; }
   a.btn { display: block; text-align: center; text-decoration: none; }
@@ -87,16 +90,19 @@
   /* Armar ruta / Clientes / Resumen */
   .wrap { padding: 14px; max-width: 900px; margin: 0 auto; }
   .card { background: #fff; border: 1px solid var(--borde); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .card.editing-tpl { border: 2px solid #7e22ce; background: #fdfaff; }
   .card h2 { font-size: 16px; margin: 0 0 10px; }
   label.lbl { font-size: 12px; color: var(--suave); font-weight: 600; display: block; margin-bottom: 4px; }
-  select, input[type=text], input[type=date], input[type=search] { width: 100%; padding: 11px 12px; border: 1px solid var(--borde); border-radius: 10px; font-size: 15px; background: #fff; font-family: inherit; }
+  select, input[type=text], input[type=tel], input[type=date], input[type=search] { width: 100%; padding: 11px 12px; border: 1px solid var(--borde); border-radius: 10px; font-size: 15px; background: #fff; font-family: inherit; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .lista { list-style: none; margin: 0; padding: 0; }
   .item { display: flex; align-items: center; gap: 10px; padding: 12px 2px; border-bottom: 1px solid var(--borde); flex-wrap: wrap; }
   .item:last-child { border-bottom: 0; }
   .item .info { flex: 1; min-width: 200px; }
   .item .info b { display: block; font-size: 15px; margin-bottom: 2px; }
-  .item .info .tel-line { display: inline-block; font-size: 13px; color: var(--azul2); font-weight: 700; margin: 2px 0; text-decoration: none; }
+  .item .info .tel-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 3px 0; }
+  .item .info .tel-line { display: inline-block; font-size: 13px; color: var(--azul2); font-weight: 700; text-decoration: none; }
+  .item .info .btn-tel-inline { border: 0; background: #eef4ff; color: var(--azul2); border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
   .item .info small { display: block; color: var(--suave); font-size: 12px; }
   .item-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-top: 4px; margin-right: 4px; }
@@ -108,6 +114,16 @@
   .btn-mini.move { background: #f3e8ff; color: #7e22ce; }
   .btn-mini.ok { background: #dff5e6; color: #146c2e; }
   .btn-mini.off { background: #f1f3f5; color: #9aa5b1; }
+
+  /* Rutas Guardadas (Plantillas) */
+  .tpl-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 10px; margin-top: 8px; background: #fafbfc; flex-wrap: wrap; }
+  .tpl-item.active { border-color: #7e22ce; background: #f7f0ff; }
+  .tpl-item .tpl-info { flex: 1; min-width: 150px; }
+  .tpl-item .tpl-info b { font-size: 14px; display: block; }
+  .tpl-item .tpl-info small { color: var(--suave); font-size: 12px; }
+  .tpl-item .tpl-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tpl-banner { background: #f3e8ff; border: 1px solid #d8b4fe; color: #581c87; padding: 10px 12px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
   .stat { background: var(--gris); border-radius: 12px; padding: 12px; }
   .stat b { display: block; font-size: 22px; }
@@ -121,11 +137,11 @@
   .muted { color: var(--suave); font-size: 13px; }
   .tbl-wrap { overflow-x: auto; }
 
-  .toast { position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%); background: #1f2933; color: #fff; padding: 11px 16px; border-radius: 10px; font-size: 14px; z-index: 2000; display: none; max-width: 90%; text-align: center; }
+  .toast { position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%); background: #1f2933; color: #fff; padding: 11px 16px; border-radius: 10px; font-size: 14px; z-index: 2500; display: none; max-width: 90%; text-align: center; }
   .toast.show { display: block; }
   .overlay { position: fixed; inset: 0; background: rgba(15,43,69,.6); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
   .overlay.show { display: flex; }
-  .overlay .box { background: #fff; border-radius: 16px; padding: 22px; max-width: 360px; text-align: center; }
+  .overlay .box { background: #fff; border-radius: 16px; padding: 22px; width: 100%; max-width: 360px; text-align: center; }
   .loading { padding: 40px; text-align: center; color: var(--suave); }
 
   @media (min-width: 900px) {
@@ -173,7 +189,23 @@
   <!-- ==================== RUTA / CLIENTES ==================== -->
   <section class="tab" id="tab-ruta">
     <div class="wrap">
-      <div class="card">
+      <!-- Tarjeta exclusiva de BILO: Rutas Guardadas (ej. Lunes, Martes...) -->
+      <div class="card" id="cardPlantillas" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <h2 style="margin:0">📁 Rutas Guardadas (Plantillas)</h2>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn-mini move" id="btnNuevaPlantilla">➕ Crear ruta (ej. Lunes)</button>
+            <button class="btn-mini add" id="btnGuardarActualComo">💾 Guardar ruta actual como…</button>
+          </div>
+        </div>
+        <p class="muted" style="margin:6px 0 8px">
+          Crea tus rutas fijas (Lunes, Martes, etc.), agrégales sus bodegas y asígnalas a cualquier preventista con un solo clic.
+        </p>
+        <div id="listaPlantillas"></div>
+      </div>
+
+      <div class="card" id="cardArmarRuta">
+        <div id="bannerEditandoTpl" class="tpl-banner" style="display:none"></div>
         <h2 id="rTitulo">🧭 Ruta de hoy</h2>
         <div class="grid2" id="gridFiltrosRuta">
           <div>
@@ -264,6 +296,36 @@
 </nav>
 
 <div class="toast" id="toast"></div>
+
+<!-- Modal para agregar o actualizar el teléfono del cliente -->
+<div class="overlay" id="modalTel">
+  <div class="box" style="text-align:left">
+    <h3 style="margin:0 0 4px" id="telModalTitulo">📞 Teléfono del cliente</h3>
+    <p class="muted" id="telModalCliente" style="margin:0 0 12px"></p>
+    <label class="lbl" for="inpTelModal">Número de teléfono / celular</label>
+    <input type="tel" id="inpTelModal" placeholder="Ej. 987654321" inputmode="tel" autocomplete="tel">
+    <p class="muted" style="font-size:12px;margin:6px 0 14px">Se actualizará automáticamente en todo el sistema (Preventa, Clientes, POS y Entregas).</p>
+    <div class="row2">
+      <button class="btn btn-sec" type="button" onclick="cerrarModalTel()">Cancelar</button>
+      <button class="btn btn-azul" type="button" id="btnGuardarTel">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para crear nueva ruta guardada -->
+<div class="overlay" id="modalPlantilla">
+  <div class="box" style="text-align:left">
+    <h3 style="margin:0 0 6px" id="tplModalTitulo">📁 Nueva ruta guardada</h3>
+    <p class="muted" id="tplModalSub" style="margin:0 0 12px">Escribe un nombre fácil de identificar (ej. Lunes, Martes, Ruta Bellavista…).</p>
+    <label class="lbl" for="inpNombrePlantilla">Nombre de la ruta</label>
+    <input type="text" id="inpNombrePlantilla" placeholder="Ej. Lunes">
+    <div class="row2" style="margin-top:14px">
+      <button class="btn btn-sec" type="button" onclick="cerrarModalPlantilla()">Cancelar</button>
+      <button class="btn btn-morado" type="button" id="btnConfirmarPlantilla">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="overlay"><div class="box">
   <h3 style="margin-top:0">Sesión no válida</h3>
   <p class="muted">Vuelve a iniciar sesión con tu usuario.</p>
@@ -282,6 +344,9 @@ const S = {
   miPos: null,             // { lat, lng, acc, t } para preventista en ruta
   ultimoGpsEnviado: null,
   selId: null,             // cliente abierto en la ficha
+  editTplId: null,         // admin: id de ruta guardada que está editando (null = editando ruta de hoy)
+  telClienteId: null,      // id del cliente cuyo teléfono se está editando
+  tplConActuales: false,   // si al crear plantilla copia los clientes de la ruta actual
   tab: 'mapa',
 };
 const $ = (id) => document.getElementById(id);
@@ -346,6 +411,10 @@ async function cargar() {
   d.checkPor = new Map(d.checks.map(c => [c.bodegaId, c]));
   d.ocupadasSet = new Set(d.ocupadas);
   d.asigMap = new Map(Object.entries(d.asignaciones || {}));
+  d.plantillas = d.plantillas || [];
+  if (S.editTplId && !d.plantillas.some(p => p.id === S.editTplId)) {
+    S.editTplId = null;
+  }
   pintarTodo();
 }
 
@@ -361,6 +430,51 @@ async function accion(body, msgOk) {
     return null;
   }
 }
+
+// =============================================================================
+// MODAL PARA AGREGAR / EDITAR TELÉFONO DEL CLIENTE
+// =============================================================================
+function abrirModalTel(bodegaId) {
+  const b = S.data?.porId?.get(bodegaId);
+  if (!b) return;
+  S.telClienteId = bodegaId;
+  $('telModalTitulo').textContent = b.telefono ? '✏️ Actualizar teléfono' : '➕ Agregar teléfono';
+  $('telModalCliente').textContent = '👤 Cliente: ' + b.nombre;
+  $('inpTelModal').value = b.telefono || '';
+  $('modalTel').classList.add('show');
+  setTimeout(() => $('inpTelModal').focus(), 60);
+}
+
+function cerrarModalTel() {
+  S.telClienteId = null;
+  $('modalTel').classList.remove('show');
+}
+
+$('btnGuardarTel').onclick = async () => {
+  const id = S.telClienteId;
+  if (!id) return;
+  const tel = $('inpTelModal').value.trim();
+  const btn = $('btnGuardarTel');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+  try {
+    const r = await accion(
+      { action: 'telefono', bodegaId: id, telefono: tel },
+      tel ? '📞 Teléfono guardado en todo el sistema' : '📞 Teléfono actualizado'
+    );
+    if (r) {
+      cerrarModalTel();
+      if (S.selId === id) abrirFicha(id, true);
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar';
+  }
+};
+
+$('inpTelModal').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); $('btnGuardarTel').click(); }
+});
 
 // =============================================================================
 // CABECERA / BARRA DE ADMIN
@@ -512,7 +626,7 @@ function verTodo() {
   if (pts.length) map.fitBounds(pts, { padding: [50, 50], maxZoom: 16 });
 }
 
-// ---- Ficha de cliente/bodega (muestra Nombre y Teléfono claramente) ----
+// ---- Ficha de cliente/bodega (muestra Nombre, Teléfono y opción de agregar/cambiar teléfono) ----
 function abrirFicha(id, soloRefrescar) {
   const d = S.data, b = d.porId.get(id);
   if (!b) return cerrarFicha();
@@ -544,10 +658,16 @@ function abrirFicha(id, soloRefrescar) {
   const bloqueTelefono = b.telefono
     ? `<div class="client-phone-box">
          <div><small style="color:var(--suave);display:block;font-size:11px">TELÉFONO DEL CLIENTE</small><b>📞 ${esc(b.telefono)}</b></div>
-         <a href="tel:${esc(b.telefono)}">Llamar</a>
+         <div class="phone-btns">
+           <button type="button" class="edit-tel" onclick="abrirModalTel('${esc(id)}')">✏️ Cambiar</button>
+           <a href="tel:${esc(b.telefono)}">📞 Llamar</a>
+         </div>
        </div>`
     : `<div class="client-phone-box">
          <div><small style="color:var(--suave);display:block;font-size:11px">TELÉFONO DEL CLIENTE</small><b style="color:var(--suave)">Sin teléfono registrado</b></div>
+         <div class="phone-btns">
+           <button type="button" onclick="abrirModalTel('${esc(id)}')">➕ Agregar teléfono</button>
+         </div>
        </div>`;
 
   $('ficha').innerHTML = `
@@ -666,10 +786,139 @@ function enviarGps(pos) {
 }
 
 // =============================================================================
+// RUTAS GUARDADAS (PLANTILLAS: ej. Lunes, Martes...) - SOLO ADMIN
+// =============================================================================
+function plantillaActiva() {
+  if (!S.data?.esAdmin || !S.editTplId) return null;
+  return (S.data.plantillas || []).find(p => p.id === S.editTplId) || null;
+}
+
+function abrirModalPlantilla(conActuales) {
+  S.tplConActuales = !!conActuales;
+  const d = S.data;
+  if (conActuales && !d.ruta.length) {
+    toast('Primero agrega clientes a la ruta actual o usa "➕ Crear ruta"');
+    return;
+  }
+  $('tplModalTitulo').textContent = conActuales
+    ? `💾 Guardar ruta de ${d.vendedor.nombre}`
+    : '📁 Crear nueva ruta guardada';
+  $('tplModalSub').textContent = conActuales
+    ? `Se guardarán los ${d.ruta.length} cliente(s) actuales bajo el nombre que elijas (ej. Lunes).`
+    : 'Escribe el nombre de la ruta (ej. Lunes) y luego selecciona abajo las bodegas que quieres incluir.';
+  $('inpNombrePlantilla').value = '';
+  $('modalPlantilla').classList.add('show');
+  setTimeout(() => $('inpNombrePlantilla').focus(), 60);
+}
+
+function cerrarModalPlantilla() {
+  $('modalPlantilla').classList.remove('show');
+}
+
+$('btnNuevaPlantilla').onclick = () => abrirModalPlantilla(false);
+$('btnGuardarActualComo').onclick = () => abrirModalPlantilla(true);
+
+$('btnConfirmarPlantilla').onclick = async () => {
+  const nombre = $('inpNombrePlantilla').value.trim();
+  if (!nombre) { toast('Escribe un nombre para la ruta (ej. Lunes)'); return; }
+  const btn = $('btnConfirmarPlantilla');
+  btn.disabled = true;
+  try {
+    const ids = S.tplConActuales ? S.data.ruta.map(r => r.bodegaId) : [];
+    const r = await api('POST', { action: 'crear_plantilla', nombre, bodegaIds: ids });
+    cerrarModalPlantilla();
+    if (!S.tplConActuales && r.plantilla?.id) {
+      S.editTplId = r.plantilla.id;
+      toast(`📁 Ruta "${nombre}" creada. Ahora agrega abajo las bodegas que quieras.`);
+    } else {
+      toast(`💾 Ruta "${nombre}" guardada (${ids.length} clientes)`);
+    }
+    await cargar();
+  } catch (e) {
+    toast('⚠️ ' + e.message, 4000);
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+$('inpNombrePlantilla').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); $('btnConfirmarPlantilla').click(); }
+});
+
+function seleccionarPlantillaEditar(id) {
+  S.editTplId = (S.editTplId === id) ? null : id;
+  pintarPlantillas();
+  pintarRuta();
+}
+
+async function aplicarPlantillaAVendedor(id) {
+  const d = S.data;
+  const tpl = (d.plantillas || []).find(p => p.id === id);
+  if (!tpl) return;
+  if (!tpl.bodegaIds.length) {
+    toast(`La ruta "${tpl.nombre}" aún no tiene bodegas. Pulsa "✏️ Editar" para agregarle clientes.`);
+    S.editTplId = tpl.id;
+    pintarPlantillas();
+    pintarRuta();
+    return;
+  }
+  S.editTplId = null;
+  await accion(
+    { action: 'aplicar_plantilla', plantillaId: id, reemplazar: true, reasignar: true },
+    r => `✅ ${d.vendedor.nombre} ahora tiene asignada la ruta "${r.nombre}" (${r.totalEnRuta} clientes)`
+  );
+}
+
+async function eliminarPlantilla(id) {
+  const tpl = (S.data?.plantillas || []).find(p => p.id === id);
+  if (!tpl) return;
+  if (!confirm(`¿Eliminar la ruta guardada "${tpl.nombre}"?`)) return;
+  if (S.editTplId === id) S.editTplId = null;
+  await accion({ action: 'eliminar_plantilla', plantillaId: id }, `🗑️ Ruta "${tpl.nombre}" eliminada`);
+}
+
+function pintarPlantillas() {
+  const d = S.data;
+  $('cardPlantillas').style.display = d.esAdmin ? '' : 'none';
+  if (!d.esAdmin) return;
+
+  const tpls = d.plantillas || [];
+  if (!tpls.length) {
+    $('listaPlantillas').innerHTML = `<div class="muted" style="padding:8px 0">Aún no tienes rutas guardadas. Pulsa <b>"➕ Crear ruta (ej. Lunes)"</b> para crear la primera.</div>`;
+    return;
+  }
+
+  $('listaPlantillas').innerHTML = tpls.map(t => {
+    const editando = S.editTplId === t.id;
+    return `<div class="tpl-item ${editando ? 'active' : ''}">
+      <div class="tpl-info">
+        <b>📌 ${esc(t.nombre)}</b>
+        <small>${t.bodegaIds.length} cliente(s) guardados${editando ? ' · ✏️ Editando abajo' : ''}</small>
+      </div>
+      <div class="tpl-btns">
+        <button class="btn-mini ok" ${!d.puedeEditarRuta ? 'disabled' : ''} onclick="aplicarPlantillaAVendedor(${t.id})">📲 Asignar a ${esc(d.vendedor.nombre)}</button>
+        <button class="btn-mini move" onclick="seleccionarPlantillaEditar(${t.id})">${editando ? '✓ Listo' : '✏️ Editar bodegas'}</button>
+        <button class="btn-mini del" onclick="eliminarPlantilla(${t.id})" title="Eliminar ruta">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// =============================================================================
 // PESTAÑA 2: ARMAR RUTA (SOLO ADMIN) / MIS CLIENTES (PREVENTISTA)
 // =============================================================================
+function mapaEnEdicion() {
+  const tpl = plantillaActiva();
+  if (tpl) {
+    return new Map(tpl.bodegaIds.map((id, i) => [id, i + 1]));
+  }
+  return S.data.enRuta;
+}
+
 function bodegasFiltradas() {
   const d = S.data;
+  const tpl = plantillaActiva();
+  const enLista = mapaEnEdicion();
   const zona = $('fZona').value;
   const mostrar = d.esAdmin ? $('fMostrar').value : 'mia';
   const q = $('fBuscar').value.trim().toLowerCase();
@@ -680,11 +929,14 @@ function bodegasFiltradas() {
       (b.telefono && b.telefono.toLowerCase().includes(q)) ||
       b.direccion.toLowerCase().includes(q)
     )) return false;
-    if (mostrar === 'mia' && !d.enRuta.has(b.id)) return false;
-    if (mostrar === 'libres' && (d.enRuta.has(b.id) || d.ocupadasSet.has(b.id))) return false;
+    if (mostrar === 'mia' && !enLista.has(b.id)) return false;
+    if (mostrar === 'libres') {
+      if (tpl) return !enLista.has(b.id);
+      if (enLista.has(b.id) || d.ocupadasSet.has(b.id)) return false;
+    }
     return true;
   }).sort((a, b) => {
-    const ra = d.enRuta.get(a.id) || 1e9, rb = d.enRuta.get(b.id) || 1e9;
+    const ra = enLista.get(a.id) || 1e9, rb = enLista.get(b.id) || 1e9;
     return ra - rb || a.nombre.localeCompare(b.nombre);
   });
 }
@@ -702,34 +954,58 @@ function pintarZonas() {
 function pintarRuta() {
   const d = S.data;
   const esAdmin = d.esAdmin;
-  const puedeEditar = d.puedeEditarRuta;
+  const tpl = plantillaActiva();
+  const enLista = mapaEnEdicion();
+  const puedeEditar = tpl ? true : d.puedeEditarRuta;
 
-  // Mostrar/ocultar controles exclusivos del Administrador
   $('boxBotonesRuta').style.display = esAdmin ? 'flex' : 'none';
   $('boxFiltroMostrar').style.display = esAdmin ? '' : 'none';
   $('gridFiltrosRuta').style.gridTemplateColumns = esAdmin ? '1fr 1fr' : '1fr';
+  $('cardArmarRuta').classList.toggle('editing-tpl', !!tpl);
 
-  $('rTitulo').textContent = esAdmin
-    ? `🧭 Asignar ruta a ${d.vendedor.nombre} (${d.ruta.length} clientes)`
-    : `📋 Mis clientes de hoy (${d.ruta.length})`;
+  const bannerTpl = $('bannerEditandoTpl');
+  if (tpl) {
+    bannerTpl.style.display = 'flex';
+    bannerTpl.innerHTML = `
+      <div><b>✏️ Editando ruta guardada: "${esc(tpl.nombre)}"</b> (${tpl.bodegaIds.length} clientes)</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-mini ok" onclick="aplicarPlantillaAVendedor(${tpl.id})">📲 Asignar a ${esc(d.vendedor.nombre)}</button>
+        <button class="btn-mini off" onclick="seleccionarPlantillaEditar(null)">✓ Volver a ruta de hoy</button>
+      </div>`;
+  } else {
+    bannerTpl.style.display = 'none';
+  }
+
+  $('rTitulo').textContent = tpl
+    ? `📁 Clientes de la ruta "${tpl.nombre}" (${tpl.bodegaIds.length})`
+    : esAdmin
+      ? `🧭 Ruta de hoy de ${d.vendedor.nombre} (${d.ruta.length} clientes)`
+      : `📋 Mis clientes de hoy (${d.ruta.length})`;
 
   const lista = bodegasFiltradas();
 
   if (esAdmin) {
-    const libres = lista.filter(b => !d.enRuta.has(b.id) && !d.ocupadasSet.has(b.id));
-    const mias = lista.filter(b => d.enRuta.has(b.id) && !d.checkPor.has(b.id));
+    const libres = tpl
+      ? lista.filter(b => !enLista.has(b.id))
+      : lista.filter(b => !enLista.has(b.id) && !d.ocupadasSet.has(b.id));
+    const mias = tpl
+      ? lista.filter(b => enLista.has(b.id))
+      : lista.filter(b => enLista.has(b.id) && !d.checkPor.has(b.id));
     const zonaTxt = $('fZona').value ? ' de ' + $('fZona').value : '';
+    const destinoTxt = tpl ? `a "${tpl.nombre}"` : `a ${d.vendedor.nombre}`;
 
-    $('btnAgregarZona').textContent = `➕ Asignar todas${zonaTxt} a ${d.vendedor.nombre} (${libres.length})`;
+    $('btnAgregarZona').textContent = `➕ Agregar todas${zonaTxt} ${destinoTxt} (${libres.length})`;
     $('btnQuitarZona').textContent = `➖ Quitar todas (${mias.length})`;
     $('btnAgregarZona').disabled = !puedeEditar || !libres.length;
     $('btnQuitarZona').disabled = !puedeEditar || !mias.length;
 
-    $('rAyuda').textContent = puedeEditar
-      ? `Selecciona una zona para asignar sus clientes a ${d.vendedor.nombre} con un clic, o asigna/quita uno por uno.`
-      : 'Esta jornada está cerrada o es de una fecha pasada (solo lectura).';
+    $('rAyuda').textContent = tpl
+      ? `Agrega o quita las bodegas que pertenecerán a la ruta "${tpl.nombre}". Se guarda automáticamente.`
+      : puedeEditar
+        ? `Selecciona una ruta guardada arriba o elige una zona para asignar sus clientes a ${d.vendedor.nombre}.`
+        : 'Esta jornada está cerrada o es de una fecha pasada (solo lectura).';
   } else {
-    $('rAyuda').textContent = 'Lista de clientes asignados por el administrador para tu recorrido de hoy.';
+    $('rAyuda').textContent = 'Lista de clientes asignados para tu recorrido de hoy. Puedes agregar o corregir su número de teléfono.';
   }
 
   if (!lista.length) {
@@ -740,18 +1016,27 @@ function pintarRuta() {
   }
 
   $('listaBodegas').innerHTML = lista.slice(0, 400).map(b => {
-    const n = d.enRuta.get(b.id);
-    const chk = d.checkPor.get(b.id);
-    const otroVendedorId = d.asigMap ? d.asigMap.get(b.id) : null;
-    const estaEnOtro = d.ocupadasSet.has(b.id);
+    const n = enLista.get(b.id);
+    const chk = !tpl && d.checkPor.has(b.id);
+    const otroVendedorId = (!tpl && d.asigMap) ? d.asigMap.get(b.id) : null;
+    const estaEnOtro = !tpl && d.ocupadasSet.has(b.id);
 
-    const telHtml = b.telefono
-      ? `<a class="tel-line" href="tel:${esc(b.telefono)}">📞 Tel: ${esc(b.telefono)}</a>`
-      : `<span class="tel-line" style="color:var(--suave);font-weight:500">📞 Sin teléfono</span>`;
+    const telRow = b.telefono
+      ? `<div class="tel-row">
+           <a class="tel-line" href="tel:${esc(b.telefono)}">📞 Tel: ${esc(b.telefono)}</a>
+           <button type="button" class="btn-tel-inline" onclick="abrirModalTel('${esc(b.id)}')">✏️ Cambiar</button>
+         </div>`
+      : `<div class="tel-row">
+           <span class="tel-line" style="color:var(--suave);font-weight:500">📞 Sin teléfono</span>
+           <button type="button" class="btn-tel-inline" onclick="abrirModalTel('${esc(b.id)}')">➕ Agregar teléfono</button>
+         </div>`;
 
-    // Botones según si es Administrador o Preventista
     let accionesHtml = '';
-    if (esAdmin) {
+    if (tpl) {
+      accionesHtml = n
+        ? `<button class="btn-mini del" onclick="quitar(['${esc(b.id)}'])">Quitar de "${esc(tpl.nombre)}"</button>`
+        : `<button class="btn-mini move" onclick="agregar(['${esc(b.id)}'])">➕ Agregar a "${esc(tpl.nombre)}"</button>`;
+    } else if (esAdmin) {
       if (chk) {
         accionesHtml = `<button class="btn-mini off" disabled>Visitado</button>`;
       } else if (n) {
@@ -762,7 +1047,6 @@ function pintarRuta() {
         accionesHtml = `<button class="btn-mini add" ${!puedeEditar ? 'disabled' : ''} onclick="agregar(['${esc(b.id)}'])">➕ Asignar</button>`;
       }
     } else {
-      // Preventista: ve teléfono, botón para ubicar en el mapa y botón de marcar visitado
       const btnMapa = `<button class="btn-mini add" onclick="verClienteEnMapa('${esc(b.id)}')">📍 Mapa</button>`;
       const btnLlamar = b.telefono ? `<a class="btn-mini add" href="tel:${esc(b.telefono)}">📞 Llamar</a>` : '';
       const btnVisitar = (!chk && d.puedeMarcar)
@@ -772,7 +1056,8 @@ function pintarRuta() {
     }
 
     let etiqueta = '';
-    if (chk) etiqueta = `<span class="tag verde">🟢 Ofrecido · ${hora(chk.createdAt)}</span>`;
+    if (tpl && n) etiqueta = `<span class="tag morado">📁 #${n} en "${esc(tpl.nombre)}"</span>`;
+    else if (chk) etiqueta = `<span class="tag verde">🟢 Ofrecido · ${hora(chk.createdAt)}</span>`;
     else if (n) etiqueta = `<span class="tag amar">🟡 #${n} Pendiente</span>`;
     else if (estaEnOtro && esAdmin) {
       const otroNombre = d.vendedores.find(x => x.id === otroVendedorId)?.nombre || 'otro vendedor';
@@ -782,7 +1067,7 @@ function pintarRuta() {
     return `<li class="item">
       <div class="info">
         <b>👤 ${n ? n + '. ' : ''}${esc(b.nombre)}</b>
-        ${telHtml}
+        ${telRow}
         <small>📍 ${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small>
         <div>
           ${etiqueta}
@@ -795,6 +1080,13 @@ function pintarRuta() {
 }
 
 function agregar(ids) {
+  const tpl = plantillaActiva();
+  if (tpl) {
+    return accion(
+      { action: 'editar_plantilla', plantillaId: tpl.id, modo: 'agregar', bodegaIds: ids },
+      `✅ Agregado(s) a la ruta "${tpl.nombre}"`
+    );
+  }
   return accion({ action: 'agregar', bodegaIds: ids }, r =>
     r.omitidas ? `✅ ${r.agregadas} asignados (${r.omitidas} ya estaban en otra ruta)` : `✅ ${r.agregadas} cliente(s) asignados`);
 }
@@ -804,19 +1096,35 @@ function reasignar(ids) {
 }
 
 function quitar(ids) {
+  const tpl = plantillaActiva();
+  if (tpl) {
+    return accion(
+      { action: 'editar_plantilla', plantillaId: tpl.id, modo: 'quitar', bodegaIds: ids },
+      `Se quitaron de la ruta "${tpl.nombre}"`
+    );
+  }
   return accion({ action: 'quitar', bodegaIds: ids }, r => `Se quitaron ${r.quitadas} cliente(s) de la ruta`);
 }
 
 $('btnAgregarZona').onclick = () => {
   const d = S.data;
-  const ids = bodegasFiltradas().filter(b => !d.enRuta.has(b.id) && !d.ocupadasSet.has(b.id)).map(b => b.id);
+  const tpl = plantillaActiva();
+  const enLista = mapaEnEdicion();
+  const ids = bodegasFiltradas()
+    .filter(b => tpl ? !enLista.has(b.id) : (!enLista.has(b.id) && !d.ocupadasSet.has(b.id)))
+    .map(b => b.id);
   if (ids.length) agregar(ids);
 };
 
 $('btnQuitarZona').onclick = () => {
   const d = S.data;
-  const ids = bodegasFiltradas().filter(b => d.enRuta.has(b.id) && !d.checkPor.has(b.id)).map(b => b.id);
-  if (ids.length && confirm(`¿Quitar ${ids.length} cliente(s) de la ruta de ${d.vendedor.nombre}?`)) quitar(ids);
+  const tpl = plantillaActiva();
+  const enLista = mapaEnEdicion();
+  const ids = bodegasFiltradas()
+    .filter(b => tpl ? enLista.has(b.id) : (enLista.has(b.id) && !d.checkPor.has(b.id)))
+    .map(b => b.id);
+  const destino = tpl ? `la ruta guardada "${tpl.nombre}"` : `la ruta de ${d.vendedor.nombre}`;
+  if (ids.length && confirm(`¿Quitar ${ids.length} cliente(s) de ${destino}?`)) quitar(ids);
 };
 
 ['fZona', 'fMostrar'].forEach(id => $(id).addEventListener('change', pintarRuta));
@@ -906,7 +1214,13 @@ function pintarResumen() {
   $('hPendientes').innerHTML = pendientes.length ? pendientes.map(b =>
     `<li class="item"><div class="info">
       <b>${b.n}. 👤 ${esc(b.nombre)}</b>
-      ${b.telefono ? `<a class="tel-line" href="tel:${esc(b.telefono)}">📞 Tel: ${esc(b.telefono)}</a>` : `<span class="tel-line" style="color:var(--suave);font-weight:500">📞 Sin teléfono</span>`}
+      <div class="tel-row">
+        ${b.telefono
+          ? `<a class="tel-line" href="tel:${esc(b.telefono)}">📞 Tel: ${esc(b.telefono)}</a>
+             <button type="button" class="btn-tel-inline" onclick="abrirModalTel('${esc(b.id)}')">✏️ Cambiar</button>`
+          : `<span class="tel-line" style="color:var(--suave);font-weight:500">📞 Sin teléfono</span>
+             <button type="button" class="btn-tel-inline" onclick="abrirModalTel('${esc(b.id)}')">➕ Agregar teléfono</button>`}
+      </div>
       <small>📍 ${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small>
     </div></li>`).join('')
     : '<li class="muted" style="padding:8px 0">¡Sin pendientes! Todos los clientes fueron visitados 🎉</li>';
@@ -994,6 +1308,7 @@ document.querySelectorAll('.bottom button').forEach(b => b.onclick = () => irTab
 function pintarTodo() {
   pintarCabecera();
   pintarMapa();
+  pintarPlantillas();
   pintarZonas();
   pintarRuta();
   pintarResumen();
