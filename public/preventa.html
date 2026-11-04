@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>Preventa - DA LOGISTICS</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+  :root {
+    --azul: #0f2b45; --azul2: #1b4a96; --verde: #22a447; --amarillo: #f5b301;
+    --rojo: #d93025; --gris: #f4f6f8; --borde: #e3e8ee; --texto: #1f2933; --suave: #6b7785;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: var(--texto); background: var(--gris); }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  button { font-family: inherit; cursor: pointer; }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+
+  /* Barra superior */
+  .top { background: var(--azul); color: #fff; display: flex; align-items: center; gap: 10px; padding: 10px 14px; flex-shrink: 0; }
+  .top img { height: 30px; background: #fff; border-radius: 6px; padding: 2px 4px; }
+  .top .who { flex: 1; min-width: 0; line-height: 1.2; }
+  .top .who b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .top .who small { opacity: .8; font-size: 12px; }
+  .top .btn-top { background: rgba(255,255,255,.12); border: 0; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; text-decoration: none; }
+
+  .banner { background: #fff4d6; color: #7a5a00; font-size: 13px; padding: 8px 14px; border-bottom: 1px solid #f1df9e; display: none; flex-shrink: 0; }
+  .banner.show { display: block; }
+  .banner a { color: var(--azul2); font-weight: 600; cursor: pointer; }
+
+  main { flex: 1; position: relative; min-height: 0; }
+  .tab { position: absolute; inset: 0; display: none; overflow: auto; }
+  .tab.active { display: block; }
+  #tab-mapa.active { display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Navegación inferior */
+  .bottom { display: flex; background: #fff; border-top: 1px solid var(--borde); flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+  .bottom button { flex: 1; border: 0; background: none; padding: 9px 4px 8px; font-size: 12px; color: var(--suave); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .bottom button span.ic { font-size: 20px; line-height: 1; }
+  .bottom button.active { color: var(--azul2); font-weight: 700; }
+
+  /* MAPA */
+  #map, #mapHist { width: 100%; }
+  #map { flex: 1; }
+  #mapHist { height: 320px; border-radius: 12px; border: 1px solid var(--borde); }
+  .map-top { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 500; display: flex; gap: 8px; flex-wrap: wrap; pointer-events: none; }
+  .chip { pointer-events: auto; background: #fff; border-radius: 20px; padding: 7px 12px; font-size: 13px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,.15); display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
+  .dot.p { background: var(--amarillo); } .dot.o { background: var(--verde); } .dot.y { background: #1a73e8; }
+  .map-btns { position: absolute; right: 10px; bottom: 18px; z-index: 500; display: flex; flex-direction: column; gap: 8px; }
+  .fab { width: 46px; height: 46px; border-radius: 50%; border: 0; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.25); font-size: 20px; }
+  .gps-status { pointer-events: auto; font-size: 12px; font-weight: 500; }
+  .empty-map { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 500; background: #fff; padding: 16px 18px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.18); text-align: center; max-width: 280px; font-size: 14px; }
+
+  /* Pines */
+  .pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; }
+  .pin span { transform: rotate(45deg); font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+  .pin.p { background: var(--amarillo); } .pin.o { background: var(--verde); } .pin.sel { outline: 3px solid var(--azul2); }
+
+  /* Ficha de bodega (hoja inferior) */
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 600; background: #fff; border-radius: 18px 18px 0 0; box-shadow: 0 -6px 24px rgba(0,0,0,.2); padding: 14px 16px 16px; transform: translateY(110%); transition: transform .2s ease; max-height: 70%; overflow: auto; }
+  .sheet.show { transform: translateY(0); }
+  .sheet .grab { width: 40px; height: 4px; background: #d0d6dd; border-radius: 4px; margin: 0 auto 10px; }
+  .sheet h3 { margin: 0 0 4px; font-size: 18px; }
+  .sheet .meta { color: var(--suave); font-size: 13px; margin-bottom: 10px; line-height: 1.5; }
+  .estado { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+  .estado.p { background: #fff3cd; color: #8a6400; } .estado.o { background: #dff5e6; color: #146c2e; }
+  .btn { border: 0; border-radius: 10px; padding: 13px 14px; font-size: 15px; font-weight: 700; width: 100%; }
+  .btn-check { background: var(--verde); color: #fff; font-size: 16px; padding: 15px; }
+  .btn-sec { background: #eef2f6; color: var(--texto); }
+  .btn-azul { background: var(--azul2); color: #fff; }
+  .btn-rojo { background: #fde8e7; color: var(--rojo); }
+  .row2 { display: flex; gap: 8px; margin-top: 8px; }
+  .row2 > * { flex: 1; }
+  a.btn { display: block; text-align: center; text-decoration: none; }
+
+  /* Armar ruta / Resumen */
+  .wrap { padding: 14px; max-width: 900px; margin: 0 auto; }
+  .card { background: #fff; border: 1px solid var(--borde); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .card h2 { font-size: 16px; margin: 0 0 10px; }
+  label.lbl { font-size: 12px; color: var(--suave); font-weight: 600; display: block; margin-bottom: 4px; }
+  select, input[type=text], input[type=date], input[type=search] { width: 100%; padding: 11px 12px; border: 1px solid var(--borde); border-radius: 10px; font-size: 15px; background: #fff; font-family: inherit; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lista { list-style: none; margin: 0; padding: 0; }
+  .item { display: flex; align-items: center; gap: 10px; padding: 11px 2px; border-bottom: 1px solid var(--borde); }
+  .item:last-child { border-bottom: 0; }
+  .item .info { flex: 1; min-width: 0; }
+  .item .info b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .info small { color: var(--suave); font-size: 12px; }
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; margin-left: 4px; }
+  .tag.gris { background: #eef2f6; color: var(--suave); } .tag.verde { background: #dff5e6; color: #146c2e; } .tag.amar { background: #fff3cd; color: #8a6400; }
+  .btn-mini { border: 0; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .btn-mini.add { background: #e6efff; color: var(--azul2); }
+  .btn-mini.del { background: #fde8e7; color: var(--rojo); }
+  .btn-mini.off { background: #f1f3f5; color: #9aa5b1; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .stat { background: var(--gris); border-radius: 12px; padding: 12px; }
+  .stat b { display: block; font-size: 22px; }
+  .stat small { color: var(--suave); font-size: 12px; }
+  .bar { height: 10px; background: #fff3cd; border-radius: 6px; overflow: hidden; margin-top: 10px; }
+  .bar > div { height: 100%; background: var(--verde); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { color: var(--suave); font-size: 12px; font-weight: 600; }
+  .num { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: var(--verde); color: #fff; font-weight: 800; font-size: 12px; align-items: center; justify-content: center; }
+  .muted { color: var(--suave); font-size: 13px; }
+  .tbl-wrap { overflow-x: auto; }
+
+  .toast { position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%); background: #1f2933; color: #fff; padding: 11px 16px; border-radius: 10px; font-size: 14px; z-index: 2000; display: none; max-width: 90%; text-align: center; }
+  .toast.show { display: block; }
+  .overlay { position: fixed; inset: 0; background: rgba(15,43,69,.6); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .overlay.show { display: flex; }
+  .overlay .box { background: #fff; border-radius: 16px; padding: 22px; max-width: 360px; text-align: center; }
+  .loading { padding: 40px; text-align: center; color: var(--suave); }
+
+  @media (min-width: 900px) {
+    .sheet { left: auto; right: 16px; bottom: 16px; width: 380px; border-radius: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <img src="/logo.png" alt="DA" onerror="this.style.display='none'">
+  <div class="who"><b id="lblNombre">Preventa</b><small id="lblFecha">Cargando…</small></div>
+  <a class="btn-top" id="btnPos" href="/pos.html" style="display:none">← POS</a>
+  <button class="btn-top" id="btnSalir">Salir</button>
+</header>
+<div class="banner" id="banner"></div>
+
+<main>
+  <!-- ==================== MAPA EN TIEMPO REAL ==================== -->
+  <section class="tab active" id="tab-mapa">
+    <div id="map"></div>
+    <div class="map-top">
+      <span class="chip"><span class="dot p"></span><span id="cPend">0</span>&nbsp;Pendientes</span>
+      <span class="chip"><span class="dot o"></span><span id="cOfre">0</span>&nbsp;Ofrecidos</span>
+      <span class="chip gps-status" id="gpsStatus"><span class="dot y"></span>Buscando GPS…</span>
+    </div>
+    <div class="map-btns">
+      <button class="fab" id="btnCentrar" title="Mi ubicación">📍</button>
+      <button class="fab" id="btnVerTodo" title="Ver todas">🗺️</button>
+    </div>
+    <div class="empty-map" id="emptyMap" style="display:none">
+      <b>Aún no tienes bodegas en tu ruta de hoy.</b><br><br>
+      <button class="btn btn-azul" onclick="irTab('ruta')">Armar mi ruta</button>
+    </div>
+    <div class="sheet" id="ficha"></div>
+  </section>
+
+  <!-- ==================== ARMAR RUTA ==================== -->
+  <section class="tab" id="tab-ruta">
+    <div class="wrap">
+      <div class="card">
+        <h2>🧭 Mi ruta de hoy: <span id="rTotal">0</span> bodegas</h2>
+        <div class="grid2">
+          <div>
+            <label class="lbl">Zona / Distrito</label>
+            <select id="fZona"></select>
+          </div>
+          <div>
+            <label class="lbl">Mostrar</label>
+            <select id="fMostrar">
+              <option value="todas">Todas</option>
+              <option value="mia">Solo mi ruta</option>
+              <option value="libres">Solo disponibles</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <input type="search" id="fBuscar" placeholder="Buscar bodega por nombre o dirección…">
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <button class="btn btn-azul" id="btnAgregarZona">➕ Agregar todas</button>
+          <button class="btn btn-rojo" id="btnQuitarZona">➖ Quitar todas</button>
+        </div>
+        <p class="muted" id="rAyuda" style="margin:10px 0 0"></p>
+      </div>
+      <div class="card">
+        <ul class="lista" id="listaBodegas"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== RESUMEN / HISTORIAL ==================== -->
+  <section class="tab" id="tab-resumen">
+    <div class="wrap">
+      <div class="card">
+        <div class="grid2">
+          <div id="boxVendedor" style="display:none">
+            <label class="lbl">Vendedor</label>
+            <select id="hVendedor"></select>
+          </div>
+          <div>
+            <label class="lbl">Fecha</label>
+            <input type="date" id="hFecha">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 id="hTitulo">Resumen de jornada</h2>
+        <div class="stats" id="hStats"></div>
+        <div class="bar"><div id="hBar" style="width:0%"></div></div>
+      </div>
+      <div class="card">
+        <h2>🗺️ Recorrido del día</h2>
+        <div id="mapHist"></div>
+        <p class="muted" style="margin:8px 0 0">
+          <span class="num">1</span> orden de visita · <span style="color:#1b4a96;font-weight:700">━</span> recorrido entre visitas · <span style="color:#7aa7e8;font-weight:700">┅</span> rastro GPS
+        </p>
+      </div>
+      <div class="card">
+        <h2>⏱️ Registro cronológico</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Bodega</th><th>Llegada</th><th>Check</th><th>Permanencia</th><th>Traslado</th></tr></thead>
+          <tbody id="hTabla"></tbody>
+        </table></div>
+        <p class="muted" style="margin:8px 0 0">La <b>llegada</b> se calcula con el GPS del celular (primer punto a menos de 80 m de la bodega). Si no hay GPS, se usa la hora del check.</p>
+      </div>
+      <div class="card">
+        <h2>🟡 Pendientes (<span id="hNPend">0</span>)</h2>
+        <ul class="lista" id="hPendientes"></ul>
+      </div>
+      <div class="card" id="boxCerrar" style="display:none">
+        <h2>🔒 Cerrar jornada</h2>
+        <p class="muted">Al cerrar, ya no podrás modificar la ruta ni marcar visitas de hoy.</p>
+        <button class="btn btn-azul" id="btnCerrar">Cerrar jornada de hoy</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav class="bottom">
+  <button data-tab="mapa" class="active"><span class="ic">🗺️</span>Mapa</button>
+  <button data-tab="ruta"><span class="ic">🧭</span>Armar ruta</button>
+  <button data-tab="resumen"><span class="ic">📊</span>Resumen</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay"><div class="box">
+  <h3 style="margin-top:0">Sesión no válida</h3>
+  <p class="muted">Vuelve a iniciar sesión con tu usuario de preventa.</p>
+  <button class="btn btn-azul" id="btnRelogin">Ir al inicio de sesión</button>
+</div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+// =============================================================================
+// ESTADO
+// =============================================================================
+const S = {
+  data: null,              // respuesta de GET /api/preventa
+  vendedorSel: null,       // admin: vendedor elegido
+  fechaSel: null,          // fecha consultada (null = hoy)
+  miPos: null,             // { lat, lng, acc, t }
+  ultimoGpsEnviado: null,  // { lat, lng, t }
+  selId: null,             // bodega abierta en la ficha
+  tab: 'mapa',
+};
+const $ = (id) => document.getElementById(id);
+const TZ = 'America/Lima';
+const CENTRO_DEFECTO = [-7.06, -76.58];
+
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+function hora(iso) { return iso ? new Date(iso).toLocaleTimeString('es-PE', { timeZone: TZ, hour: '2-digit', minute: '2-digit' }) : '—'; }
+function dur(ms) {
+  if (ms == null || !isFinite(ms) || ms < 0) return '—';
+  const m = Math.round(ms / 60000);
+  if (m < 60) return m + ' min';
+  return Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0') + ' min';
+}
+function fechaBonita(f) {
+  const [y, m, d] = f.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d, 12)).toLocaleDateString('es-PE', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' });
+}
+function distM(a, b) {
+  const R = 6371000, toR = x => x * Math.PI / 180;
+  const dLat = toR(b.lat - a.lat), dLng = toR(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toR(a.lat)) * Math.cos(toR(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function toast(msg, ms = 2600) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), ms);
+}
+
+// =============================================================================
+// API
+// =============================================================================
+async function api(method, body) {
+  let url = '/api/preventa';
+  if (method === 'GET') {
+    const p = new URLSearchParams();
+    if (S.fechaSel) p.set('fecha', S.fechaSel);
+    if (S.vendedorSel) p.set('vendedor', S.vendedorSel);
+    url += '?' + p.toString();
+  }
+  const res = await fetch(url, {
+    method,
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
+  });
+  const json = await res.json().catch(() => ({}));
+  if (res.status === 401) { $('overlay').classList.add('show'); throw new Error('NO_SESION'); }
+  if (!res.ok) throw new Error(json.error || ('Error ' + res.status));
+  return json;
+}
+
+async function cargar() {
+  const d = await api('GET');
+  S.data = d;
+  // índices rápidos
+  d.porId = new Map(d.bodegas.map(b => [b.id, b]));
+  d.enRuta = new Map(d.ruta.map((r, i) => [r.bodegaId, i + 1]));
+  d.checkPor = new Map(d.checks.map(c => [c.bodegaId, c]));
+  d.ocupadasSet = new Set(d.ocupadas);
+  pintarTodo();
+}
+
+async function accion(body, msgOk) {
+  try {
+    const r = await api('POST', body);
+    if (msgOk) toast(typeof msgOk === 'function' ? msgOk(r) : msgOk);
+    await cargar();
+    return r;
+  } catch (e) {
+    if (e.message !== 'NO_SESION') toast('⚠️ ' + e.message, 4000);
+    await cargar().catch(() => {});
+    return null;
+  }
+}
+
+// =============================================================================
+// CABECERA / BANNER
+// =============================================================================
+function pintarCabecera() {
+  const d = S.data;
+  const esAdmin = d.me.role === 'admin';
+  $('lblNombre').textContent = esAdmin ? ('👁️ ' + d.vendedor.nombre) : d.me.nombre;
+  $('lblFecha').textContent = fechaBonita(d.fecha) + (d.fecha === d.hoy ? ' · hoy' : '');
+  $('btnPos').style.display = esAdmin ? '' : 'none';
+
+  const b = $('banner');
+  let msg = '';
+  if (esAdmin) msg = 'Modo administrador (solo lectura). Cambia vendedor y fecha en <a onclick="irTab(\'resumen\')">Resumen</a>.';
+  else if (d.fecha !== d.hoy) msg = 'Estás viendo el ' + esc(fechaBonita(d.fecha)) + ' (solo lectura). <a onclick="volverAHoy()">Volver a hoy</a>';
+  else if (d.cerradaAt) msg = '🔒 Jornada cerrada a las ' + hora(d.cerradaAt) + '. Solo lectura.';
+  b.innerHTML = msg;
+  b.classList.toggle('show', !!msg);
+}
+
+function volverAHoy() { S.fechaSel = null; $('hFecha').value = S.data.hoy; cargar(); }
+
+// =============================================================================
+// MAPA EN TIEMPO REAL
+// =============================================================================
+const map = L.map('map', { zoomControl: false }).setView(CENTRO_DEFECTO, 13);
+L.control.zoom({ position: 'bottomleft' }).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+const capaBodegas = L.layerGroup().addTo(map);
+let miMarker = null, miCirculo = null, primerEncuadre = true;
+
+function icono(estado, n, sel) {
+  return L.divIcon({
+    className: '',
+    html: `<div class="pin ${estado}${sel ? ' sel' : ''}"><span>${n}</span></div>`,
+    iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -28],
+  });
+}
+
+function bodegasDeRuta() {
+  const d = S.data;
+  return d.ruta.map((r, i) => ({ ...d.porId.get(r.bodegaId), n: i + 1 })).filter(b => b.id);
+}
+
+// Dibuja los pines de la ruta: 🟡 pendiente / 🟢 ofrecido
+function pintarPines() {
+  const d = S.data;
+  capaBodegas.clearLayers();
+  let pend = 0, ofre = 0;
+  bodegasDeRuta().forEach(b => {
+    const hecho = d.checkPor.has(b.id);
+    hecho ? ofre++ : pend++;
+    if (b.lat == null) return;
+    const m = L.marker([b.lat, b.lng], { icon: icono(hecho ? 'o' : 'p', b.n, S.selId === b.id), zIndexOffset: hecho ? 0 : 500 });
+    m.on('click', () => abrirFicha(b.id));
+    m.addTo(capaBodegas);
+  });
+  $('cPend').textContent = pend;
+  $('cOfre').textContent = ofre;
+}
+
+function pintarMapa() {
+  const d = S.data;
+  pintarPines();
+  const lista = bodegasDeRuta();
+  const pts = lista.filter(b => b.lat != null).map(b => [b.lat, b.lng]);
+  $('emptyMap').style.display = (!lista.length && !d.soloLectura) ? '' : 'none';
+  if (primerEncuadre && pts.length) {
+    map.fitBounds(pts, { padding: [50, 50], maxZoom: 16 });
+    primerEncuadre = false;
+  }
+  if (S.selId) abrirFicha(S.selId, true);
+}
+
+function verTodo() {
+  const pts = bodegasDeRuta().filter(b => b.lat != null).map(b => [b.lat, b.lng]);
+  if (S.miPos) pts.push([S.miPos.lat, S.miPos.lng]);
+  if (pts.length) map.fitBounds(pts, { padding: [50, 50], maxZoom: 16 });
+}
+
+// ---- Ficha de la bodega ----
+function abrirFicha(id, soloRefrescar) {
+  const d = S.data, b = d.porId.get(id);
+  if (!b) return cerrarFicha();
+  S.selId = id;
+  const chk = d.checkPor.get(id);
+  const n = d.enRuta.get(id);
+  let dist = '';
+  if (S.miPos && b.lat != null) {
+    const m = distM(S.miPos, b);
+    dist = ' · a ' + (m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km');
+  }
+  const nav = b.lat != null ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}` : null;
+  let acciones = '';
+  if (!d.soloLectura) {
+    acciones = chk
+      ? `<button class="btn btn-sec" onclick="desmarcar('${esc(id)}')">↩️ Deshacer (marcado por error)</button>`
+      : `<button class="btn btn-check" id="btnCheck" onclick="marcar('${esc(id)}')">✅ Marcar como Ofrecido / Visitado</button>`;
+  }
+  $('ficha').innerHTML = `
+    <div class="grab"></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+      <h3>${n ? n + '. ' : ''}${esc(b.nombre)}</h3>
+      <button class="btn-mini off" onclick="cerrarFicha()">✕</button>
+    </div>
+    <div class="meta">
+      ${chk ? `<span class="estado o">🟢 Ofrecido · ${hora(chk.createdAt)}</span>` : `<span class="estado p">🟡 Pendiente</span>`}
+      <br>📍 ${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}${dist}
+      ${b.telefono ? `<br>📞 <a href="tel:${esc(b.telefono)}">${esc(b.telefono)}</a>` : ''}
+      ${b.lat == null ? '<br>⚠️ Esta bodega no tiene ubicación registrada' : ''}
+    </div>
+    ${acciones}
+    <div class="row2">
+      ${nav ? `<a class="btn btn-sec" href="${nav}" target="_blank" rel="noopener">🧭 Cómo llegar</a>` : ''}
+      ${b.lat != null ? `<button class="btn btn-sec" onclick="map.setView([${b.lat},${b.lng}],17)">🔎 Acercar</button>` : ''}
+    </div>`;
+  $('ficha').classList.add('show');
+  if (!soloRefrescar) pintarPines();
+}
+function cerrarFicha() { S.selId = null; $('ficha').classList.remove('show'); if (S.data) pintarPines(); }
+
+// ---- Check-in ----
+function posicionParaCheck() {
+  return new Promise(resolve => {
+    if (S.miPos && Date.now() - S.miPos.t < 60000) return resolve(S.miPos);
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, t: Date.now() }),
+      () => resolve(S.miPos || null),
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+    );
+  });
+}
+
+async function marcar(id) {
+  const d = S.data;
+  const btn = $('btnCheck'); if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+  const pos = await posicionParaCheck();
+  // Cambio inmediato a verde (optimista)
+  d.checkPor.set(id, { bodegaId: id, createdAt: new Date().toISOString(), lat: pos?.lat, lng: pos?.lng });
+  pintarPines(); abrirFicha(id, true);
+  const r = await accion({ action: 'check', bodegaId: id, lat: pos?.lat, lng: pos?.lng, exactitud: pos?.acc },
+    pos ? '🟢 Visita registrada' : '🟢 Visita registrada (sin GPS)');
+  if (r) setTimeout(() => { if (S.selId === id) cerrarFicha(); }, 900);
+}
+async function desmarcar(id) {
+  if (!confirm('¿Deshacer el check de esta bodega?')) return;
+  await accion({ action: 'desmarcar', bodegaId: id }, 'Check eliminado');
+}
+
+// ---- Geolocalización en vivo (watchPosition) ----
+function iniciarGPS() {
+  if (!navigator.geolocation) { $('gpsStatus').innerHTML = '<span class="dot y"></span>GPS no disponible'; return; }
+  navigator.geolocation.watchPosition(onPos, onPosError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 });
+}
+function onPos(p) {
+  const pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, t: Date.now() };
+  S.miPos = pos;
+  const ll = [pos.lat, pos.lng];
+  if (!miMarker) {
+    miCirculo = L.circle(ll, { radius: pos.acc, color: '#1a73e8', weight: 1, fillOpacity: .12 }).addTo(map);
+    miMarker = L.circleMarker(ll, { radius: 8, color: '#fff', weight: 3, fillColor: '#1a73e8', fillOpacity: 1 }).addTo(map).bindTooltip('Tú');
+  } else {
+    miMarker.setLatLng(ll); miCirculo.setLatLng(ll); miCirculo.setRadius(pos.acc);
+  }
+  $('gpsStatus').innerHTML = `<span class="dot y"></span>GPS ±${Math.round(pos.acc)} m`;
+  enviarGps(pos);
+}
+function onPosError(e) {
+  $('gpsStatus').innerHTML = '<span class="dot y" style="background:#999"></span>' +
+    (e.code === 1 ? 'Activa el permiso de ubicación' : 'Sin señal GPS');
+}
+function enviarGps(pos) {
+  const d = S.data;
+  if (!d || d.me.role !== 'preventa' || d.soloLectura || pos.acc > 150) return;
+  const u = S.ultimoGpsEnviado;
+  const seg = u ? (pos.t - u.t) / 1000 : Infinity;
+  const mov = u ? distM(u, pos) : Infinity;
+  if (seg >= 60 || (mov >= 40 && seg >= 15)) {
+    S.ultimoGpsEnviado = pos;
+    fetch('/api/preventa', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'gps', lat: pos.lat, lng: pos.lng }) }).catch(() => {});
+  }
+}
+
+// =============================================================================
+// ARMAR RUTA
+// =============================================================================
+function bodegasFiltradas() {
+  const d = S.data;
+  const zona = $('fZona').value, mostrar = $('fMostrar').value;
+  const q = $('fBuscar').value.trim().toLowerCase();
+  return d.bodegas.filter(b => {
+    if (zona && b.zona !== zona) return false;
+    if (q && !(b.nombre.toLowerCase().includes(q) || b.direccion.toLowerCase().includes(q))) return false;
+    if (mostrar === 'mia' && !d.enRuta.has(b.id)) return false;
+    if (mostrar === 'libres' && (d.enRuta.has(b.id) || d.ocupadasSet.has(b.id))) return false;
+    return true;
+  }).sort((a, b) => {
+    const ra = d.enRuta.get(a.id) || 1e9, rb = d.enRuta.get(b.id) || 1e9;
+    return ra - rb || a.nombre.localeCompare(b.nombre);
+  });
+}
+
+function pintarZonas() {
+  const d = S.data, sel = $('fZona'), actual = sel.value;
+  const cuenta = {};
+  d.bodegas.forEach(b => { cuenta[b.zona] = (cuenta[b.zona] || 0) + 1; });
+  const zonas = Object.keys(cuenta).sort((a, b) => a.localeCompare(b));
+  sel.innerHTML = '<option value="">Todas las zonas (' + d.bodegas.length + ')</option>' +
+    zonas.map(z => `<option value="${esc(z)}">${esc(z)} (${cuenta[z]})</option>`).join('');
+  if (zonas.includes(actual)) sel.value = actual;
+}
+
+function pintarRuta() {
+  const d = S.data, ro = d.soloLectura;
+  $('rTotal').textContent = d.ruta.length;
+  const lista = bodegasFiltradas();
+  const libres = lista.filter(b => !d.enRuta.has(b.id) && !d.ocupadasSet.has(b.id));
+  const mias = lista.filter(b => d.enRuta.has(b.id) && !d.checkPor.has(b.id));
+  const zonaTxt = $('fZona').value ? ' de ' + $('fZona').value : '';
+  $('btnAgregarZona').textContent = `➕ Agregar todas${zonaTxt} (${libres.length})`;
+  $('btnQuitarZona').textContent = `➖ Quitar (${mias.length})`;
+  $('btnAgregarZona').disabled = ro || !libres.length;
+  $('btnQuitarZona').disabled = ro || !mias.length;
+  $('rAyuda').textContent = ro ? 'Solo lectura: no se puede modificar esta ruta.'
+    : 'Elige una zona y agrega todas sus bodegas con un clic, o suma/quita una por una.';
+
+  if (!lista.length) { $('listaBodegas').innerHTML = '<li class="muted" style="padding:10px 0">No hay bodegas con ese filtro.</li>'; return; }
+  $('listaBodegas').innerHTML = lista.slice(0, 400).map(b => {
+    const n = d.enRuta.get(b.id), chk = d.checkPor.has(b.id), otro = d.ocupadasSet.has(b.id);
+    let btn;
+    if (chk) btn = `<button class="btn-mini off" disabled>Visitada</button>`;
+    else if (n) btn = `<button class="btn-mini del" ${ro ? 'disabled' : ''} onclick="quitar(['${esc(b.id)}'])">Quitar</button>`;
+    else if (otro) btn = `<button class="btn-mini off" disabled>Otro vendedor</button>`;
+    else btn = `<button class="btn-mini add" ${ro ? 'disabled' : ''} onclick="agregar(['${esc(b.id)}'])">Agregar</button>`;
+    return `<li class="item">
+      <div class="info">
+        <b>${n ? n + '. ' : ''}${esc(b.nombre)}</b>
+        <small>${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small>
+        ${chk ? '<span class="tag verde">🟢 Ofrecido</span>' : n ? '<span class="tag amar">🟡 En mi ruta</span>' : ''}
+        ${b.lat == null ? '<span class="tag gris">sin ubicación</span>' : ''}
+      </div>${btn}</li>`;
+  }).join('');
+}
+
+function agregar(ids) {
+  return accion({ action: 'agregar', bodegaIds: ids }, r =>
+    r.omitidas ? `✅ ${r.agregadas} agregadas (${r.omitidas} ya estaban en otra ruta)` : `✅ ${r.agregadas} bodega(s) agregada(s)`);
+}
+function quitar(ids) { return accion({ action: 'quitar', bodegaIds: ids }, r => `Se quitaron ${r.quitadas} bodega(s)`); }
+
+$('btnAgregarZona').onclick = () => {
+  const d = S.data;
+  const ids = bodegasFiltradas().filter(b => !d.enRuta.has(b.id) && !d.ocupadasSet.has(b.id)).map(b => b.id);
+  if (ids.length) agregar(ids);
+};
+$('btnQuitarZona').onclick = () => {
+  const d = S.data;
+  const ids = bodegasFiltradas().filter(b => d.enRuta.has(b.id) && !d.checkPor.has(b.id)).map(b => b.id);
+  if (ids.length && confirm(`¿Quitar ${ids.length} bodega(s) de tu ruta?`)) quitar(ids);
+};
+['fZona', 'fMostrar'].forEach(id => $(id).addEventListener('change', pintarRuta));
+$('fBuscar').addEventListener('input', pintarRuta);
+
+// =============================================================================
+// RESUMEN / HISTORIAL
+// =============================================================================
+let mapHist = null, capaHist = null;
+
+function calcularVisitas() {
+  const d = S.data;
+  const gps = d.gps.map(g => ({ lat: g.lat, lng: g.lng, t: new Date(g.createdAt).getTime() }));
+  let prevT = null;
+  return d.checks.map((c, i) => {
+    const b = d.porId.get(c.bodegaId) || { nombre: '(bodega eliminada)', zona: '' };
+    const tCheck = new Date(c.createdAt).getTime();
+    const ref = (b.lat != null) ? { lat: b.lat, lng: b.lng } : (c.lat != null ? { lat: c.lat, lng: c.lng } : null);
+    let tLlegada = tCheck;
+    if (ref) {
+      const desde = prevT ?? (tCheck - 3 * 3600000);
+      const cerca = gps.find(g => g.t > desde && g.t <= tCheck && distM(g, ref) <= 80);
+      if (cerca) tLlegada = cerca.t;
+    }
+    const v = {
+      n: i + 1, b, c, tCheck, tLlegada,
+      permanencia: tCheck - tLlegada,
+      traslado: prevT != null ? tLlegada - prevT : null,
+      lat: c.lat ?? b.lat, lng: c.lng ?? b.lng,
+    };
+    prevT = tCheck;
+    return v;
+  });
+}
+
+function pintarResumen() {
+  const d = S.data;
+  const esAdmin = d.me.role === 'admin';
+  $('boxVendedor').style.display = esAdmin ? '' : 'none';
+  if (esAdmin) {
+    $('hVendedor').innerHTML = d.vendedores.map(v => `<option value="${v.id}">${esc(v.nombre)}</option>`).join('');
+    $('hVendedor').value = d.vendedor.id;
+  }
+  $('hFecha').max = d.hoy;
+  $('hFecha').value = d.fecha;
+  $('hTitulo').textContent = 'Resumen · ' + d.vendedor.nombre + ' · ' + fechaBonita(d.fecha);
+
+  const visitas = calcularVisitas();
+  const total = d.ruta.length, ofre = d.checks.length, pend = Math.max(total - ofre, 0);
+  const pct = total ? Math.round(ofre * 100 / total) : 0;
+  const t0 = d.gps.length ? new Date(d.gps[0].createdAt).getTime() : (visitas[0]?.tLlegada ?? null);
+  const tFin = visitas.length ? visitas[visitas.length - 1].tCheck : null;
+  let km = 0;
+  const rastro = d.gps.length > 1 ? d.gps : visitas.filter(v => v.lat != null);
+  for (let i = 1; i < rastro.length; i++) km += distM(rastro[i - 1], rastro[i]);
+  const promedio = visitas.filter(v => v.permanencia > 0);
+  const promMs = promedio.length ? promedio.reduce((s, v) => s + v.permanencia, 0) / promedio.length : null;
+
+  $('hStats').innerHTML = [
+    ['🟢 Ofrecidas', ofre], ['🟡 Pendientes', pend], ['Total en ruta', total], ['Avance', pct + '%'],
+    ['Primera visita', visitas[0] ? hora(visitas[0].c.createdAt) : '—'],
+    ['Última visita', tFin ? hora(new Date(tFin).toISOString()) : '—'],
+    ['Duración jornada', t0 && tFin ? dur(tFin - t0) : '—'],
+    ['Recorrido aprox.', km ? (km / 1000).toFixed(1) + ' km' : '—'],
+    ['Permanencia prom.', promMs != null ? dur(promMs) : '—'],
+  ].map(([k, v]) => `<div class="stat"><b>${v}</b><small>${k}</small></div>`).join('');
+  $('hBar').style.width = pct + '%';
+
+  $('hTabla').innerHTML = visitas.length ? visitas.map(v => `<tr>
+      <td><span class="num">${v.n}</span></td>
+      <td><b>${esc(v.b.nombre)}</b><br><small class="muted">${esc(v.b.zona || '')}${v.c.lat == null ? ' · sin GPS' : ''}</small></td>
+      <td>${hora(new Date(v.tLlegada).toISOString())}</td>
+      <td>${hora(v.c.createdAt)}</td>
+      <td>${v.permanencia > 0 ? dur(v.permanencia) : '—'}</td>
+      <td>${v.traslado != null ? dur(v.traslado) : '—'}</td>
+    </tr>`).join('') : '<tr><td colspan="6" class="muted">Todavía no hay visitas registradas.</td></tr>';
+
+  const pendientes = bodegasDeRuta().filter(b => !d.checkPor.has(b.id));
+  $('hNPend').textContent = pendientes.length;
+  $('hPendientes').innerHTML = pendientes.length ? pendientes.map(b =>
+    `<li class="item"><div class="info"><b>${b.n}. ${esc(b.nombre)}</b><small>${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small></div></li>`).join('')
+    : '<li class="muted" style="padding:8px 0">¡Sin pendientes! 🎉</li>';
+
+  $('boxCerrar').style.display = (!esAdmin && d.fecha === d.hoy && !d.cerradaAt) ? '' : 'none';
+  if (S.tab === 'resumen') pintarMapaHist(visitas, pendientes);
+}
+
+function pintarMapaHist(visitas, pendientes) {
+  if (!mapHist) {
+    mapHist = L.map('mapHist').setView(CENTRO_DEFECTO, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapHist);
+    capaHist = L.layerGroup().addTo(mapHist);
+  }
+  setTimeout(() => mapHist.invalidateSize(), 50);
+  capaHist.clearLayers();
+  const d = S.data, pts = [];
+  if (d.gps.length > 1) {
+    const g = d.gps.map(p => [p.lat, p.lng]);
+    L.polyline(g, { color: '#7aa7e8', weight: 3, dashArray: '4 6' }).addTo(capaHist);
+    pts.push(...g);
+  }
+  const conPos = visitas.filter(v => v.lat != null);
+  if (conPos.length > 1) L.polyline(conPos.map(v => [v.lat, v.lng]), { color: '#1b4a96', weight: 4 }).addTo(capaHist);
+  conPos.forEach(v => {
+    pts.push([v.lat, v.lng]);
+    L.marker([v.lat, v.lng], { icon: icono('o', v.n), zIndexOffset: 1000 })
+      .bindPopup(`<b>${v.n}. ${esc(v.b.nombre)}</b><br>Llegada: ${hora(new Date(v.tLlegada).toISOString())}<br>Check: ${hora(v.c.createdAt)}`)
+      .addTo(capaHist);
+  });
+  pendientes.filter(b => b.lat != null).forEach(b => {
+    pts.push([b.lat, b.lng]);
+    L.marker([b.lat, b.lng], { icon: icono('p', '·') }).bindPopup(`<b>${esc(b.nombre)}</b><br>Pendiente`).addTo(capaHist);
+  });
+  if (pts.length) setTimeout(() => mapHist.fitBounds(pts, { padding: [30, 30], maxZoom: 16 }), 80);
+}
+
+$('hFecha').addEventListener('change', () => {
+  const v = $('hFecha').value;
+  S.fechaSel = (!v || v === S.data.hoy) ? null : v;
+  primerEncuadre = true; cargar();
+});
+$('hVendedor').addEventListener('change', () => { S.vendedorSel = $('hVendedor').value; primerEncuadre = true; cargar(); });
+$('btnCerrar').onclick = () => {
+  const pend = Math.max(S.data.ruta.length - S.data.checks.length, 0);
+  if (confirm(`¿Cerrar la jornada de hoy?${pend ? `\nQuedan ${pend} bodega(s) pendientes.` : ''}`))
+    accion({ action: 'cerrar' }, '🔒 Jornada cerrada');
+};
+
+// =============================================================================
+// NAVEGACIÓN Y ARRANQUE
+// =============================================================================
+function irTab(t) {
+  S.tab = t;
+  document.querySelectorAll('.tab').forEach(s => s.classList.toggle('active', s.id === 'tab-' + t));
+  document.querySelectorAll('.bottom button').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  if (t === 'mapa') setTimeout(() => map.invalidateSize(), 50);
+  if (S.data && t === 'resumen') pintarResumen();
+}
+document.querySelectorAll('.bottom button').forEach(b => b.onclick = () => irTab(b.dataset.tab));
+
+function pintarTodo() {
+  pintarCabecera();
+  pintarMapa();
+  pintarZonas();
+  pintarRuta();
+  pintarResumen();
+}
+
+$('btnCentrar').onclick = () => {
+  if (S.miPos) map.setView([S.miPos.lat, S.miPos.lng], 17);
+  else toast('Esperando señal GPS… revisa que la ubicación esté activada');
+};
+$('btnVerTodo').onclick = verTodo;
+async function salir() { try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {} location.href = '/'; }
+$('btnSalir').onclick = salir;
+$('btnRelogin').onclick = salir;
+
+(async function iniciar() {
+  try {
+    await cargar();
+    iniciarGPS();
+    // Admin viendo hoy: refresco automático cada minuto para seguir al vendedor
+    setInterval(() => {
+      const d = S.data;
+      if (d && d.me.role === 'admin' && d.fecha === d.hoy && !document.hidden) cargar().catch(() => {});
+    }, 60000);
+  } catch (e) {
+    if (e.message !== 'NO_SESION') {
+      document.querySelector('main').innerHTML = `<div class="loading">⚠️ No se pudo cargar: ${esc(e.message)}<br><br><button class="btn btn-azul" style="max-width:240px" onclick="location.reload()">Reintentar</button></div>`;
+    }
+  }
+})();
+</script>
+</body>
+</html>

@@ -25,7 +25,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        window.location.href = data.role === 'worker' ? '/entregas.html' : '/pos.html';
+        window.location.href = data.role === 'worker' ? '/entregas.html' : data.role === 'preventa' ? '/preventa.html' : '/pos.html';
       } else {
         setError(data.message || 'Credenciales incorrectas');
         setLoading(false);

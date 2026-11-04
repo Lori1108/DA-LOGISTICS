@@ -14,3 +14,71 @@ model StoreData {
   clients   Json     @default("[]")
   updatedAt DateTime @updatedAt
 }
+
+
+// ===================== MÓDULO PREVENTA (VENDEDOR DE RUTA) =====================
+// Estas tablas se crean solas desde lib/preventa.js (CREATE TABLE IF NOT EXISTS).
+// Están declaradas aquí solo para que Prisma las conozca y NUNCA las borre.
+// IMPORTANTE: no ejecutar "prisma db push --accept-data-loss" ni "migrate reset".
+
+// Sesiones de los preventistas y del administrador (token aleatorio en cookie)
+model PreventaSesion {
+  token      String   @id
+  vendedorId String   @map("vendedor_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("preventa_sesion")
+}
+
+// Bodegas asignadas a la ruta de un vendedor en un día (una bodega = un vendedor por día)
+model PreventaRuta {
+  id         Int      @id @default(autoincrement())
+  vendedorId String   @map("vendedor_id")
+  fecha      String // YYYY-MM-DD (hora de Perú)
+  bodegaId   String   @map("bodega_id")
+  orden      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([fecha, bodegaId])
+  @@index([vendedorId, fecha])
+  @@map("preventa_ruta")
+}
+
+// Check de visita: bodega ofrecida/visitada con hora y GPS del momento
+model PreventaCheck {
+  id         Int      @id @default(autoincrement())
+  vendedorId String   @map("vendedor_id")
+  fecha      String
+  bodegaId   String   @map("bodega_id")
+  lat        Float?
+  lng        Float?
+  exactitud  Float?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([fecha, bodegaId])
+  @@index([vendedorId, fecha])
+  @@map("preventa_check")
+}
+
+// Rastro GPS del vendedor durante la jornada (para llegada, permanencia y recorrido)
+model PreventaGps {
+  id         Int      @id @default(autoincrement())
+  vendedorId String   @map("vendedor_id")
+  fecha      String
+  lat        Float
+  lng        Float
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([vendedorId, fecha])
+  @@map("preventa_gps")
+}
+
+// Cierre de jornada
+model PreventaJornada {
+  vendedorId String   @map("vendedor_id")
+  fecha      String
+  cerradaAt  DateTime @default(now()) @map("cerrada_at")
+
+  @@id([vendedorId, fecha])
+  @@map("preventa_jornada")
+}
