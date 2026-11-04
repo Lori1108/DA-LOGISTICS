@@ -1,14 +1,14 @@
 // =============================================================================
 // API PREVENTA
-//   GET  /api/preventa?fecha=YYYY-MM-DD[&vendedor=preventa1]  -> datos de la jornada
-//   POST /api/preventa  { action, ... }                         -> modificar MI jornada
+//   GET  /api/preventa?fecha=YYYY-MM-DD[&vendedor=preventa1]
+//   POST /api/preventa  { action, vendedorId, ... }
 //
-// Reglas de autorización:
-//   - Sin sesión válida (cookie bilo_pv)            -> 401
-//   - Preventista: solo ve y modifica SU propia ruta (vendedor_id sale de la sesión,
-//     nunca del navegador). No puede ver los checks/ruta del otro vendedor.
-//   - Administrador: puede VER la jornada de cualquier preventista (solo lectura).
-//   - Solo se puede modificar la jornada de HOY y mientras no esté cerrada.
+// Flujo de trabajo:
+//   - El usuario BILO (Administrador) crea, arma y asigna la ruta de cada preventista.
+//     También monitorea el mapa en vivo y el recorrido de cada uno.
+//   - El usuario PREVENTA (preventa1 / preventa2) inicia sesión desde su celular,
+//     ve la ruta asignada por BILO, su punto azul en el mapa, marca visitas
+//     (Ofrecido / Visitado) y se va registrando su recorrido GPS en tiempo real.
 // =============================================================================
 import { NextResponse } from 'next/server';
 import {
@@ -53,22 +53,24 @@ export async function GET(request) {
     let fecha = url.searchParams.get('fecha') || hoy;
     if (!FECHA_RE.test(fecha)) fecha = hoy;
 
-    // El preventista SIEMPRE ve lo suyo. El admin elige vendedor.
+    const esAdmin = ses.role === 'admin';
+
+    // El preventista siempre ve lo suyo. El admin puede elegir vendedor.
     let vendedorId = ses.vendedorId;
-    if (ses.role === 'admin') {
+    if (esAdmin) {
       const pedido = url.searchParams.get('vendedor');
       vendedorId = VENDEDORES[pedido] ? pedido : Object.keys(VENDEDORES)[0];
     }
 
-    const [bodegas, ruta, ocupadas, checks, gps, jornada] = await Promise.all([
+    const [bodegas, ruta, ocupadasRaw, checks, gps, jornada] = await Promise.all([
       getBodegas(),
       prisma.$queryRaw`
         SELECT bodega_id AS "bodegaId", orden FROM preventa_ruta
         WHERE vendedor_id = ${vendedorId} AND fecha = ${fecha}
         ORDER BY orden, id`,
       prisma.$queryRaw`
-        SELECT bodega_id AS "bodegaId" FROM preventa_ruta
-        WHERE vendedor_id <> ${vendedorId} AND fecha = ${fecha}`,
+        SELECT bodega_id AS "bodegaId", vendedor_id AS "vendedorId" FROM preventa_ruta
+        WHERE fecha = ${fecha}`,
       prisma.$queryRaw`
         SELECT bodega_id AS "bodegaId", lat, lng, exactitud, created_at AS "createdAt"
         FROM preventa_check
@@ -84,22 +86,34 @@ export async function GET(request) {
     ]);
 
     const cerradaAt = jornada[0]?.cerradaAt || null;
+    const esHoy = fecha === hoy;
+
+    // Mapa de asignaciones de todas las bodegas en esa fecha
+    // { bodegaId: 'preventa1' | 'preventa2' }
+    const asignaciones = {};
+    for (const row of ocupadasRaw) {
+      asignaciones[row.bodegaId] = row.vendedorId;
+    }
+
+    // Lista de IDs ocupados por OTRO vendedor
+    const ocupadasPorOtro = ocupadasRaw
+      .filter((r) => r.vendedorId !== vendedorId)
+      .map((r) => r.bodegaId);
 
     return NextResponse.json({
       me: { role: ses.role, vendedorId: ses.vendedorId, nombre: ses.nombre },
       vendedor: { id: vendedorId, nombre: VENDEDORES[vendedorId].nombre },
-      vendedores:
-        ses.role === 'admin'
-          ? Object.values(VENDEDORES).map((v) => ({ id: v.id, nombre: v.nombre }))
-          : [],
+      vendedores: Object.values(VENDEDORES).map((v) => ({ id: v.id, nombre: v.nombre })),
       fecha,
       hoy,
       cerradaAt,
-      soloLectura: ses.role !== 'preventa' || fecha !== hoy || !!cerradaAt,
+      esAdmin,
+      puedeEditarRuta: (esAdmin || ses.role === 'preventa') && esHoy && !cerradaAt,
+      puedeMarcar: esHoy && !cerradaAt,
       bodegas,
       ruta,
-      // Solo los IDs ocupados por otro vendedor (para no duplicar), sin más datos
-      ocupadas: ocupadas.map((r) => r.bodegaId),
+      ocupadas: ocupadasPorOtro,
+      asignaciones: esAdmin ? asignaciones : undefined,
       checks,
       gps,
     });
@@ -110,28 +124,41 @@ export async function GET(request) {
 }
 
 // -----------------------------------------------------------------------------
-// POST: acciones sobre MI jornada de hoy
+// POST: acciones sobre la jornada de hoy
 // -----------------------------------------------------------------------------
 export async function POST(request) {
   try {
     const ses = await leerSesion(request);
     if (!ses) return err(401, 'NO_SESION');
-    if (ses.role !== 'preventa') return err(403, 'Solo los preventistas pueden modificar su ruta');
+    if (ses.role !== 'preventa' && ses.role !== 'admin') {
+      return err(403, 'Sin permiso');
+    }
     await ensureTables();
 
     const body = await request.json().catch(() => ({}));
-    const v = ses.vendedorId; // <- SIEMPRE desde la sesión, nunca del navegador
+    const esAdmin = ses.role === 'admin';
+
+    // Si es admin: opera sobre el vendedor indicado en el body (o preventa1 por defecto)
+    // Si es preventista: opera SIEMPRE sobre su propia cuenta
+    let v;
+    if (esAdmin) {
+      const pedido = body.vendedorId;
+      v = VENDEDORES[pedido] ? pedido : Object.keys(VENDEDORES)[0];
+    } else {
+      v = ses.vendedorId;
+    }
+
     const fecha = hoyLima();
 
     const cerrada = await prisma.$queryRaw`
       SELECT 1 FROM preventa_jornada WHERE vendedor_id = ${v} AND fecha = ${fecha}`;
-    if (cerrada.length) {
+    if (cerrada.length && body.action !== 'reabrir') {
       if (body.action === 'gps') return NextResponse.json({ ok: true, ignorado: true });
       return err(409, 'La jornada de hoy ya está cerrada');
     }
 
     switch (body.action) {
-      // ---- Agregar bodegas a mi ruta (masivo o individual) ----
+      // ---- Agregar bodegas a la ruta (masivo o individual) ----
       case 'agregar': {
         const bodegas = await getBodegas();
         const porId = new Map(bodegas.map((b) => [b.id, b]));
@@ -141,16 +168,28 @@ export async function POST(request) {
           SELECT COALESCE(MAX(orden), 0)::int AS m FROM preventa_ruta
           WHERE vendedor_id = ${v} AND fecha = ${fecha}`;
         const base = max[0].m;
-        // ON CONFLICT: si la bodega ya está en la ruta de alguien hoy, no se duplica
-        const agregadas = await prisma.$executeRaw`
-          INSERT INTO preventa_ruta (vendedor_id, fecha, bodega_id, orden, created_at)
-          SELECT ${v}, ${fecha}, t.id, ${base}::int + t.n::int, (now() AT TIME ZONE 'UTC')
-          FROM unnest(${ids}::text[]) WITH ORDINALITY AS t(id, n)
-          ON CONFLICT (fecha, bodega_id) DO NOTHING`;
+
+        let agregadas = 0;
+        if (esAdmin && body.reasignar) {
+          // Si es admin y pide reasignar, mueve la bodega a este vendedor
+          agregadas = await prisma.$executeRaw`
+            INSERT INTO preventa_ruta (vendedor_id, fecha, bodega_id, orden, created_at)
+            SELECT ${v}, ${fecha}, t.id, ${base}::int + t.n::int, (now() AT TIME ZONE 'UTC')
+            FROM unnest(${ids}::text[]) WITH ORDINALITY AS t(id, n)
+            ON CONFLICT (fecha, bodega_id) DO UPDATE SET vendedor_id = EXCLUDED.vendedor_id, orden = EXCLUDED.orden`;
+        } else {
+          // Inserción sin sobreescribir si ya está asignada hoy a otro
+          agregadas = await prisma.$executeRaw`
+            INSERT INTO preventa_ruta (vendedor_id, fecha, bodega_id, orden, created_at)
+            SELECT ${v}, ${fecha}, t.id, ${base}::int + t.n::int, (now() AT TIME ZONE 'UTC')
+            FROM unnest(${ids}::text[]) WITH ORDINALITY AS t(id, n)
+            ON CONFLICT (fecha, bodega_id) DO NOTHING`;
+        }
+
         return NextResponse.json({ ok: true, agregadas, omitidas: ids.length - agregadas });
       }
 
-      // ---- Quitar bodegas de mi ruta (las ya visitadas no se quitan) ----
+      // ---- Quitar bodegas de la ruta (las ya visitadas no se quitan) ----
       case 'quitar': {
         const ids = Array.isArray(body.bodegaIds) ? body.bodegaIds.map(String).slice(0, 500) : [];
         if (!ids.length) return err(400, 'No hay bodegas para quitar');
@@ -172,7 +211,7 @@ export async function POST(request) {
         const enRuta = await prisma.$queryRaw`
           SELECT 1 FROM preventa_ruta
           WHERE vendedor_id = ${v} AND fecha = ${fecha} AND bodega_id = ${id}`;
-        if (!enRuta.length) return err(403, 'Esa bodega no está en tu ruta de hoy');
+        if (!enRuta.length) return err(403, 'Esa bodega no está en la ruta de hoy');
         await prisma.$executeRaw`
           INSERT INTO preventa_check (vendedor_id, fecha, bodega_id, lat, lng, exactitud, created_at)
           VALUES (${v}, ${fecha}, ${id}, ${lat}, ${lng}, ${exactitud}, (now() AT TIME ZONE 'UTC'))
@@ -180,7 +219,7 @@ export async function POST(request) {
         return NextResponse.json({ ok: true });
       }
 
-      // ---- Deshacer un check (por si se marcó por error) ----
+      // ---- Deshacer un check ----
       case 'desmarcar': {
         const id = String(body.bodegaId || '');
         await prisma.$executeRaw`
@@ -189,8 +228,9 @@ export async function POST(request) {
         return NextResponse.json({ ok: true });
       }
 
-      // ---- Punto GPS del recorrido (máx. 1 cada 15 s) ----
+      // ---- Punto GPS del vendedor en ruta (máx. 1 cada 15 s) ----
       case 'gps': {
+        if (esAdmin) return NextResponse.json({ ok: true, ignorado: true });
         const lat = coord(body.lat, 90);
         const lng = coord(body.lng, 180);
         if (lat === null || lng === null) return err(400, 'Coordenadas inválidas');
@@ -210,6 +250,14 @@ export async function POST(request) {
           INSERT INTO preventa_jornada (vendedor_id, fecha, cerrada_at)
           VALUES (${v}, ${fecha}, (now() AT TIME ZONE 'UTC'))
           ON CONFLICT (vendedor_id, fecha) DO NOTHING`;
+        return NextResponse.json({ ok: true });
+      }
+
+      // ---- Reabrir la jornada (solo admin) ----
+      case 'reabrir': {
+        if (!esAdmin) return err(403, 'Solo el administrador puede reabrir la jornada');
+        await prisma.$executeRaw`
+          DELETE FROM preventa_jornada WHERE vendedor_id = ${v} AND fecha = ${fecha}`;
         return NextResponse.json({ ok: true });
       }
 

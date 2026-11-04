@@ -22,11 +22,17 @@
   .top .who { flex: 1; min-width: 0; line-height: 1.2; }
   .top .who b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .top .who small { opacity: .8; font-size: 12px; }
-  .top .btn-top { background: rgba(255,255,255,.12); border: 0; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; text-decoration: none; }
+  .top .btn-top { background: rgba(255,255,255,.14); border: 0; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; text-decoration: none; font-weight: 600; }
+
+  /* Selector de Vendedor para Admin (BILO) */
+  .admin-bar { background: #163e63; color: #fff; padding: 8px 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,.1); overflow-x: auto; }
+  .admin-bar span { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; opacity: .85; white-space: nowrap; }
+  .v-pill { background: rgba(255,255,255,.15); color: #fff; border: 0; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; white-space: nowrap; transition: all .15s; }
+  .v-pill.active { background: #fff; color: var(--azul); box-shadow: 0 2px 6px rgba(0,0,0,.2); }
 
   .banner { background: #fff4d6; color: #7a5a00; font-size: 13px; padding: 8px 14px; border-bottom: 1px solid #f1df9e; display: none; flex-shrink: 0; }
   .banner.show { display: block; }
-  .banner a { color: var(--azul2); font-weight: 600; cursor: pointer; }
+  .banner a { color: var(--azul2); font-weight: 700; cursor: pointer; text-decoration: underline; }
 
   main { flex: 1; position: relative; min-height: 0; }
   .tab { position: absolute; inset: 0; display: none; overflow: auto; }
@@ -46,16 +52,17 @@
   .map-top { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 500; display: flex; gap: 8px; flex-wrap: wrap; pointer-events: none; }
   .chip { pointer-events: auto; background: #fff; border-radius: 20px; padding: 7px 12px; font-size: 13px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,.15); display: inline-flex; align-items: center; gap: 6px; }
   .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
-  .dot.p { background: var(--amarillo); } .dot.o { background: var(--verde); } .dot.y { background: #1a73e8; }
+  .dot.p { background: var(--amarillo); } .dot.o { background: var(--verde); } .dot.y { background: #1a73e8; } .dot.v { background: #9333ea; }
   .map-btns { position: absolute; right: 10px; bottom: 18px; z-index: 500; display: flex; flex-direction: column; gap: 8px; }
   .fab { width: 46px; height: 46px; border-radius: 50%; border: 0; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.25); font-size: 20px; }
   .gps-status { pointer-events: auto; font-size: 12px; font-weight: 500; }
-  .empty-map { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 500; background: #fff; padding: 16px 18px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.18); text-align: center; max-width: 280px; font-size: 14px; }
+  .empty-map { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 500; background: #fff; padding: 18px 20px; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.2); text-align: center; max-width: 300px; font-size: 14px; }
 
   /* Pines */
   .pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; }
   .pin span { transform: rotate(45deg); font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
   .pin.p { background: var(--amarillo); } .pin.o { background: var(--verde); } .pin.sel { outline: 3px solid var(--azul2); }
+  .pin-vendor { background: #9333ea; border: 2px solid #fff; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
 
   /* Ficha de bodega (hoja inferior) */
   .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 600; background: #fff; border-radius: 18px 18px 0 0; box-shadow: 0 -6px 24px rgba(0,0,0,.2); padding: 14px 16px 16px; transform: translateY(110%); transition: transform .2s ease; max-height: 70%; overflow: auto; }
@@ -88,10 +95,12 @@
   .item .info b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .item .info small { color: var(--suave); font-size: 12px; }
   .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; margin-left: 4px; }
-  .tag.gris { background: #eef2f6; color: var(--suave); } .tag.verde { background: #dff5e6; color: #146c2e; } .tag.amar { background: #fff3cd; color: #8a6400; }
+  .tag.gris { background: #eef2f6; color: var(--suave); } .tag.verde { background: #dff5e6; color: #146c2e; }
+  .tag.amar { background: #fff3cd; color: #8a6400; } .tag.morado { background: #f3e8ff; color: #7e22ce; }
   .btn-mini { border: 0; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 700; white-space: nowrap; }
   .btn-mini.add { background: #e6efff; color: var(--azul2); }
   .btn-mini.del { background: #fde8e7; color: var(--rojo); }
+  .btn-mini.move { background: #f3e8ff; color: #7e22ce; }
   .btn-mini.off { background: #f1f3f5; color: #9aa5b1; }
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
   .stat { background: var(--gris); border-radius: 12px; padding: 12px; }
@@ -126,6 +135,13 @@
   <a class="btn-top" id="btnPos" href="/pos.html" style="display:none">← POS</a>
   <button class="btn-top" id="btnSalir">Salir</button>
 </header>
+
+<!-- Barra exclusiva de BILO (Admin) para cambiar rápidamente de vendedor -->
+<div class="admin-bar" id="adminBar" style="display:none">
+  <span>Vendedor:</span>
+  <div id="vendedorPills" style="display:flex;gap:6px"></div>
+</div>
+
 <div class="banner" id="banner"></div>
 
 <main>
@@ -142,8 +158,8 @@
       <button class="fab" id="btnVerTodo" title="Ver todas">🗺️</button>
     </div>
     <div class="empty-map" id="emptyMap" style="display:none">
-      <b>Aún no tienes bodegas en tu ruta de hoy.</b><br><br>
-      <button class="btn btn-azul" onclick="irTab('ruta')">Armar mi ruta</button>
+      <b id="emptyMsg">Aún no hay bodegas en esta ruta de hoy.</b><br><br>
+      <button class="btn btn-azul" id="btnArmarDesdeMapa" onclick="irTab('ruta')">Armar ruta ahora</button>
     </div>
     <div class="sheet" id="ficha"></div>
   </section>
@@ -152,7 +168,7 @@
   <section class="tab" id="tab-ruta">
     <div class="wrap">
       <div class="card">
-        <h2>🧭 Mi ruta de hoy: <span id="rTotal">0</span> bodegas</h2>
+        <h2 id="rTitulo">🧭 Armar ruta de hoy</h2>
         <div class="grid2">
           <div>
             <label class="lbl">Zona / Distrito</label>
@@ -162,7 +178,7 @@
             <label class="lbl">Mostrar</label>
             <select id="fMostrar">
               <option value="todas">Todas</option>
-              <option value="mia">Solo mi ruta</option>
+              <option value="mia">Solo en esta ruta</option>
               <option value="libres">Solo disponibles</option>
             </select>
           </div>
@@ -171,7 +187,7 @@
           <input type="search" id="fBuscar" placeholder="Buscar bodega por nombre o dirección…">
         </div>
         <div class="row2" style="margin-top:12px">
-          <button class="btn btn-azul" id="btnAgregarZona">➕ Agregar todas</button>
+          <button class="btn btn-azul" id="btnAgregarZona">➕ Asignar todas</button>
           <button class="btn btn-rojo" id="btnQuitarZona">➖ Quitar todas</button>
         </div>
         <p class="muted" id="rAyuda" style="margin:10px 0 0"></p>
@@ -206,25 +222,30 @@
         <h2>🗺️ Recorrido del día</h2>
         <div id="mapHist"></div>
         <p class="muted" style="margin:8px 0 0">
-          <span class="num">1</span> orden de visita · <span style="color:#1b4a96;font-weight:700">━</span> recorrido entre visitas · <span style="color:#7aa7e8;font-weight:700">┅</span> rastro GPS
+          <span class="num">1</span> orden de visita · <span style="color:#1b4a96;font-weight:700">━</span> recorrido entre visitas · <span style="color:#7aa7e8;font-weight:700">┅</span> rastro GPS en vivo
         </p>
       </div>
       <div class="card">
-        <h2>⏱️ Registro cronológico</h2>
+        <h2>⏱️ Registro cronológico de visitas</h2>
         <div class="tbl-wrap"><table>
           <thead><tr><th>#</th><th>Bodega</th><th>Llegada</th><th>Check</th><th>Permanencia</th><th>Traslado</th></tr></thead>
           <tbody id="hTabla"></tbody>
         </table></div>
-        <p class="muted" style="margin:8px 0 0">La <b>llegada</b> se calcula con el GPS del celular (primer punto a menos de 80 m de la bodega). Si no hay GPS, se usa la hora del check.</p>
+        <p class="muted" style="margin:8px 0 0">La <b>llegada</b> se calcula con el GPS del celular del vendedor (punto a menos de 80 m de la bodega). Si no hay GPS, se usa la hora del check.</p>
       </div>
       <div class="card">
-        <h2>🟡 Pendientes (<span id="hNPend">0</span>)</h2>
+        <h2>🟡 Bodegas pendientes (<span id="hNPend">0</span>)</h2>
         <ul class="lista" id="hPendientes"></ul>
       </div>
       <div class="card" id="boxCerrar" style="display:none">
         <h2>🔒 Cerrar jornada</h2>
-        <p class="muted">Al cerrar, ya no podrás modificar la ruta ni marcar visitas de hoy.</p>
+        <p class="muted">Al cerrar, la jornada queda archivada como completada.</p>
         <button class="btn btn-azul" id="btnCerrar">Cerrar jornada de hoy</button>
+      </div>
+      <div class="card" id="boxReabrir" style="display:none">
+        <h2>🔓 Jornada cerrada</h2>
+        <p class="muted">Esta jornada está cerrada. Como administrador puedes reabrirla si necesitas hacer cambios.</p>
+        <button class="btn btn-sec" id="btnReabrir">Reabrir jornada</button>
       </div>
     </div>
   </section>
@@ -239,21 +260,21 @@
 <div class="toast" id="toast"></div>
 <div class="overlay" id="overlay"><div class="box">
   <h3 style="margin-top:0">Sesión no válida</h3>
-  <p class="muted">Vuelve a iniciar sesión con tu usuario de preventa.</p>
+  <p class="muted">Vuelve a iniciar sesión con tu usuario.</p>
   <button class="btn btn-azul" id="btnRelogin">Ir al inicio de sesión</button>
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 // =============================================================================
-// ESTADO
+// ESTADO GLOBAL
 // =============================================================================
 const S = {
   data: null,              // respuesta de GET /api/preventa
-  vendedorSel: null,       // admin: vendedor elegido
+  vendedorSel: null,       // admin: vendedor seleccionado ('preventa1'|'preventa2')
   fechaSel: null,          // fecha consultada (null = hoy)
-  miPos: null,             // { lat, lng, acc, t }
-  ultimoGpsEnviado: null,  // { lat, lng, t }
+  miPos: null,             // { lat, lng, acc, t } para preventista en ruta
+  ultimoGpsEnviado: null,
   selId: null,             // bodega abierta en la ficha
   tab: 'mapa',
 };
@@ -295,10 +316,15 @@ async function api(method, body) {
     if (S.vendedorSel) p.set('vendedor', S.vendedorSel);
     url += '?' + p.toString();
   }
+  const payload = body ? { ...body } : undefined;
+  // Si admin envía acción POST, adjuntar siempre el vendedorId seleccionado
+  if (payload && S.data?.esAdmin && !payload.vendedorId && S.data?.vendedor?.id) {
+    payload.vendedorId = S.vendedorSel || S.data.vendedor.id;
+  }
   const res = await fetch(url, {
     method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
+    headers: payload ? { 'Content-Type': 'application/json' } : undefined,
+    body: payload ? JSON.stringify(payload) : undefined,
     cache: 'no-store',
   });
   const json = await res.json().catch(() => ({}));
@@ -310,11 +336,11 @@ async function api(method, body) {
 async function cargar() {
   const d = await api('GET');
   S.data = d;
-  // índices rápidos
   d.porId = new Map(d.bodegas.map(b => [b.id, b]));
   d.enRuta = new Map(d.ruta.map((r, i) => [r.bodegaId, i + 1]));
   d.checkPor = new Map(d.checks.map(c => [c.bodegaId, c]));
   d.ocupadasSet = new Set(d.ocupadas);
+  d.asigMap = new Map(Object.entries(d.asignaciones || {}));
   pintarTodo();
 }
 
@@ -332,22 +358,44 @@ async function accion(body, msgOk) {
 }
 
 // =============================================================================
-// CABECERA / BANNER
+// CABECERA / BARRA DE ADMIN
 // =============================================================================
 function pintarCabecera() {
   const d = S.data;
-  const esAdmin = d.me.role === 'admin';
-  $('lblNombre').textContent = esAdmin ? ('👁️ ' + d.vendedor.nombre) : d.me.nombre;
+  const esAdmin = d.esAdmin;
+
+  $('lblNombre').textContent = esAdmin ? 'Administrador BILO' : d.me.nombre;
   $('lblFecha').textContent = fechaBonita(d.fecha) + (d.fecha === d.hoy ? ' · hoy' : '');
   $('btnPos').style.display = esAdmin ? '' : 'none';
 
+  // Barra de selección de vendedor para Admin (BILO)
+  $('adminBar').style.display = esAdmin ? 'flex' : 'none';
+  if (esAdmin) {
+    $('vendedorPills').innerHTML = d.vendedores.map(v => {
+      const active = (v.id === d.vendedor.id) ? 'active' : '';
+      return `<button class="v-pill ${active}" onclick="cambiarVendedorAdmin('${v.id}')">👤 ${esc(v.nombre)}</button>`;
+    }).join('');
+  }
+
+  // Banner informativo
   const b = $('banner');
   let msg = '';
-  if (esAdmin) msg = 'Modo administrador (solo lectura). Cambia vendedor y fecha en <a onclick="irTab(\'resumen\')">Resumen</a>.';
-  else if (d.fecha !== d.hoy) msg = 'Estás viendo el ' + esc(fechaBonita(d.fecha)) + ' (solo lectura). <a onclick="volverAHoy()">Volver a hoy</a>';
-  else if (d.cerradaAt) msg = '🔒 Jornada cerrada a las ' + hora(d.cerradaAt) + '. Solo lectura.';
+  if (esAdmin) {
+    msg = `Creando / monitoreando la ruta de <b>${esc(d.vendedor.nombre)}</b> para ${esc(fechaBonita(d.fecha))}.`;
+    if (d.cerradaAt) msg += ` (Jornada cerrada a las ${hora(d.cerradaAt)})`;
+  } else if (d.fecha !== d.hoy) {
+    msg = `Estás viendo el historial del ${esc(fechaBonita(d.fecha))}. <a onclick="volverAHoy()">Volver a hoy</a>`;
+  } else if (d.cerradaAt) {
+    msg = `🔒 Tu jornada de hoy fue cerrada a las ${hora(d.cerradaAt)}.`;
+  }
   b.innerHTML = msg;
   b.classList.toggle('show', !!msg);
+}
+
+function cambiarVendedorAdmin(vid) {
+  S.vendedorSel = vid;
+  primerEncuadre = true;
+  cargar();
 }
 
 function volverAHoy() { S.fechaSel = null; $('hFecha').value = S.data.hoy; cargar(); }
@@ -359,7 +407,7 @@ const map = L.map('map', { zoomControl: false }).setView(CENTRO_DEFECTO, 13);
 L.control.zoom({ position: 'bottomleft' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
 const capaBodegas = L.layerGroup().addTo(map);
-let miMarker = null, miCirculo = null, primerEncuadre = true;
+let miMarker = null, miCirculo = null, vendorMarker = null, primerEncuadre = true;
 
 function icono(estado, n, sel) {
   return L.divIcon({
@@ -374,7 +422,6 @@ function bodegasDeRuta() {
   return d.ruta.map((r, i) => ({ ...d.porId.get(r.bodegaId), n: i + 1 })).filter(b => b.id);
 }
 
-// Dibuja los pines de la ruta: 🟡 pendiente / 🟢 ofrecido
 function pintarPines() {
   const d = S.data;
   capaBodegas.clearLayers();
@@ -396,7 +443,46 @@ function pintarMapa() {
   pintarPines();
   const lista = bodegasDeRuta();
   const pts = lista.filter(b => b.lat != null).map(b => [b.lat, b.lng]);
-  $('emptyMap').style.display = (!lista.length && !d.soloLectura) ? '' : 'none';
+
+  // Si es Admin: mostrar en el mapa la última posición GPS del vendedor
+  if (d.esAdmin) {
+    if (d.gps && d.gps.length > 0) {
+      const ult = d.gps[d.gps.length - 1];
+      const ll = [ult.lat, ult.lng];
+      pts.push(ll);
+      const ultHora = hora(ult.createdAt);
+      if (!vendorMarker) {
+        vendorMarker = L.marker(ll, {
+          icon: L.divIcon({
+            className: '',
+            html: `<div class="pin-vendor" title="${esc(d.vendedor.nombre)}">🛵</div>`,
+            iconSize: [34, 34], iconAnchor: [17, 17],
+          })
+        }).addTo(map);
+      } else {
+        vendorMarker.setLatLng(ll);
+        if (!map.hasLayer(vendorMarker)) vendorMarker.addTo(map);
+      }
+      vendorMarker.bindPopup(`<b>${esc(d.vendedor.nombre)}</b><br>Última ubicación: ${ultHora}`).openPopup();
+      $('gpsStatus').innerHTML = `<span class="dot v"></span>${esc(d.vendedor.nombre)} (${ultHora})`;
+    } else {
+      if (vendorMarker && map.hasLayer(vendorMarker)) map.removeLayer(vendorMarker);
+      $('gpsStatus').innerHTML = `<span class="dot y"></span>${esc(d.vendedor.nombre)} (sin GPS aún)`;
+    }
+  }
+
+  // Mensaje si no hay bodegas
+  const empty = $('emptyMap');
+  if (!lista.length) {
+    empty.style.display = '';
+    $('emptyMsg').textContent = d.esAdmin
+      ? `Aún no has asignado bodegas a ${d.vendedor.nombre} para hoy.`
+      : 'Aún no tienes bodegas asignadas en tu ruta de hoy.';
+    $('btnArmarDesdeMapa').textContent = d.esAdmin ? 'Asignar bodegas ahora' : 'Ver catálogo de bodegas';
+  } else {
+    empty.style.display = 'none';
+  }
+
   if (primerEncuadre && pts.length) {
     map.fitBounds(pts, { padding: [50, 50], maxZoom: 16 });
     primerEncuadre = false;
@@ -405,30 +491,46 @@ function pintarMapa() {
 }
 
 function verTodo() {
+  const d = S.data;
   const pts = bodegasDeRuta().filter(b => b.lat != null).map(b => [b.lat, b.lng]);
-  if (S.miPos) pts.push([S.miPos.lat, S.miPos.lng]);
+  if (!d.esAdmin && S.miPos) pts.push([S.miPos.lat, S.miPos.lng]);
+  if (d.esAdmin && d.gps && d.gps.length) {
+    const ult = d.gps[d.gps.length - 1];
+    pts.push([ult.lat, ult.lng]);
+  }
   if (pts.length) map.fitBounds(pts, { padding: [50, 50], maxZoom: 16 });
 }
 
-// ---- Ficha de la bodega ----
+// ---- Ficha de bodega ----
 function abrirFicha(id, soloRefrescar) {
   const d = S.data, b = d.porId.get(id);
   if (!b) return cerrarFicha();
   S.selId = id;
   const chk = d.checkPor.get(id);
   const n = d.enRuta.get(id);
+
   let dist = '';
-  if (S.miPos && b.lat != null) {
+  if (!d.esAdmin && S.miPos && b.lat != null) {
     const m = distM(S.miPos, b);
     dist = ' · a ' + (m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km');
   }
+
   const nav = b.lat != null ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}` : null;
   let acciones = '';
-  if (!d.soloLectura) {
-    acciones = chk
-      ? `<button class="btn btn-sec" onclick="desmarcar('${esc(id)}')">↩️ Deshacer (marcado por error)</button>`
-      : `<button class="btn btn-check" id="btnCheck" onclick="marcar('${esc(id)}')">✅ Marcar como Ofrecido / Visitado</button>`;
+
+  if (d.puedeMarcar) {
+    if (!d.esAdmin) {
+      acciones = chk
+        ? `<button class="btn btn-sec" onclick="desmarcar('${esc(id)}')">↩️ Deshacer visita (marcado por error)</button>`
+        : `<button class="btn btn-check" id="btnCheck" onclick="marcar('${esc(id)}')">✅ Marcar como Ofrecido / Visitado</button>`;
+    } else {
+      // Admin viendo la ficha
+      acciones = chk
+        ? `<button class="btn btn-sec" onclick="desmarcar('${esc(id)}')">↩️ Quitar marca de visita (Admin)</button>`
+        : `<p class="muted" style="margin:4px 0 8px">El vendedor marcará esta visita cuando esté en la bodega.</p>`;
+    }
   }
+
   $('ficha').innerHTML = `
     <div class="grab"></div>
     <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
@@ -436,10 +538,10 @@ function abrirFicha(id, soloRefrescar) {
       <button class="btn-mini off" onclick="cerrarFicha()">✕</button>
     </div>
     <div class="meta">
-      ${chk ? `<span class="estado o">🟢 Ofrecido · ${hora(chk.createdAt)}</span>` : `<span class="estado p">🟡 Pendiente</span>`}
+      ${chk ? `<span class="estado o">🟢 Ofrecido · ${hora(chk.createdAt)}</span>` : `<span class="estado p">🟡 Pendiente de visita</span>`}
       <br>📍 ${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}${dist}
       ${b.telefono ? `<br>📞 <a href="tel:${esc(b.telefono)}">${esc(b.telefono)}</a>` : ''}
-      ${b.lat == null ? '<br>⚠️ Esta bodega no tiene ubicación registrada' : ''}
+      ${b.lat == null ? '<br>⚠️ Esta bodega no tiene coordenadas registradas' : ''}
     </div>
     ${acciones}
     <div class="row2">
@@ -449,9 +551,14 @@ function abrirFicha(id, soloRefrescar) {
   $('ficha').classList.add('show');
   if (!soloRefrescar) pintarPines();
 }
-function cerrarFicha() { S.selId = null; $('ficha').classList.remove('show'); if (S.data) pintarPines(); }
 
-// ---- Check-in ----
+function cerrarFicha() {
+  S.selId = null;
+  $('ficha').classList.remove('show');
+  if (S.data) pintarPines();
+}
+
+// ---- Check-in de visita ----
 function posicionParaCheck() {
   return new Promise(resolve => {
     if (S.miPos && Date.now() - S.miPos.t < 60000) return resolve(S.miPos);
@@ -468,23 +575,28 @@ async function marcar(id) {
   const d = S.data;
   const btn = $('btnCheck'); if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
   const pos = await posicionParaCheck();
-  // Cambio inmediato a verde (optimista)
+  // Cambio optimista e inmediato a verde 🟢
   d.checkPor.set(id, { bodegaId: id, createdAt: new Date().toISOString(), lat: pos?.lat, lng: pos?.lng });
   pintarPines(); abrirFicha(id, true);
-  const r = await accion({ action: 'check', bodegaId: id, lat: pos?.lat, lng: pos?.lng, exactitud: pos?.acc },
-    pos ? '🟢 Visita registrada' : '🟢 Visita registrada (sin GPS)');
+  const r = await accion(
+    { action: 'check', bodegaId: id, lat: pos?.lat, lng: pos?.lng, exactitud: pos?.acc },
+    pos ? '🟢 Visita registrada' : '🟢 Visita registrada (sin GPS)'
+  );
   if (r) setTimeout(() => { if (S.selId === id) cerrarFicha(); }, 900);
 }
+
 async function desmarcar(id) {
   if (!confirm('¿Deshacer el check de esta bodega?')) return;
   await accion({ action: 'desmarcar', bodegaId: id }, 'Check eliminado');
 }
 
-// ---- Geolocalización en vivo (watchPosition) ----
+// ---- Geolocalización en vivo del preventista (watchPosition) ----
 function iniciarGPS() {
+  if (S.data?.esAdmin) return; // Admin no envía su GPS, solo consulta el de los vendedores
   if (!navigator.geolocation) { $('gpsStatus').innerHTML = '<span class="dot y"></span>GPS no disponible'; return; }
   navigator.geolocation.watchPosition(onPos, onPosError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 });
 }
+
 function onPos(p) {
   const pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, t: Date.now() };
   S.miPos = pos;
@@ -498,25 +610,32 @@ function onPos(p) {
   $('gpsStatus').innerHTML = `<span class="dot y"></span>GPS ±${Math.round(pos.acc)} m`;
   enviarGps(pos);
 }
+
 function onPosError(e) {
-  $('gpsStatus').innerHTML = '<span class="dot y" style="background:#999"></span>' +
-    (e.code === 1 ? 'Activa el permiso de ubicación' : 'Sin señal GPS');
+  if (!S.data?.esAdmin) {
+    $('gpsStatus').innerHTML = '<span class="dot y" style="background:#999"></span>' +
+      (e.code === 1 ? 'Activa el permiso de ubicación' : 'Buscando GPS…');
+  }
 }
+
 function enviarGps(pos) {
   const d = S.data;
-  if (!d || d.me.role !== 'preventa' || d.soloLectura || pos.acc > 150) return;
+  if (!d || d.esAdmin || !d.puedeMarcar || pos.acc > 150) return;
   const u = S.ultimoGpsEnviado;
   const seg = u ? (pos.t - u.t) / 1000 : Infinity;
   const mov = u ? distM(u, pos) : Infinity;
   if (seg >= 60 || (mov >= 40 && seg >= 15)) {
     S.ultimoGpsEnviado = pos;
-    fetch('/api/preventa', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'gps', lat: pos.lat, lng: pos.lng }) }).catch(() => {});
+    fetch('/api/preventa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'gps', lat: pos.lat, lng: pos.lng }),
+    }).catch(() => {});
   }
 }
 
 // =============================================================================
-// ARMAR RUTA
+// ARMAR RUTA (BILO O PREVENTISTA)
 // =============================================================================
 function bodegasFiltradas() {
   const d = S.data;
@@ -545,32 +664,73 @@ function pintarZonas() {
 }
 
 function pintarRuta() {
-  const d = S.data, ro = d.soloLectura;
-  $('rTotal').textContent = d.ruta.length;
+  const d = S.data;
+  const esAdmin = d.esAdmin;
+  const puedeEditar = d.puedeEditarRuta;
+
+  $('rTitulo').textContent = esAdmin
+    ? `🧭 Asignando ruta a ${d.vendedor.nombre} (${d.ruta.length} bodegas)`
+    : `🧭 Mi ruta de hoy: ${d.ruta.length} bodegas`;
+
   const lista = bodegasFiltradas();
   const libres = lista.filter(b => !d.enRuta.has(b.id) && !d.ocupadasSet.has(b.id));
   const mias = lista.filter(b => d.enRuta.has(b.id) && !d.checkPor.has(b.id));
   const zonaTxt = $('fZona').value ? ' de ' + $('fZona').value : '';
-  $('btnAgregarZona').textContent = `➕ Agregar todas${zonaTxt} (${libres.length})`;
-  $('btnQuitarZona').textContent = `➖ Quitar (${mias.length})`;
-  $('btnAgregarZona').disabled = ro || !libres.length;
-  $('btnQuitarZona').disabled = ro || !mias.length;
-  $('rAyuda').textContent = ro ? 'Solo lectura: no se puede modificar esta ruta.'
-    : 'Elige una zona y agrega todas sus bodegas con un clic, o suma/quita una por una.';
 
-  if (!lista.length) { $('listaBodegas').innerHTML = '<li class="muted" style="padding:10px 0">No hay bodegas con ese filtro.</li>'; return; }
+  $('btnAgregarZona').textContent = esAdmin
+    ? `➕ Asignar todas${zonaTxt} a ${d.vendedor.nombre} (${libres.length})`
+    : `➕ Agregar todas${zonaTxt} (${libres.length})`;
+
+  $('btnQuitarZona').textContent = `➖ Quitar todas (${mias.length})`;
+  $('btnAgregarZona').disabled = !puedeEditar || !libres.length;
+  $('btnQuitarZona').disabled = !puedeEditar || !mias.length;
+
+  $('rAyuda').textContent = !puedeEditar
+    ? 'Solo lectura: esta jornada está cerrada o no corresponde a hoy.'
+    : (esAdmin
+      ? `Selecciona un sector o zona y asígnalas a ${d.vendedor.nombre} con un solo clic. También puedes reasignar o sumar individuales.`
+      : 'Puedes ver las bodegas que te asignó el administrador o sumar bodegas adicionales según tu conveniencia.');
+
+  if (!lista.length) {
+    $('listaBodegas').innerHTML = '<li class="muted" style="padding:10px 0">No hay bodegas con ese filtro.</li>';
+    return;
+  }
+
   $('listaBodegas').innerHTML = lista.slice(0, 400).map(b => {
-    const n = d.enRuta.get(b.id), chk = d.checkPor.has(b.id), otro = d.ocupadasSet.has(b.id);
-    let btn;
-    if (chk) btn = `<button class="btn-mini off" disabled>Visitada</button>`;
-    else if (n) btn = `<button class="btn-mini del" ${ro ? 'disabled' : ''} onclick="quitar(['${esc(b.id)}'])">Quitar</button>`;
-    else if (otro) btn = `<button class="btn-mini off" disabled>Otro vendedor</button>`;
-    else btn = `<button class="btn-mini add" ${ro ? 'disabled' : ''} onclick="agregar(['${esc(b.id)}'])">Agregar</button>`;
+    const n = d.enRuta.get(b.id);
+    const chk = d.checkPor.has(b.id);
+    const otroVendedorId = d.asigMap ? d.asigMap.get(b.id) : null;
+    const estaEnOtro = d.ocupadasSet.has(b.id);
+
+    let btn = '';
+    if (chk) {
+      btn = `<button class="btn-mini off" disabled>Visitada</button>`;
+    } else if (n) {
+      btn = `<button class="btn-mini del" ${!puedeEditar ? 'disabled' : ''} onclick="quitar(['${esc(b.id)}'])">Quitar</button>`;
+    } else if (estaEnOtro) {
+      if (esAdmin) {
+        const otroNombre = d.vendedores.find(x => x.id === otroVendedorId)?.nombre || 'otro vendedor';
+        btn = `<button class="btn-mini move" ${!puedeEditar ? 'disabled' : ''} onclick="reasignar(['${esc(b.id)}'])">🔁 Pasar a ${esc(d.vendedor.nombre)}</button>`;
+      } else {
+        btn = `<button class="btn-mini off" disabled>Otro vendedor</button>`;
+      }
+    } else {
+      btn = `<button class="btn-mini add" ${!puedeEditar ? 'disabled' : ''} onclick="agregar(['${esc(b.id)}'])">➕ Asignar</button>`;
+    }
+
+    let etiqueta = '';
+    if (chk) etiqueta = '<span class="tag verde">🟢 Visitada</span>';
+    else if (n) etiqueta = `<span class="tag amar">🟡 #${n} en ruta</span>`;
+    else if (estaEnOtro && esAdmin) {
+      const otroNombre = d.vendedores.find(x => x.id === otroVendedorId)?.nombre || 'otro vendedor';
+      etiqueta = `<span class="tag morado">En ${esc(otroNombre)}</span>`;
+    }
+
     return `<li class="item">
       <div class="info">
         <b>${n ? n + '. ' : ''}${esc(b.nombre)}</b>
         <small>${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small>
-        ${chk ? '<span class="tag verde">🟢 Ofrecido</span>' : n ? '<span class="tag amar">🟡 En mi ruta</span>' : ''}
+        ${etiqueta}
         ${b.lat == null ? '<span class="tag gris">sin ubicación</span>' : ''}
       </div>${btn}</li>`;
   }).join('');
@@ -578,20 +738,29 @@ function pintarRuta() {
 
 function agregar(ids) {
   return accion({ action: 'agregar', bodegaIds: ids }, r =>
-    r.omitidas ? `✅ ${r.agregadas} agregadas (${r.omitidas} ya estaban en otra ruta)` : `✅ ${r.agregadas} bodega(s) agregada(s)`);
+    r.omitidas ? `✅ ${r.agregadas} asignadas (${r.omitidas} ya estaban en otra ruta)` : `✅ ${r.agregadas} bodega(s) asignadas`);
 }
-function quitar(ids) { return accion({ action: 'quitar', bodegaIds: ids }, r => `Se quitaron ${r.quitadas} bodega(s)`); }
+
+function reasignar(ids) {
+  return accion({ action: 'agregar', bodegaIds: ids, reasignar: true }, r => `✅ ${r.agregadas} bodega(s) reasignadas a ${S.data.vendedor.nombre}`);
+}
+
+function quitar(ids) {
+  return accion({ action: 'quitar', bodegaIds: ids }, r => `Se quitaron ${r.quitadas} bodega(s) de la ruta`);
+}
 
 $('btnAgregarZona').onclick = () => {
   const d = S.data;
   const ids = bodegasFiltradas().filter(b => !d.enRuta.has(b.id) && !d.ocupadasSet.has(b.id)).map(b => b.id);
   if (ids.length) agregar(ids);
 };
+
 $('btnQuitarZona').onclick = () => {
   const d = S.data;
   const ids = bodegasFiltradas().filter(b => d.enRuta.has(b.id) && !d.checkPor.has(b.id)).map(b => b.id);
-  if (ids.length && confirm(`¿Quitar ${ids.length} bodega(s) de tu ruta?`)) quitar(ids);
+  if (ids.length && confirm(`¿Quitar ${ids.length} bodega(s) de la ruta de ${d.vendedor.nombre}?`)) quitar(ids);
 };
+
 ['fZona', 'fMostrar'].forEach(id => $(id).addEventListener('change', pintarRuta));
 $('fBuscar').addEventListener('input', pintarRuta);
 
@@ -602,10 +771,10 @@ let mapHist = null, capaHist = null;
 
 function calcularVisitas() {
   const d = S.data;
-  const gps = d.gps.map(g => ({ lat: g.lat, lng: g.lng, t: new Date(g.createdAt).getTime() }));
+  const gps = (d.gps || []).map(g => ({ lat: g.lat, lng: g.lng, t: new Date(g.createdAt).getTime() }));
   let prevT = null;
   return d.checks.map((c, i) => {
-    const b = d.porId.get(c.bodegaId) || { nombre: '(bodega eliminada)', zona: '' };
+    const b = d.porId.get(c.bodegaId) || { nombre: '(bodega)', zona: '' };
     const tCheck = new Date(c.createdAt).getTime();
     const ref = (b.lat != null) ? { lat: b.lat, lng: b.lng } : (c.lat != null ? { lat: c.lat, lng: c.lng } : null);
     let tLlegada = tCheck;
@@ -627,7 +796,8 @@ function calcularVisitas() {
 
 function pintarResumen() {
   const d = S.data;
-  const esAdmin = d.me.role === 'admin';
+  const esAdmin = d.esAdmin;
+
   $('boxVendedor').style.display = esAdmin ? '' : 'none';
   if (esAdmin) {
     $('hVendedor').innerHTML = d.vendedores.map(v => `<option value="${v.id}">${esc(v.nombre)}</option>`).join('');
@@ -635,16 +805,18 @@ function pintarResumen() {
   }
   $('hFecha').max = d.hoy;
   $('hFecha').value = d.fecha;
-  $('hTitulo').textContent = 'Resumen · ' + d.vendedor.nombre + ' · ' + fechaBonita(d.fecha);
+  $('hTitulo').textContent = `Resumen · ${d.vendedor.nombre} · ${fechaBonita(d.fecha)}`;
 
   const visitas = calcularVisitas();
   const total = d.ruta.length, ofre = d.checks.length, pend = Math.max(total - ofre, 0);
   const pct = total ? Math.round(ofre * 100 / total) : 0;
-  const t0 = d.gps.length ? new Date(d.gps[0].createdAt).getTime() : (visitas[0]?.tLlegada ?? null);
+  const t0 = (d.gps && d.gps.length) ? new Date(d.gps[0].createdAt).getTime() : (visitas[0]?.tLlegada ?? null);
   const tFin = visitas.length ? visitas[visitas.length - 1].tCheck : null;
+
   let km = 0;
-  const rastro = d.gps.length > 1 ? d.gps : visitas.filter(v => v.lat != null);
+  const rastro = (d.gps && d.gps.length > 1) ? d.gps : visitas.filter(v => v.lat != null);
   for (let i = 1; i < rastro.length; i++) km += distM(rastro[i - 1], rastro[i]);
+
   const promedio = visitas.filter(v => v.permanencia > 0);
   const promMs = promedio.length ? promedio.reduce((s, v) => s + v.permanencia, 0) / promedio.length : null;
 
@@ -665,15 +837,18 @@ function pintarResumen() {
       <td>${hora(v.c.createdAt)}</td>
       <td>${v.permanencia > 0 ? dur(v.permanencia) : '—'}</td>
       <td>${v.traslado != null ? dur(v.traslado) : '—'}</td>
-    </tr>`).join('') : '<tr><td colspan="6" class="muted">Todavía no hay visitas registradas.</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="6" class="muted">Todavía no hay visitas registradas para esta fecha.</td></tr>';
 
   const pendientes = bodegasDeRuta().filter(b => !d.checkPor.has(b.id));
   $('hNPend').textContent = pendientes.length;
   $('hPendientes').innerHTML = pendientes.length ? pendientes.map(b =>
     `<li class="item"><div class="info"><b>${b.n}. ${esc(b.nombre)}</b><small>${esc(b.zona)}${b.direccion ? ' · ' + esc(b.direccion) : ''}</small></div></li>`).join('')
-    : '<li class="muted" style="padding:8px 0">¡Sin pendientes! 🎉</li>';
+    : '<li class="muted" style="padding:8px 0">¡Sin pendientes! Todas las bodegas fueron visitadas 🎉</li>';
 
-  $('boxCerrar').style.display = (!esAdmin && d.fecha === d.hoy && !d.cerradaAt) ? '' : 'none';
+  // Opciones de cerrar / reabrir jornada
+  $('boxCerrar').style.display = (d.fecha === d.hoy && !d.cerradaAt) ? '' : 'none';
+  $('boxReabrir').style.display = (esAdmin && d.fecha === d.hoy && !!d.cerradaAt) ? '' : 'none';
+
   if (S.tab === 'resumen') pintarMapaHist(visitas, pendientes);
 }
 
@@ -686,23 +861,34 @@ function pintarMapaHist(visitas, pendientes) {
   setTimeout(() => mapHist.invalidateSize(), 50);
   capaHist.clearLayers();
   const d = S.data, pts = [];
-  if (d.gps.length > 1) {
+
+  // Rastro GPS continuo del vendedor
+  if (d.gps && d.gps.length > 1) {
     const g = d.gps.map(p => [p.lat, p.lng]);
     L.polyline(g, { color: '#7aa7e8', weight: 3, dashArray: '4 6' }).addTo(capaHist);
     pts.push(...g);
   }
+
+  // Línea cronológica entre visitas
   const conPos = visitas.filter(v => v.lat != null);
-  if (conPos.length > 1) L.polyline(conPos.map(v => [v.lat, v.lng]), { color: '#1b4a96', weight: 4 }).addTo(capaHist);
+  if (conPos.length > 1) {
+    L.polyline(conPos.map(v => [v.lat, v.lng]), { color: '#1b4a96', weight: 4 }).addTo(capaHist);
+  }
+
+  // Pines de visitas ofrecidas con su número de orden
   conPos.forEach(v => {
     pts.push([v.lat, v.lng]);
     L.marker([v.lat, v.lng], { icon: icono('o', v.n), zIndexOffset: 1000 })
       .bindPopup(`<b>${v.n}. ${esc(v.b.nombre)}</b><br>Llegada: ${hora(new Date(v.tLlegada).toISOString())}<br>Check: ${hora(v.c.createdAt)}`)
       .addTo(capaHist);
   });
+
+  // Pines pendientes
   pendientes.filter(b => b.lat != null).forEach(b => {
     pts.push([b.lat, b.lng]);
     L.marker([b.lat, b.lng], { icon: icono('p', '·') }).bindPopup(`<b>${esc(b.nombre)}</b><br>Pendiente`).addTo(capaHist);
   });
+
   if (pts.length) setTimeout(() => mapHist.fitBounds(pts, { padding: [30, 30], maxZoom: 16 }), 80);
 }
 
@@ -711,11 +897,23 @@ $('hFecha').addEventListener('change', () => {
   S.fechaSel = (!v || v === S.data.hoy) ? null : v;
   primerEncuadre = true; cargar();
 });
-$('hVendedor').addEventListener('change', () => { S.vendedorSel = $('hVendedor').value; primerEncuadre = true; cargar(); });
+
+$('hVendedor').addEventListener('change', () => {
+  S.vendedorSel = $('hVendedor').value;
+  primerEncuadre = true; cargar();
+});
+
 $('btnCerrar').onclick = () => {
   const pend = Math.max(S.data.ruta.length - S.data.checks.length, 0);
-  if (confirm(`¿Cerrar la jornada de hoy?${pend ? `\nQuedan ${pend} bodega(s) pendientes.` : ''}`))
+  if (confirm(`¿Cerrar la jornada de hoy de ${S.data.vendedor.nombre}?${pend ? `\nQuedan ${pend} bodega(s) pendientes.` : ''}`)) {
     accion({ action: 'cerrar' }, '🔒 Jornada cerrada');
+  }
+};
+
+$('btnReabrir').onclick = () => {
+  if (confirm(`¿Reabrir la jornada de hoy de ${S.data.vendedor.nombre}?`)) {
+    accion({ action: 'reabrir' }, '🔓 Jornada reabierta');
+  }
 };
 
 // =============================================================================
@@ -739,11 +937,22 @@ function pintarTodo() {
 }
 
 $('btnCentrar').onclick = () => {
-  if (S.miPos) map.setView([S.miPos.lat, S.miPos.lng], 17);
-  else toast('Esperando señal GPS… revisa que la ubicación esté activada');
+  if (!S.data?.esAdmin && S.miPos) {
+    map.setView([S.miPos.lat, S.miPos.lng], 17);
+  } else if (S.data?.esAdmin && S.data?.gps && S.data.gps.length) {
+    const ult = S.data.gps[S.data.gps.length - 1];
+    map.setView([ult.lat, ult.lng], 17);
+  } else {
+    toast(S.data?.esAdmin ? 'El vendedor aún no ha enviado posición GPS hoy' : 'Esperando señal GPS… activa la ubicación');
+  }
 };
+
 $('btnVerTodo').onclick = verTodo;
-async function salir() { try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {} location.href = '/'; }
+
+async function salir() {
+  try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+  location.href = '/';
+}
 $('btnSalir').onclick = salir;
 $('btnRelogin').onclick = salir;
 
@@ -751,14 +960,22 @@ $('btnRelogin').onclick = salir;
   try {
     await cargar();
     iniciarGPS();
-    // Admin viendo hoy: refresco automático cada minuto para seguir al vendedor
+
+    // Si es BILO (Admin) viendo el día de hoy: refrescar automáticamente cada 30 segundos
+    // para seguir el avance y recorrido de los preventistas en tiempo real
     setInterval(() => {
       const d = S.data;
-      if (d && d.me.role === 'admin' && d.fecha === d.hoy && !document.hidden) cargar().catch(() => {});
-    }, 60000);
+      if (d && d.esAdmin && d.fecha === d.hoy && !document.hidden) {
+        cargar().catch(() => {});
+      }
+    }, 30000);
   } catch (e) {
     if (e.message !== 'NO_SESION') {
-      document.querySelector('main').innerHTML = `<div class="loading">⚠️ No se pudo cargar: ${esc(e.message)}<br><br><button class="btn btn-azul" style="max-width:240px" onclick="location.reload()">Reintentar</button></div>`;
+      document.querySelector('main').innerHTML = `
+        <div class="loading">
+          ⚠️ No se pudo cargar: ${esc(e.message)}<br><br>
+          <button class="btn btn-azul" style="max-width:240px" onclick="location.reload()">Reintentar</button>
+        </div>`;
     }
   }
 })();
